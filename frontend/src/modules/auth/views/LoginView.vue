@@ -29,19 +29,7 @@
               </label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg
-                    class="w-5 h-5 text-gray-400 dark:text-gray-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-17 0V6a2 2 0 012-2h14a2 2 0 012 2v2m-18 0a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-18 0h18"
-                    />
-                  </svg>
+                  <IconMail class="h-6 w-6 mx-auto text-[#70BFE9] dark:text-gray-300" />
                 </div>
                 <input
                   type="email"
@@ -63,19 +51,9 @@
               </label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg
-                    class="w-5 h-5 text-gray-400 dark:text-gray-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
+                  <IconLockSquareRounded
+                    class="h-6 w-6 mx-auto text-[#70BFE9] dark:text-gray-300"
+                  />
                 </div>
                 <input
                   type="password"
@@ -123,6 +101,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { IconLockSquareRounded, IconMail } from '@tabler/icons-vue'
 
 const email = ref('')
 const password = ref('')

@@ -19,7 +19,7 @@
                 ¿Eres un profesional de la salud mental?
               </p>
               <router-link
-                to="/register/professional"
+                to="/register-professional"
                 class="inline-block w-full bg-[#70BFE9] hover:bg-[#3457B2] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 ¡Haz click aquí!
@@ -31,7 +31,7 @@
                 ¿Eres un paciente?
               </p>
               <router-link
-                to="/register/patient"
+                to="/register-patient"
                 class="inline-block w-full bg-[#70BFE9] hover:bg-[#3457B2] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 ¡Haz click aquí!

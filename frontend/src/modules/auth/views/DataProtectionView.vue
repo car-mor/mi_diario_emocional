@@ -4,7 +4,7 @@
   >
     <main class="py-10 pb-28">
       <div class="max-w-3xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-8 text-[#70BFE9] dark:text-gray-300">
+        <h2 class="text-3xl font-bold text-center mb-8 text-[#70BFE9]">
           Protección de datos y seguridad
         </h2>
 

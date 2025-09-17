@@ -4,9 +4,7 @@
   >
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-16">
       <div class="text-center lg:text-left">
-        <h2 class="text-4xl md:text-5xl font-bold mb-4 text-[#70BFE9] dark:text-gray-200">
-          ¿Quiénes somos?
-        </h2>
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 text-[#70BFE9]">¿Quiénes somos?</h2>
         <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6">
           En Diario Emocional, creemos en el poder de la tecnología para transformar nuestro
           bienestar. Nuestro proyecto nació de la necesidad de entender mejor nuestras emociones en

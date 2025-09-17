@@ -34,6 +34,26 @@ const router = createRouter({
       name: 'home-patient',
       component: () => import('../modules/patient/views/HomePatientView.vue'),
     },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('@/modules/auth/views/RegisterView.vue'),
+    },
+    {
+      path: '/register-patient',
+      name: 'register-patient',
+      component: () => import('@/modules/auth/views/RegisterPatientView.vue'),
+    },
+    {
+      path: '/register-professional',
+      name: 'register-professional',
+      component: () => import('@/modules/auth/views/RegisterProfessionalView.vue'),
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('@/modules/auth/views/ForgotPasswordView.vue'),
+    },
   ],
 })
 

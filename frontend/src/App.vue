@@ -15,14 +15,9 @@ authStore.loginAs('anónimo')
 <template>
   <header>
     <div class="wrapper">
-<<<<<<< HEAD
-      <!--<WelcomeHeader />
-      <!-- To do -->
-=======
       <PacienteHeader v-if="authStore.userType === 'paciente'" />
       <TerapeutaHeader v-else-if="authStore.userType === 'terapeuta'" />
       <AnonymusHeader v-else />
->>>>>>> ee6b31f73712fd1a985a7eeca3625b5ea1ebb4e4
     </div>
   </header>
 

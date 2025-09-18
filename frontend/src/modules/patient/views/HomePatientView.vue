@@ -11,7 +11,7 @@
           <img 
             src="https://img.europapress.es/fotoweb/fotonoticia_20220430132209_690.jpg" 
             alt="Artículo destacado" 
-            class="w-full h-full object-cover rounded-2xl opacity-100"
+            class="w-4/5 h-full object-cover rounded-2xl opacity-100"
           />
           
           <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 text-white text-center w-full px-4">

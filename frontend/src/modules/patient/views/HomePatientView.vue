@@ -101,7 +101,7 @@
       />
       <div class="p-4">
         <h4 class="font-semibold text-gray-800 mb-2">
-          Audiolibro - Hábitos Atómicos, Por James Clear
+          Audiolibro - Hábitos Atómicos, Por James Clear.
         </h4>
         <p class="text-sm text-gray-600">Un método sencillo y comprobado para desarrollar buenos hábitos y eliminar los malos.</p>
       </div>
@@ -111,7 +111,26 @@
 
 
 <swiper-slide class="flex justify-center items-center">
-  <router-link to="/video-carrusel-1-patient" class="block w-full">
+  <router-link to="/meditation-carrusel-3-patient" class="block w-full">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+      <img 
+        src="https://us.123rf.com/450wm/maxoidos/maxoidos1609/maxoidos160900021/65880231-pyramid-of-stones-for-meditation-lying-on-sea-coast-at-sunset.jpg" 
+        alt="Video psicología 1" 
+        class="w-full h-40 object-cover"
+      />
+      <div class="p-4">
+        <h4 class="font-semibold text-gray-800 mb-2">
+          Podcast. Vamos a meditar.
+        </h4>
+        <p class="text-sm text-gray-600">Por Glenda Yoga - Toma un momento para calmar tu mente.</p>
+      </div>
+    </div>
+  </router-link>
+</swiper-slide>
+
+
+<swiper-slide class="flex justify-center items-center">
+  <router-link to="/video-carrusel-4-patient" class="block w-full">
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
       <img 
         src="https://aprendemosjuntos.bbva.com/wp-content/uploads/2024/10/1024x512-01-MARIAN-ROJAS-2-CORTE.jpg" 
@@ -120,9 +139,9 @@
       />
       <div class="p-4">
         <h4 class="font-semibold text-gray-800 mb-2">
-          Video. Completa. Recupera tu mente, reconquista tu vida.
+          Video. Cómo Regular y Gestionar Emociones Con Mindfulness.
         </h4>
-        <p class="text-sm text-gray-600">Marian Rojas-Estapé, psiquiatra y escritora.</p>
+        <p class="text-sm text-gray-600">Helena Echeverría, psicóloga y coach. Especialista en ansiedad.</p>
       </div>
     </div>
   </router-link>
@@ -133,26 +152,7 @@
   <router-link to="/video-carrusel-1-patient" class="block w-full">
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
       <img 
-        src="https://aprendemosjuntos.bbva.com/wp-content/uploads/2024/10/1024x512-01-MARIAN-ROJAS-2-CORTE.jpg" 
-        alt="Video psicología 1" 
-        class="w-full h-40 object-cover"
-      />
-      <div class="p-4">
-        <h4 class="font-semibold text-gray-800 mb-2">
-          Video. Completa. Recupera tu mente, reconquista tu vida.
-        </h4>
-        <p class="text-sm text-gray-600">Marian Rojas-Estapé, psiquiatra y escritora.</p>
-      </div>
-    </div>
-  </router-link>
-</swiper-slide>
-
-
-<swiper-slide class="flex justify-center items-center">
-  <router-link to="/video-carrusel-1-patient" class="block w-full">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-      <img 
-        src="https://aprendemosjuntos.bbva.com/wp-content/uploads/2024/10/1024x512-01-MARIAN-ROJAS-2-CORTE.jpg" 
+        src="https://helenaecheverria.com/wp-content/uploads/2020/08/fotos.png" 
         alt="Video psicología 1" 
         class="w-full h-40 object-cover"
       />

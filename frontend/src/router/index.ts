@@ -79,6 +79,16 @@ const router = createRouter({
       name: 'first-login',
       component: () => import('@/modules/auth/views/FirstLoginView.vue'),
     },
+    {
+      path: '/meditation-carrusel-3-patient',
+      name: 'meditation-carrusel-3-patient',
+      component: () => import('@/modules/patient/views/MeditationCarrusel3PatientView.vue'),
+    },
+    {
+      path: '/video-carrusel-4-patient',
+      name: 'video-carrusel-4-patient',
+      component: () => import('@/modules/patient/views/VideoCarrusel4PatientView.vue'),
+    },
   ],
 })
 

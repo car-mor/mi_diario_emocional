@@ -7,7 +7,7 @@
             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-16 max-w-4xl mx-auto my-6">
                 <div class="text-center mb-8">
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-800 leading-tight mb-2">
-                        Hábitos Atómicos
+                        Hábitos Atómicos.
                     </h1>
                     <p class="text-lg text-gray-600 font-semibold">Por James Clear</p>
                     <p class="text-sm text-gray-500">16 de octubre de 2018</p>

@@ -6,14 +6,14 @@
     <!-- Círculo superior izquierdo (medio fuera del contenedor) -->
     <div
       aria-hidden="true"
-      class="absolute -left-16 -top-20 w-64 h-64 md:-left-20 md:-top-24 md:w-80 md:h-80 rounded-full bg-[#70BFE9] dark:bg-[#3457B2] pointer-events-none"
+      class="absolute -left-24 -top-20 w-64 h-64 md:-left-40 md:-top-24 md:w-80 md:h-80 rounded-full bg-[#70BFE9] pointer-events-none"
       style="filter: none"
     />
 
     <!-- Círculo inferior derecho (medio fuera del contenedor) -->
     <div
       aria-hidden="true"
-      class="absolute -right-16 -bottom-20 w-64 h-64 md:-right-20 md:-bottom-24 md:w-80 md:h-80 rounded-full bg-[#70BFE9] dark:bg-[#3457B2] pointer-events-none"
+      class="absolute -right-24 -bottom-20 w-64 h-64 md:-right-40 md:-bottom-24 md:w-80 md:h-80 rounded-full bg-[#70BFE9] pointer-events-none"
       style="filter: none"
     />
 

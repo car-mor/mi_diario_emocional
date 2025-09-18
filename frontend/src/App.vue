@@ -6,7 +6,7 @@ import WelcomeHeader from '@/modules/auth/components/WelcomeHeader.vue'
 <template>
   <header>
     <div class="wrapper">
-      <WelcomeHeader />
+      <!--<WelcomeHeader />
       <!-- To do -->
     </div>
   </header>

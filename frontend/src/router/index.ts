@@ -54,6 +54,26 @@ const router = createRouter({
       name: 'forgot-password',
       component: () => import('@/modules/auth/views/ForgotPasswordView.vue'),
     },
+    {
+      path: '/profile-patient-mobile',
+      name: 'profile-patient-mobile',
+      component: () => import('@/modules/patient/views/PatientProfileMobileView.vue'),
+    },
+    {
+      path: '/article-weekly-patient',
+      name: 'article-weekly-patient',
+      component: () => import('../modules/patient/views/ArticleWeekPatientView.vue'),
+    },
+    {
+      path: '/video-carrusel-1-patient',
+      name: 'video-carrusel-1-patient',
+      component: () => import('../modules/patient/views/VideoCarrusel1PatientView.vue'),
+    },
+    {
+      path: '/audiobook-carrusel-2-patient',
+      name: 'audiobook-carrusel-2-patient',
+      component: () => import('../modules/patient/views/AudiolibroCarrusel2PatientView.vue'),
+    },
   ],
 })
 

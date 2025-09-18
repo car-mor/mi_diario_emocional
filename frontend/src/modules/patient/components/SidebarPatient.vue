@@ -18,9 +18,16 @@
     >
         <!-- Navegación -->
         <nav class="flex flex-col space-y-4 md:space-y-6 flex-1 mt-12 md:mt-6 min-h-0 justify-center md:justify-start">
+            <!-- Icono Perfil (solo en móvil) -->
+            <router-link
+                to="/profile-patient-mobile"
+                class="flex justify-center p-2 md:p-3 rounded-full hover:bg-[#5aa7d1] transition flex-shrink-0 block md:hidden"
+            >
+                <IconUserCircle class="w-8 h-8" />
+            </router-link>
             <!-- Icono Home -->
             <router-link
-                to="/"
+                to="/home-patient"
                 class="flex justify-center p-2 md:p-3 rounded-full hover:bg-[#5aa7d1] transition flex-shrink-0"
             >
                 <IconHome class="w-8 h-8 md:w-10 md:h-10" />
@@ -74,7 +81,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
-import { IconHome, IconMenu2, IconBook, IconClock, IconChartPie2, IconCloud, IconHelpHexagon, IconSettings } from "@tabler/icons-vue"
+import { IconHome, IconMenu2, IconBook, IconClock, IconChartPie2, IconCloud, IconHelpHexagon, IconSettings, IconUserCircle } from "@tabler/icons-vue"
 
 const showMobileMenu = ref(false)
 const toggleMobileMenu = () => {

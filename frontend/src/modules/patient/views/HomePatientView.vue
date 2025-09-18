@@ -47,13 +47,13 @@
           </div>
         </div>
 
-        <div class="mb-8">
+        <div class="mb-8 snap-normal">
           <h3 class="text-xl font-semibold text-gray-800 mb-6">¿Te gustaría explorar nuevos temas? ¡Hagámoslo!</h3>
           
           <swiper
             :space-between="15"
-            :centered-slides="true"
-            :loop="false"
+            :centered-slides="false"
+            :loop="true"
             :pagination="{ clickable: true }"
             :navigation="true"
             :modules="[Navigation, Pagination, Scrollbar, A11y]"

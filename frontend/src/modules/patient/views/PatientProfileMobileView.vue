@@ -19,7 +19,8 @@
                     Alias de María
                 </h2>
                 <p class="text-sm text-gray-500">maria@correo.com</p>
-            </div>
+            </div> 
+            
 
             <!-- Descripción -->
             <p class="ml-6 mr-6 text-center mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">

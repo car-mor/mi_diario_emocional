@@ -74,6 +74,11 @@ const router = createRouter({
       name: 'audiobook-carrusel-2-patient',
       component: () => import('../modules/patient/views/AudiolibroCarrusel2PatientView.vue'),
     },
+    {
+      path: '/first-login',
+      name: 'first-login',
+      component: () => import('@/modules/auth/views/FirstLoginView.vue'),
+    },
   ],
 })
 

@@ -1,17 +1,30 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import WelcomeHeader from '@/modules/auth/components/WelcomeHeader.vue'
+import { useAuthStore } from '@/store/auth' // Asegúrate de que la ruta es correcta
+
+// Importa los tres componentes de header con sus nombres correspondientes
+// import PacienteHeader from '@/modules/patient/components/PatientHeader.vue'
+// import TerapeutaHeader from '@/modules/professional/components/ProfessionalHeader.vue'
+import AnonymusHeader from '@/modules/auth/components/WelcomeHeader.vue'
+
+const authStore = useAuthStore()
+// Inicializa el tipo de usuario en 'anónimo' al cargar la aplicación
+authStore.loginAs('anónimo')
 </script>
 
 <template>
   <header>
     <div class="wrapper">
+<<<<<<< HEAD
       <!--<WelcomeHeader />
       <!-- To do -->
+=======
+      <PacienteHeader v-if="authStore.userType === 'paciente'" />
+      <TerapeutaHeader v-else-if="authStore.userType === 'terapeuta'" />
+      <AnonymusHeader v-else />
+>>>>>>> ee6b31f73712fd1a985a7eeca3625b5ea1ebb4e4
     </div>
   </header>
 
   <RouterView />
 </template>
-
-<style scoped></style>

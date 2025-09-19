@@ -55,7 +55,7 @@
             </router-link>
             <!-- Icono Nube de Palabras -->
             <router-link
-                to="/faq"
+                to="/word-cloud-patient"
                 class="flex justify-center p-2 md:p-3 rounded-full hover:bg-[#5aa7d1] transition flex-shrink-0"
             >
                 <IconCloud class="w-8 h-8 md:w-10 md:h-10" />

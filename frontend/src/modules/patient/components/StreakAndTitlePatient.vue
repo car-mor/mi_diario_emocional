@@ -1,5 +1,5 @@
 <template>
-    <div class="dark:bg-gray-800 w-full pt-13 pb-4">
+    <div class="dark:bg-gray-800 border-b border-gray-200 dark:border-gray-800 w-full pt-4 pb-4">
         <!-- Desktop: título centrado con racha al lado -->
         <div class="hidden lg:flex justify-center items-center relative">
             <h1 class="text-3xl font-bold text-[#7DBFF8]">

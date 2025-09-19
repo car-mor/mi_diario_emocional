@@ -94,6 +94,11 @@ const router = createRouter({
       name: 'conference-carrusel-5-patient',
       component: () => import('@/modules/patient/views/ConferenceCarrusel5PatientView.vue'),
     },
+    {
+      path: '/faqs-patient',
+      name: 'faqs-patient',
+      component: () => import('@/modules/patient/views/FAQsPatientView.vue'),
+    },
   ],
 })
 

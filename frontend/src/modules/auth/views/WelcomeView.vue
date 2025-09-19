@@ -6,11 +6,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
       <!-- IZQUIERDA: imagen centrada vertical y horizontalmente -->
       <div class="flex items-center justify-center">
-        <img
-          src="@/assets/images/mujer_corazon.jpg"
-          alt="Mujer con corazón"
-          class="mx-auto object-cover w-56 sm:w-72 md:w-80 lg:w-[420px] h-56 sm:h-72 md:h-80 lg:h-[420px] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-md transition-transform duration-300 hover:scale-105"
-        />
+        <WomanHeart />
       </div>
 
       <!-- DERECHA: tarjeta centrada verticalmente -->
@@ -40,4 +36,6 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import WomanHeart from '../components/WomanHeart.vue'
+</script>

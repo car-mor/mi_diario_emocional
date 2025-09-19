@@ -4,20 +4,14 @@
   >
     <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
       <div class="flex items-center justify-center">
-        <img
-          src="@/assets/images/mujer_corazon.jpg"
-          alt="Mujer con corazón"
-          class="mx-auto object-cover w-56 sm:w-72 md:w-80 lg:w-[420px] h-56 sm:h-72 md:h-80 lg:h-[420px] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-md transition-transform duration-300 hover:scale-105"
-        />
+        <WomanHeart />
       </div>
 
       <div class="flex items-center justify-center p-6">
         <div
           class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-lg border border-gray-200 dark:border-gray-700"
         >
-          <h1 class="mb-8 text-3xl font-bold text-center text-gray-900 dark:text-white">
-            Iniciar sesión
-          </h1>
+          <h1 class="mb-8 text-3xl font-bold text-center text-[#70BFE9]">Iniciar sesión</h1>
 
           <form @submit.prevent="login">
             <div class="mb-6">
@@ -102,6 +96,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { IconLockSquareRounded, IconMail } from '@tabler/icons-vue'
+import WomanHeart from '../components/WomanHeart.vue'
 
 const email = ref('')
 const password = ref('')

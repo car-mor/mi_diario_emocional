@@ -99,6 +99,11 @@ const router = createRouter({
       name: 'word-cloud-patient',
       component: () => import('@/modules/patient/views/WordCloudPatientView.vue'),
     },
+    {
+      path: '/faqs-patient',
+      name: 'faqs-patient',
+      component: () => import('@/modules/patient/views/FAQsPatientView.vue'),
+    },
   ],
 })
 

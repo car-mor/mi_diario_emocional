@@ -1,6 +1,6 @@
 <template>
     <aside
-        class="hidden md:flex w-90 bg-white border-l border-gray-200 dark:bg-gray-800 dark:border-gray-700 p-6 flex-col"
+        class="hidden lg:flex w-90 bg-white border-l border-gray-200 dark:bg-gray-900 dark:border-gray-800 p-6 flex-col transition-colors"
     >
         <!-- Título -->
         <div class="flex flex-col items-center text-center">

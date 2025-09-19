@@ -1,7 +1,7 @@
 <template>
-    <div class="flex h-screen bg-gray-100">
+    <div class="dark:bg-gray-800 transition-colors flex h-screen bg-gray-100">
         <Sidebar />
-        <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-12">
+        <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-1">
             <StreakAndTitle title="Audiolibro Completo" :streakCount="2" />
 
             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-16 max-w-4xl mx-auto my-6">

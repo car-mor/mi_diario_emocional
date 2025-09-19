@@ -1,7 +1,7 @@
 <template>
-    <div class="w-full pt-13 pb-4">
+    <div class="dark:bg-gray-800 w-full pt-13 pb-4">
         <!-- Desktop: título centrado con racha al lado -->
-        <div class="hidden md:flex justify-center items-center relative">
+        <div class="hidden lg:flex justify-center items-center relative">
             <h1 class="text-3xl font-bold text-[#7DBFF8]">
                 {{ title }}
             </h1>
@@ -12,7 +12,7 @@
         </div>
         
         <!-- Mobile: título y racha apilados -->
-        <div class="md:hidden flex flex-col items-center space-y-2">
+        <div class="lg:hidden flex flex-col items-center space-y-2">
             <h1 class="text-2xl font-bold text-[#7DBFF8] text-center">
                 {{ title }}
             </h1>

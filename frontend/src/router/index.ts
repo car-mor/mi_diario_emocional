@@ -89,6 +89,11 @@ const router = createRouter({
       name: 'video-carrusel-4-patient',
       component: () => import('@/modules/patient/views/VideoCarrusel4PatientView.vue'),
     },
+    {
+      path: '/conference-carrusel-5-patient',
+      name: 'conference-carrusel-5-patient',
+      component: () => import('@/modules/patient/views/ConferenceCarrusel5PatientView.vue'),
+    },
   ],
 })
 

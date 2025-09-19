@@ -1,7 +1,7 @@
 <template>
-    <div class="flex h-screen bg-gray-100">
+    <div class="dark:bg-gray-800 transition-colors flex h-screen bg-gray-100">
         <Sidebar />
-        <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-12">
+        <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-1">
             <StreakAndTitle title="VIDEO - Aprendemos Juntos BBVA" :streakCount="2" />
             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-16 max-w-4xl mx-auto my-6">
                 <div class="text-center mb-8">
@@ -13,7 +13,7 @@
                 </div>
 
                 <p class="text-xl md:text-2xl font-light text-gray-700 italic text-center leading-relaxed mb-8">
-                    “¿Se puede educar el optimismo? “Sí, se puede aprender a ser optimista”. Y depende de nuestra voz interior, de cómo vemos la realidad y de si estamos dispuestos a conectar con el presente y profundizar en la trascendencia de la vida más allá de las pantallas, la superficialidad y las adicciones. Para la psiquiatra y experta en neurociencia Marian Rojas-Estapé técnicas como la contemplación y la instrospección nos permitirán ver lo que hay dentro de nosotros mismos y fuera con ojos nuevos, y a conectar con las pequeñas alegrías del día a día. En este vídeo, la reconocida psiquiatra y experta en neurociencia explica cómo la comprensión del funcionamiento de nuestro cerebro, nuestras emociones y nuestro organismo nos ayuda a vivir una vida más real: “Nuestra voz interior influye en el sistema inmune y cuando comprendes por lo que pasa tu mente, te sientes aliviado; porque si no eres esclavo de síntomas físicos, psicológicos y vas perdido por la vida”. 
+                    “¿Se puede educar el optimismo? “Sí, se puede aprender a ser optimista”. Y depende de nuestra voz interior, de cómo vemos la realidad y de si estamos dispuestos a conectar con el presente y profundizar en la trascendencia de la vida más allá de las pantallas, la superficialidad y las adicciones. Para la psiquiatra y experta en neurociencia Marian Rojas-Estapé técnicas como la contemplación y la instrospección nos permitirán ver lo que hay dentro de nosotros mismos y fuera con ojos nuevos, y a conectar con las pequeñas alegrías del día a día. En este vídeo, la reconocida psiquiatra y experta en neurociencia explica cómo la comprensión del funcionamiento de nuestro cerebro, nuestras emociones y nuestro organismo nos ayuda a vivir una vida más real: “Nuestra voz interior influye en el sistema inmune y cuando comprendes por lo que pasa tu mente, te sientes aliviado; porque si no eres esclavo de síntomas físicos, psicológicos y vas perdido por la vida.” 
                 </p>
         
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">

@@ -1,28 +1,31 @@
 <template>
-    <div class="flex h-screen bg-gray-100">
+    <div class="dark:bg-gray-800 transition-colors flex h-screen bg-gray-100">
         <Sidebar />
-        <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-12">
+        <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-1">
             <StreakAndTitle title="VIDEO - Mindfulness" :streakCount="2" />
             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-16 max-w-4xl mx-auto my-6">
                 <div class="text-center mb-8">
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-800 leading-tight mb-2">
-                        Cómo Regular y Gestionar Emociones Con Mindfulness
+                        Cómo Regular y Gestionar Emociones Con Mindfulness.
                     </h1>
-                    <p class="text-lg text-gray-600 font-semibold">Helena Echeverría, psicóloga.</p>
+                    <p class="text-lg text-gray-600 font-semibold">Helena Echeverría, psicóloga</p>
                     <p class="text-sm text-gray-500">12 may 2022</p>
                 </div>
 
                 <p class="text-xl md:text-2xl font-light text-gray-700 italic text-center leading-relaxed mb-8">
-                    ““Solo existen dos días en el año en los que no se puede hacer nada. Uno se llama ayer y el otro se llama mañana. Hoy es el único día para amar, creer, hacer y principalmente vivir”. - Dalai Lama. ”. 
+                    ““Hay que ser conscientes de que lo que nos provoca malestar o ansiedad no son los eventos, sino como vinculamos las emociones a éstos - Jonathan García-Allen. ”
                 </p>
         
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
                     <p class="mb-6 text-justify">
-                        Cuando Rojas-Estapé comenzó a estudiar Medicina sentía que siempre faltaba el plano emocional en el abordaje de las enfermedades, siendo reconocida por su enfoque humanista en la conexión de la salud física y mental con la somatización emocional. Marian es una de las psiquiatras más influyentes de la actualidad por su capacidad para explicar conceptos complejos de manera accesible, ayudando a muchas personas a conocerse y a gestionar de manera más consciente sus emociones. “Entender que la mente, el cuerpo y el alma están profundamente unidos es fundamental a la hora de abordar una terapia pero no patologicemos todo lo que nos sucede. No todo tiene que ser paliado con medicación y no todo tiene que ser tratado por un profesional. Hay procesos que cada cual tiene que vivir a medida que nos van sucediendo”, reflexiona. 
+                        El mindfulness es una práctica popular, pero… ¿sabes qué es mindfulness y para qué sirve? En esencia, se trata de una herramienta para alcanzar tu bienestar en medio del estrés diario. <br></br>
+                        Conocida también como atención plena, la meditación mindfulness nos invita a concentrarnos en el momento presente a fin de mejorar nuestra conexión con nosotros mismos y con el entorno. Además de sus beneficios personales, ha demostrado ser un recurso efectivo en el ámbito educativo, especialmente para desarrollar habilidades cognitivas. <br></br>
+                        Mindfulness en español es atención plena o conciencia plena. Esta traducción de mindfulness evidencia la idea de prestar atención de manera intencionada, sin distracciones y con aceptación. <br></br>
+                        El significado de mindfulness se refiere a un estado mental en el que nos conectamos profundamente con el aquí y el ahora, dejando de lado juicios y preocupaciones. La conciencia plena se basa en observar pensamientos, sensaciones y emociones, sin aferrarnos a ellos.
                     </p>
 
                     <p class="mb-6 text-justify">
-                        Marian Rojas-Estapé es psiquiatra licenciada en Medicina y Cirugía por la Universidad de Navarra, y compagina su trabajo en el Instituto Español de Investigaciones Psiquiátricas con su labor como colaboradora en universidades, proyectos de cooperación, divulgadora y autora de obras superventas como ‘Cómo hacer que te pasen cosas buenas’, ‘Encuentra tu persona vitamina’, y ‘Recupera tu mente, reconquista tu vida’. Su último trabajo, en el que pone de relieve la urgencia de profundizar en nuestras vidas para saber elegir, identificar patrones y alejarnos del mundanal ruido para proteger nuestra salud física y psicológica.
+                        Aprende sobre emociones en este episodio. Descubre las emociones básicas que existen, cuáles son los componentes de una emoción y cómo gestionar emociones a través de un ejercicio práctico de mindfulness. ¡Adelante!
                     </p>
 
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
@@ -30,7 +33,7 @@
                         <div class="relative overflow-hidden w-full" style="padding-top: 56.25%">
                             <iframe 
                                 class="absolute top-0 left-0 w-full h-full rounded-2xl"
-                                src="https://www.youtube.com/embed/S_0l-EqwknU?si=R_LydyDwWWnhnEfo" 
+                                src="https://www.youtube.com/embed/RdAhXhP26Uo?si=fZZzIsgyUmSO-lun" 
                                 title="YouTube video player" 
                                 frameborder="0" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -46,11 +49,11 @@
                     <div class="mt-8 pt-4 border-t border-gray-200 text-gray-600 text-sm">
                         <h3 class="text-base font-bold text-gray-800 mb-2">Sobre la especialista</h3>
                         <p class="mb-2">
-                            **Marian Rojas-Estapé** Marian Rojas Estapé es una médica, especialista en psiquiatría y escritora española. Su padre es el psiquiatra y escritor Enrique Rojas y su madre la notaria y profesora universitaria Isabel Estapé. Es nieta del economista Fabián Estapé. Comenzó la Licenciatura de Medicina en la Universidad Complutense de Madrid, concluyéndola en la Universidad de Navarra (2007). Concluida la licenciatura, se especializó en Psiquiatría.
+                            **Helena Echeverría** Helena Echeverría es psicóloga, fundadora de PsicoGuías y autora de varios libros. S especializada en ansiedad, estrés y mindfulness, y es una de las voces más reconocidas en España sobre psicología positiva y desarrollo personal.
                         </p>
                         <p class="text-xs text-gray-500">
-                            **Fuente:** Adaptado de: #AprendemosJuntosBBVA2030. <br></br>
-                            Ver más en: <a href="https://www.youtube.com/watch?v=S_0l-EqwknU" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">https://www.youtube.com/watch?v=S_0l-EqwknU</a>
+                            **Fuente:** Adaptado de: PsicoGuías | Podcast Psicología. <br></br>
+                            Ver más en: <a href="https://www.youtube.com/watch?v=RdAhXhP26Uo" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">https://www.youtube.com/watch?v=RdAhXhP26Uo</a>
                         </p>
                     </div>
                 </div>

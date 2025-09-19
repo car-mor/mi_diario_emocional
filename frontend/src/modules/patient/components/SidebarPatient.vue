@@ -11,7 +11,7 @@
     <!-- Sidebar -->
     <aside
     :class="[
-        'fixed md:static top-0 left-0 h-full w-18 bg-[#7DBFF8] text-white flex flex-col items-center py-6 transform transition-transform duration-300 z-40 overflow-y-auto',
+        'dark:bg-gray-900 transition-colors fixed md:static top-0 left-0 h-full w-18 bg-[#7DBFF8] text-white flex flex-col items-center py-6 transform transition-transform duration-300 z-40 overflow-y-auto',
         showMobileMenu ? 'translate-x-0' : '-translate-x-full',
         'md:translate-x-0 md:w-15 lg:w-24'
     ]"

@@ -48,7 +48,7 @@
             </router-link>
             <!-- Icono Gráfica de Pastel -->
             <router-link
-                to="/stats"
+                to="/pie-chart-patient"
                 class="flex justify-center p-2 md:p-3 rounded-full hover:bg-[#5aa7d1] transition flex-shrink-0"
             >
                 <IconChartPie2 class="w-8 h-8 md:w-10 md:h-10" />

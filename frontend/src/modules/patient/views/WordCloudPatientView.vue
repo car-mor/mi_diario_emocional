@@ -12,34 +12,25 @@
                         ¡Mira, esa nube tiene forma de estrella!
                     </h2>
                 </div>
-
-
-<div class="text-center lg:text-left p-4">
+                <!-- Descripción -->
+                <div class="text-center lg:text-left p-4">
                     <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6">
-          En la sección de Nube de Palabras, podrás ver una recopilación de las palabras que más has ustilizado hasta ahora ¡Entre más grande la palabra más veces la has usado!
-        </p>
+                        En la sección de Nube de Palabras, podrás ver una recopilación de las palabras que más has ustilizado hasta ahora ¡Entre más grande la palabra más veces la has usado!
+                    </p>
                 </div>
-
-
-                <!-- Contenido principal - preguntas -->
-                
-                    <WordCloudPatient />
-                
-
-                
-
+                <!-- Contenido principal - component nube de palabras -->
+                <WordCloudPatient />
                 <router-view /> 
             </div>
         </main>
-        <!-- Perfil del usuario(solo en pantallas grandes) component -->
+        <!-- Perfil del usuario component -->
         <UserProfile />
     </div>
 </template>
 
 <script setup lang="ts">
-import Sidebar from "../components/SidebarPatient.vue"
-import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
-import UserProfile from "../components/PatientProfile.vue"
-import WordCloudPatient from "../components/WordCloudPatient.vue"
-
+    import Sidebar from "../components/SidebarPatient.vue"
+    import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
+    import UserProfile from "../components/PatientProfile.vue"
+    import WordCloudPatient from "../components/WordCloudPatient.vue"
 </script>

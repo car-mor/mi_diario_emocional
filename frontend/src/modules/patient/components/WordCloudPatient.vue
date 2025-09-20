@@ -1,5 +1,16 @@
 <template>
-    <div class="w-full h-96 bg-white rounded-lg shadow p-4">
+    <div class="w-full h-96 bg-white dark:bg-gray-800 rounded-lg shadow p-4 items-center justify-center">
+
+    <div v-if="words.length === 0" class="flex flex-col items-center justify-center">
+        <IconBellRingingFilled class="w-12 h-12 text-yellow-400 mb-4" />
+        <h2 class="text-2xl mt-3 font-semibold text-gray-800 dark:text-gray-200">
+            ¡Aún hay mucho por escribir!
+        </h2>
+        <p class="text-center text-xl text-gray-500 dark:text-gray-400 mt-2 px-4">
+            Aún no hay suficientes palabras para generar la nube. Escribe más en tu diario y vuelve a intentarlo.
+        </p>
+    </div>
+        <!-- Componente de Nube de Palabras -->
         <vue-word-cloud
             :words="words"
             font-family="Quicksand, Arial, sans-serif"
@@ -9,7 +20,7 @@
             shape="star"
         />
     </div>
-    <div class="flex justify-center mt-4 gap-4">
+    <div v-if="words.length > 0" class="flex justify-center mt-4 gap-4">
         <button
             @click="changeColorPalette"
             class="bg-[#7DBFF8] hover:bg-[#3457B2] text-white font-bold py-2 px-4 rounded"
@@ -20,6 +31,7 @@
 </template>
 
 <script setup lang="ts">
+import { IconBellRingingFilled } from "@tabler/icons-vue"
 import { ref } from 'vue';
 import VueWordCloud from "vuewordcloud";
 //backend
@@ -44,6 +56,9 @@ const words: [string, number][] = [
   ["esperanzado", 28],
   ["aburrido", 7],
 ];
+
+// Simula un array vacío para probar el mensaje
+ //const words: [string, number][] = [];
 
 //backend
 /*

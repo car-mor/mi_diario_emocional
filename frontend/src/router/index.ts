@@ -95,6 +95,11 @@ const router = createRouter({
       component: () => import('@/modules/patient/views/ConferenceCarrusel5PatientView.vue'),
     },
     {
+      path: '/word-cloud-patient',
+      name: 'word-cloud-patient',
+      component: () => import('@/modules/patient/views/WordCloudPatientView.vue'),
+    },
+    {
       path: '/faqs-patient',
       name: 'faqs-patient',
       component: () => import('@/modules/patient/views/FAQsPatientView.vue'),

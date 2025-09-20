@@ -39,6 +39,7 @@ import VueWordCloud from "vuewordcloud";
 import axios from 'axios';
 import { onMounted } from 'vue';*/
 
+// Datos de ejemplo: Array de palabras con sus frecuencias
 const words: [string, number][] = [
   ["feliz", 50],
   ["triste", 30],

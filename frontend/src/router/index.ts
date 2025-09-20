@@ -104,6 +104,11 @@ const router = createRouter({
       name: 'faqs-patient',
       component: () => import('@/modules/patient/views/FAQsPatientView.vue'),
     },
+    {
+      path: '/pie-chart-patient',
+      name: 'pie-chart-patient',
+      component: () => import('../modules/patient/views/PieChartPatientView.vue'),
+    },
   ],
 })
 

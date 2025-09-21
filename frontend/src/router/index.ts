@@ -104,6 +104,12 @@ const router = createRouter({
       name: 'faqs-patient',
       component: () => import('@/modules/patient/views/FAQsPatientView.vue'),
     },
+    
+    {
+      path: '/diary-history',
+      name: 'diary-history',
+      component: () => import('@/modules/patient/views/DiaryHistoryPatientView.vue'),
+    },
   ],
 })
 

@@ -41,7 +41,7 @@
             </router-link>
             <!-- Icono Historial -->
             <router-link
-                to="/history"
+                to="/diary-history"
                 class="flex justify-center p-2 md:p-3 rounded-full hover:bg-[#5aa7d1] transition flex-shrink-0"
             >
                 <IconClock class="w-8 h-8 md:w-10 md:h-10" />

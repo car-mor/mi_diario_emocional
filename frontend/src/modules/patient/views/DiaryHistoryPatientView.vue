@@ -19,7 +19,7 @@
                     </p>
                 </div>
                 <!-- Contenido principal - component nube de palabras -->
-                
+                <DiaryHistoryPatient />
                 <router-view /> 
             </div>
         </main>
@@ -32,5 +32,5 @@
     import Sidebar from "../components/SidebarPatient.vue"
     import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
     import UserProfile from "../components/PatientProfile.vue"
-    import DiaryHistoryPatient from "../views/DiaryHistoryPatientView.vue"
+    import DiaryHistoryPatient from "../components/DiaryHistoryPatient.vue"
 </script>

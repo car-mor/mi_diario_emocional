@@ -15,7 +15,7 @@
                 <!-- Descripción -->
                 <div class="text-center lg:text-left p-4">
                     <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6">
-                        ¡Hola! Te presentamos la sección de recuerdos, en donde puedes consultar tus escritos anteriores. Aquí podrás ver todas las entradas que has realizado en tu diario,¡Revive tus pensamientos y emociones pasadas!
+                        ¡Hola! Te presentamos la sección de recuerdos, en donde puedes consultar tus escritos anteriores. Aquí podrás ver todas las entradas que has realizado en tu diario, ¡Revive tus pensamientos y emociones pasadas!
                     </p>
                 </div>
                 <!-- Contenido principal - component nube de palabras -->

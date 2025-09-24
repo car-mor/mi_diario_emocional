@@ -9,13 +9,13 @@
             <div class="dark:bg-gray-800 transition-colors flex-1 p-4 overflow-y-auto">
                 <div class="p-4 flex flex-col text-left">
                     <h2 class="text-2xl mt-3 font-semibold text-gray-800 dark:text-gray-200">
-                        Paso 1:
+                        Hoy es un buen día para escribir en tu diario
                     </h2>
                 </div>
                 <!-- Descripción -->
                 <div class="text-center lg:text-left p-4">
                     <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6">
-                        Antes de escribir en tu diario, contesta:
+                        En esta sección puedes registrar tus emociones y pensamientos diarios. Recuerda que expresar lo que sientes puede ayudarte a comprenderte mejor y a manejar tus emociones de manera saludable.
                     </p>
                 </div>
                 <!-- Contenido principal - component  -->

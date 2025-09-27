@@ -112,7 +112,18 @@ const router = createRouter({
     {
       path: '/pie-chart-patient',
       name: 'pie-chart-patient',
-      component: () => import('../modules/patient/views/PieChartPatientView.vue'),
+      component: () => import('@/modules/patient/views/PieChartPatientView.vue'),
+    },
+    {
+      path: '/account-settings',
+      name: 'account-settings',
+      component: () => import('@/modules/patient/views/AccountSettingsPatientView.vue'),
+    },
+    
+    {
+      path: '/unlinked-view',
+      name: 'unlinked-view',
+      component: () => import('@/modules/patient/views/UnlinkedView.vue'),
     },
     
     {

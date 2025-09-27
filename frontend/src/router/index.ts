@@ -125,11 +125,15 @@ const router = createRouter({
       name: 'unlinked-view',
       component: () => import('@/modules/patient/views/UnlinkedView.vue'),
     },
-    
     {
       path: '/diary-register',
       name: 'diary-register',
       component: () => import('@/modules/patient/views/DiaryRegisterPatientView.vue'),
+    },
+    {
+      path: '/home-professional',
+      name: 'home-professional',
+      component: () => import('../modules/professional/views/HomeProfessionalView.vue'),
     },
   ],
 })

@@ -167,7 +167,7 @@ const descriptionError = ref<string | null>(null);
 //-------------- constantes para la foto ------------------
 const avatarInput = ref<HTMLInputElement | null>(null);
 // Ruta relativa a la imagen por defecto en tu carpeta public
-const defaultAvatar = '/images/avatar-icon.png'; 
+const defaultAvatar = 'src/assets/images/avatar-icon.png'; 
 const avatarUrl = ref<string | null>(null); // ejemplo: https://i.pravatar.cc/150?img=38
 
 //-------------- constantes para modales ------------------

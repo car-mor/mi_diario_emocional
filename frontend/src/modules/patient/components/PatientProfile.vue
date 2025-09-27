@@ -155,7 +155,7 @@ const descriptionError = ref<string | null>(null);
 
 //-------------- constantes para la foto ------------------
 const avatarInput = ref<HTMLInputElement | null>(null);
-const defaultAvatar = '/images/avatar-icon.png'; 
+const defaultAvatar = '/src/assets/images/avatar-icon.png'; 
 const avatarUrl = ref<string | null>(null); 
 
 //-------------- constantes para modales ------------------

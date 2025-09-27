@@ -114,6 +114,12 @@ const router = createRouter({
       name: 'pie-chart-patient',
       component: () => import('../modules/patient/views/PieChartPatientView.vue'),
     },
+    
+    {
+      path: '/diary-register',
+      name: 'diary-register',
+      component: () => import('@/modules/patient/views/DiaryRegisterPatientView.vue'),
+    },
   ],
 })
 

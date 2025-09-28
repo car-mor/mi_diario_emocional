@@ -70,23 +70,23 @@
           
           <nav class="py-2">
             <a
-              href="/change-password"
+              href="/faqs-tutorials-professional"
               class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
               @click="closeSettingsMenu"
             >
               <div class="flex items-center space-x-3">
-                <IconZoomQuestion class="w-4 h-4" />
+                <IconZoomQuestion class="w-5 h-5" />
                 <span>Preguntas frecuentes</span>
               </div>
             </a>
             
             <a
-              href="/change-email"
+              href="/videos-tutorials-professional"
               class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
               @click="closeSettingsMenu"
             >
               <div class="flex items-center space-x-3">
-                <IconVideo class="w-4 h-4" />
+                <IconVideo class="w-5 h-5" />
                 <span>Video tutoriales</span>
               </div>
             </a>
@@ -113,7 +113,7 @@
     >
       <nav class="flex flex-col space-y-4">
         <a
-          href="#"
+          href="/home-professional"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Inicio
@@ -125,16 +125,16 @@
           Gestionar pacientes
         </a>
         <a
-          href="#"
+          href="/videos-tutorials-professional"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Video tutoriales
         </a>
         <a
-          href="#"
+          href="/faqs-tutorials-professional"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
-          Preguntas
+          Preguntas frecuentes
         </a>
         <a href="/">
             <button

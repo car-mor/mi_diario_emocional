@@ -145,6 +145,11 @@ const router = createRouter({
       name: 'faqs-tutorials-professional',
       component: () => import('../modules/professional/views/FAQsProfessionalView.vue'),
     },
+    {
+      path: '/patient-management',
+      name: 'patient-management',
+      component: () => import('@/modules/professional/views/ManagementProfessionalView.vue'),
+    },
   ],
 })
 

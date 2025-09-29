@@ -125,11 +125,25 @@ const router = createRouter({
       name: 'unlinked-view',
       component: () => import('@/modules/patient/views/UnlinkedView.vue'),
     },
-    
     {
       path: '/diary-register',
       name: 'diary-register',
       component: () => import('@/modules/patient/views/DiaryRegisterPatientView.vue'),
+    },
+    {
+      path: '/home-professional',
+      name: 'home-professional',
+      component: () => import('../modules/professional/views/HomeProfessionalView.vue'),
+    },
+    {
+      path: '/videos-tutorials-professional',
+      name: 'videos-tutorials-professional',
+      component: () => import('../modules/professional/views/VideoTutorialsProfessionalView.vue'),
+    },
+    {
+      path: '/faqs-tutorials-professional',
+      name: 'faqs-tutorials-professional',
+      component: () => import('../modules/professional/views/FAQsProfessionalView.vue'),
     },
   ],
 })

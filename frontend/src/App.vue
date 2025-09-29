@@ -9,7 +9,7 @@ import AnonymusHeader from '@/modules/auth/components/WelcomeHeader.vue'
 
 const authStore = useAuthStore()
 // Inicializa el tipo de usuario en 'anónimo' al cargar la aplicación
-authStore.loginAs('anónimo')
+authStore.loginAs('anónimo') // Cambia esto para probar diferentes tipos de usuario
 </script>
 
 <template>

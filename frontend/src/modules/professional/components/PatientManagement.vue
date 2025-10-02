@@ -198,7 +198,7 @@ function confirmDisconnect() {
 
 function viewPatientDetails(patientId: number) {
     // ESTE ES EL CÓDIGO CORRECTO PARA ENVIAR EL ID:
-    // router.push({ name: 'PatientDetails', params: { id: patientId } });
+    router.push({ name: 'PatientDetails', params: { id: patientId } });
 
     // Por ahora, solo mostramos una alerta y un log en consola
     alert(`ACCION: Navegando a la vista de detalles para el paciente ID: ${patientId}`);

@@ -150,6 +150,11 @@ const router = createRouter({
       name: 'patient-management',
       component: () => import('@/modules/professional/views/ManagementProfessionalView.vue'),
     },
+    {
+      path: '/patient-details',
+      name: 'patient-details',
+      component: () => import('../modules/professional/views/PatientDetailsProfessionalView.vue'),
+    },
   ],
 })
 

@@ -18,7 +18,7 @@
           Inicio
         </a>
         <a
-          href="/who-are-we"
+          href="/patient-management"
           class="text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
         >
           Gestionar pacientes
@@ -119,7 +119,7 @@
           Inicio
         </a>
         <a
-          href="#"
+          href="/patient-management"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Gestionar pacientes

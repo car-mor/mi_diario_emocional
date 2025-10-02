@@ -18,7 +18,7 @@
                         </h1>
                     </div>
                     
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full mb-12">
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full mb-12 border border-gray-200">
                         <h2 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-white border-b pb-2">Opciones de Cuenta y configuración</h2>
                         <ul class="space-y-4">
                             <li @click="openSecurityModal('password')" class="flex items-center space-x-4 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-colors duration-200">

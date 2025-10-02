@@ -46,7 +46,7 @@
                                 
                                 <td class="px-6 py-2 lg:py-4 whitespace-normal text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Alias">{{ patient.alias }}</td>
                                 
-                                <td class="px-6 py-2 lg:py-4 whitespace-normal text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Avatar">
+                                <td class="px-6 py-2 lg:py-4 whitespace-normal text-sm text-gray-700 dark:text-gray-300 flex items-center justify-center" data-label="Avatar">
                                     <img 
                                         :src="patient.avatarUrl" 
                                         :alt="`Avatar de ${patient.alias}`"

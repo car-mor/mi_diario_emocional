@@ -18,6 +18,15 @@
           <IconEdit class="w-7 h-7 text-gray-600 dark:text-gray-400" />
           <span class="text-gray-800 text-lg dark:text-gray-200">Editar alias</span>
         </li>
+        <li class="flex items-center space-x-4 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-colors duration-200">
+          <button
+            @click="theme.toggleDark"
+            class="rounded-full border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105"
+          >
+            {{ theme.isDark ? '🌙 ' : '☀️ ' }}
+          </button>
+          <span class="text-gray-800 text-lg dark:text-gray-200">Cambiar tema</span>
+        </li> 
       </ul>
     </div>
 
@@ -216,6 +225,9 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { IconLock, IconTrash, IconMail, IconEdit } from "@tabler/icons-vue";
+import { useThemeStore } from '@/store/theme'
+
+const theme = useThemeStore()
 
 const router = useRouter();
 

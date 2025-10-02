@@ -41,7 +41,7 @@
             <p class="text-sm text-gray-500">{{ userEmail }}</p>
             
             <p class="text-sm text-gray-500 mt-2">
-                {{ hasCustomAvatar ? 'Haz clic para cambiar la foto' : 'Haz clic para agregar una foto' }}
+                {{ hasCustomAvatar ? 'Haz clic en la foto para cambiarla' : 'Haz clic en la foto para agregar una' }}
             </p>
         </div>
 

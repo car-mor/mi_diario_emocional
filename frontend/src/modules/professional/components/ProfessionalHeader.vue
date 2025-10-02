@@ -13,19 +13,19 @@
       <nav class="hidden md:flex items-center space-x-8">
         <a
           href="/home-professional"
-          class="text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
+          class="text-xl text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
         >
           Inicio
         </a>
         <a
           href="/patient-management"
-          class="text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
+          class="text-xl text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
         >
           Gestionar pacientes
         </a>
         <a
           href="/"
-          class="text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
+          class="text-xl text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
         >
           Cerrar sesión
         </a>
@@ -36,7 +36,7 @@
         <!-- Botón de tema -->
         <button
           @click="theme.toggleDark"
-          class="rounded-full border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105"
+          class="rounded-full border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-4 py-1.5 text-lg font-medium text-gray-700 dark:text-gray-200 transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105"
         >
           {{ theme.isDark ? '🌙 ' : '☀️ ' }}
         </button>
@@ -53,7 +53,7 @@
         >
           <IconSettingsFilled 
             :class="[
-              'w-7 h-7 transition-transform duration-200',
+              'w-8 h-8 transition-transform duration-200',
               showSettingsMenu ? 'rotate-45 text-white' : 'text-gray-600 dark:text-gray-300'
             ]" 
           />

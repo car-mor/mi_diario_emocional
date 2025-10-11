@@ -26,7 +26,7 @@
             {{ theme.isDark ? '🌙 ' : '☀️ ' }}
           </button>
           <span class="text-gray-800 text-lg dark:text-gray-200">Cambiar tema</span>
-        </li> 
+        </li>
       </ul>
     </div>
 
@@ -102,7 +102,7 @@
         </form>
       </div>
     </div>
-    
+
     <!-- Modal para cambiar correo electrónico -->
     <div v-if="activeModal === 'email'" class="fixed inset-0 flex items-center justify-center z-50">
   <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-sm w-full">
@@ -112,7 +112,7 @@
       <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-4">
         Para confirmar tu identidad, introduce tu contraseña actual y el nuevo correo.
       </p>
-      
+
       <div class="mb-4">
         <label for="current-password-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña actual</label>
         <input type="password" id="current-password-email" v-model="currentPasswordEmail" class="mt-1 block w-full border rounded-md shadow-sm p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
@@ -148,9 +148,9 @@
           Verificar código
         </button>
 
-        <button 
-          type="button" 
-          @click="sendVerificationCode" 
+        <button
+          type="button"
+          @click="sendVerificationCode"
           :disabled="!canResendCode"
           class="px-4 py-2 font-semibold rounded transition-all duration-200"
           :class="{
@@ -160,12 +160,12 @@
         >
           {{ isCodeInvalidated ? 'Código invalidado' : canResendCode ? `Reenviar Código (${resendAttempts}/${maxResendAttempts})` : 'Límite de reenvío alcanzado' }}
         </button>
-        
+
         <button type="button" @click="closeModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold rounded">
           Cancelar y reiniciar
         </button>
       </div>
-    </form> 
+    </form>
   </div>
 </div>
 
@@ -174,14 +174,14 @@
       <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-sm w-full">
         <h3 class="text-xl font-bold mb-4 dark:text-white">Editar alias</h3>
         <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-4">
-          Recuerda que el alias debe cumplir con:
+          Recuerda que el alias debe cumplir con:</p>
           <ul class="list-disc list-inside mt-2 text-left dark:text-white">
             <li>- Longitud de 1 a 40 caracteres.</li>
             <li>- No consisitir sólo en espacios.</li>
             <li>- Al menos un número.</li>
             <li>- Al menos un carácter especial.</li>
           </ul>
-        </p>
+
         <form @submit.prevent="editAlias">
           <div class="mb-4">
             <label for="new-alias" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nuevo alias</label>
@@ -276,7 +276,7 @@ const formattedTime = computed(() => {
 
 const currentPassword = ref("");
 const newPassword = ref("");
-const newPasswordConfirm = ref(""); 
+const newPasswordConfirm = ref("");
 const newEmail = ref("");
 const newAlias = ref("");
 const deletePassword = ref("");
@@ -360,11 +360,11 @@ async function deleteAccount() {
     if (deletePassword.value === "error") {
       throw new Error("La contraseña proporcionada es incorrecta.");
     }
-    
+
     console.log("Simulando eliminación de cuenta...");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log("Contraseña enviada:", deletePassword.value);
-    
+
     closeModal();
     showDeleteSuccessModal.value = true;
   } catch (err: unknown) {
@@ -406,12 +406,12 @@ async function changePassword() {
     if (currentPassword.value === "error") {
       throw new Error("La contraseña actual es incorrecta.");
     }
-    
+
     console.log("Simulando cambio de contraseña...");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log("Contraseña actual:", currentPassword.value);
     console.log("Nueva contraseña:", newPassword.value);
-    
+
     closeModal();
     successTitle.value = "Contraseña actualizada";
     successMessage.value = "Tu contraseña ha sido actualizada con éxito.";
@@ -458,7 +458,7 @@ function resetEmailFlow() {
     verificationCode.value = "";
     emailError.value = null;
     verificationError.value = null;
-    
+
 }
 
 // Lógica para enviar el código de verificación
@@ -488,14 +488,14 @@ async function sendVerificationCode() {
             throw new Error("Contraseña actual incorrecta.");
         }
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        
+
         // Si la llamada es exitosa:
         codeSentTime.value = Date.now();
-        
+
         if (emailStep.value === 2) { // Es un reenvío
              resendAttempts.value++;
              // Resetear intentos de verificación al enviar nuevo código
-             verificationAttempts.value = 0; 
+             verificationAttempts.value = 0;
              verificationError.value = null;
         }
 
@@ -528,9 +528,9 @@ async function changeEmail() {
         verificationError.value = "El código de verificación ha expirado (5 minutos). Por favor, solicita uno nuevo.";
         // Simular que el código en el backend queda invalidado por tiempo.
         isCodeInvalidated.value = true;
-        return; 
+        return;
     }
-    
+
     // 2. CHEQUEO DE CÓDIGO INVALIDADO POR INTENTOS
     if (isCodeInvalidated.value) {
         verificationError.value = `Código invalidado por ${maxVerificationAttempts} intentos fallidos. Cancela y reinicia el proceso.`;
@@ -545,7 +545,7 @@ async function changeEmail() {
         if (verificationCode.value !== "123456") {
             // 3. LÓGICA DE INTENTOS FALLIDOS (Invalidación después de 3)
             verificationAttempts.value++;
-            
+
             if (verificationAttempts.value >= maxVerificationAttempts) {
                 isCodeInvalidated.value = true;
                 throw new Error(`Código incorrecto. El código ha sido invalidado después de ${maxVerificationAttempts} intentos. Reinicia el proceso.`);
@@ -562,10 +562,10 @@ async function changeEmail() {
         successMessage.value = `Tu correo electrónico ha sido actualizado a ${newEmail.value} con éxito.`;
         showSuccessModal.value = true;
         resetEmailFlow(); // Reiniciar todas las variables
-        
+
     } catch (err: unknown) {
         const error = err as Error;
-        
+
         // Manejar el error específico de intentos agotados
         if (error.message.includes("Código incorrecto. El código ha sido invalidado")) {
             verificationError.value = error.message;
@@ -577,7 +577,7 @@ async function changeEmail() {
     }
 }
 
-/* 
+/*
 respuesta simulada error por expiración del código
 {
   "error_type": "EXPIRED_CODE",
@@ -599,7 +599,7 @@ async function editAlias() {
     return;
   }
   aliasError.value = null;
-  
+
   try {
     if (newAlias.value === "error") {
       throw new Error("El alias no es válido.");

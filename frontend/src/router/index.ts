@@ -225,7 +225,7 @@ router.beforeEach((to, from, next) => {
 
   // Regla 2: Si está autenticado y va a una ruta pública -> a su dashboard
   if (!to.meta.requiresAuth && isAuthenticated) {
-    if (userRole === 'patient') return next({ name: 'patient-layout' });
+    if (userRole === 'patient') return next({ name: 'home-patient' });
     if (userRole === 'professional') {
       return reviewStatus === 'APPROVED' ? next({ name: 'professional-layout' }) : next({ name: 'not-approved-professional' });
     }

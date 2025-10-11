@@ -1,6 +1,5 @@
 <template>
     <div class="dark:bg-gray-800 transition-colors flex h-screen bg-gray-100">
-        <Sidebar />
 
         <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-1">
             <StreakAndTitle title="Artículo de la semana" :streakCount="2" />
@@ -18,9 +17,9 @@
                     Aceptar que la persona con la que nos imaginábamos envejeciendo ya no es nuestra pareja es una experiencia dolorosa pero común. Aprender a soltar es la clave para transitarla.
                 </p>
 
-                <img 
-                    src="https://imagenes.elpais.com/resizer/v2/MJSYNXVYZRHIXDMYEBO6F5DG6I.jpg?auth=026dd58b17122ea34b020a5ec5d5ce137dba8a781a1ef907cdb9a2fcf8221e27&width=1200" 
-                    alt="Artículo destacado" 
+                <img
+                    src="https://imagenes.elpais.com/resizer/v2/MJSYNXVYZRHIXDMYEBO6F5DG6I.jpg?auth=026dd58b17122ea34b020a5ec5d5ce137dba8a781a1ef907cdb9a2fcf8221e27&width=1200"
+                    alt="Artículo destacado"
                     class="w-full h-auto object-cover rounded-2xl opacity-90 mb-8"
                 />
 
@@ -86,7 +85,6 @@
 </template>
 
 <script setup lang="ts">
-import Sidebar from "../components/SidebarPatient.vue";
 import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
 import UserProfile from "../components/PatientProfile.vue";
 </script>

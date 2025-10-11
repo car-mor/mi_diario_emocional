@@ -1,7 +1,5 @@
 <template>
     <div class="flex h-screen">
-        <!-- Sidebar izquierdo component -->
-        <Sidebar />
         <!-- Área principal central -->
         <main class="flex-1 flex flex-col overflow-hidden">
             <!-- header con título y racha component-->
@@ -42,17 +40,17 @@
                     <h2 class="text-2xl md:text-2xl font-bold mb-4 text-gray-600 dark:text-gray-300 mb-6">
                         ¿Necesitas más información? ¡Contáctanos!
                     </h2>
-                    <a 
-                    href="mailto:midiarioemocional@gmail.com" 
+                    <a
+                    href="mailto:midiarioemocional@gmail.com"
                     class="text-lg md:text-4xl text-[#70BFE9] font-bold"
                     >
                         <IconMailHeart class="inline w-11 h-11 md:w-11 md:h-11 mr-2 mb-1" />
                         midiarioemocional@gmail.com
                     </a>
-        
+
                 </div>
 
-                <router-view /> 
+                <router-view />
             </div>
         </main>
         <!-- Perfil del usuario(solo en pantallas grandes) component -->
@@ -62,7 +60,6 @@
 
 <script setup lang="ts">
 import { IconMailHeart } from "@tabler/icons-vue"
-import Sidebar from "../components/SidebarPatient.vue"
 import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
 import UserProfile from "../components/PatientProfile.vue"
 import { ref } from 'vue';

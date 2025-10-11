@@ -17,7 +17,7 @@
                             {{ professionalName }}
                         </h1>
                     </div>
-                    
+
                     <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full mb-12 border border-gray-200">
                         <h2 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-white border-b pb-2">Opciones de Cuenta y configuración</h2>
                         <ul class="space-y-4">
@@ -35,7 +35,7 @@
                             </li>
                         </ul>
                     </div>
-                    
+
                 </div>
 
                 <div class="flex flex-col items-end pt-4 space-y-4">
@@ -49,7 +49,7 @@
                             type="text"
                             :value="linkCode"
                             readonly
-                            class="py-2 px-4 rounded-lg border border-gray-300 text-lg font-medium text-center bg-gray-50 select-none cursor-default w-32 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            class="py-2 px-4 rounded-lg border border-gray-300 text-lg font-medium text-center bg-gray-50 select-none cursor-default w-auto dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                     </div>
 
@@ -278,61 +278,115 @@
 
         </div>
     </div>
+    <footer >
+        <WelcomeFooter />
+
+         </footer>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from "vue-router";
+import * as AuthServices from '@/modules/auth/services/authServices';
+import { isAxiosError } from 'axios';
+import { useAuthStore } from '@/store/auth';
 const router = useRouter(); // Descomentar si realmente se usa vue-router
 
 // ----------------------------------------------------
 // --- Variables de Estado del Profesional (Del Código Original) ---
 // ----------------------------------------------------
+const professionalData = ref<AuthServices.UserProfileData | null>(null); // Declaración para TypeScript
 
-const professionalName = ref('');
-const professionalGender = ref(''); // female o male
+const loadingProfile = ref(true);
+
+// --- FUNCIÓN TYPE GUARD (Ahora usa el alias del módulo) ---
+const isProfessionalProfile = (data: AuthServices.UserProfileData): data is AuthServices.ProfessionalProfile => {
+    // Verificación segura: comprueba si el campo 'link_code' existe en el objeto.
+    return (data as AuthServices.ProfessionalProfile).link_code !== undefined;
+};
+
+// --- FUNCIÓN TYPE GUARD (Para el perfil de paciente) ---
+const isPatientProfile = (data: AuthServices.UserProfileData): data is AuthServices.PatientProfile => {
+    // Verificación segura: si tiene 'alias' y no tiene 'link_code', es un paciente.
+    return (data as AuthServices.PatientProfile).alias !== undefined && !isProfessionalProfile(data);
+};
+
+
 const linkCode = ref('');
-
-// Control de Modal y Límites del código de enlace
-const showCodeModal = ref(false); // Control del modal de confirmación
-const maxDailyChanges = 3; // Máximo de cambios al día
-const dailyCodeChanges = ref(0); // Contador actual de cambios (simulado)
-
-// Control de Modal de Éxito del código de enlace
+const dailyCodeChanges = ref(0);
+const showCodeModal = ref(false);
+const maxDailyChanges = 3;
 const showSuccessUpdateModal = ref(false);
 const newGeneratedCode = ref('');
 
 // Lógica COMPUTED para determinar la BIENVENIDA según género
+const professionalName = computed(() => {
+    if (!professionalData.value) return 'Cargando...';
+
+    // Accede a los campos de forma segura
+    return `${professionalData.value.name} ${professionalData.value.paternal_last_name}`;
+});
+
 const salutation = computed(() => {
-    const gender = professionalGender.value.toLowerCase();
-    if (gender === 'female') {
-        return 'Bienvenida,';
+    if (!professionalData.value) return 'Bienvenido,';
+
+    // Usamos el type guard para saber qué campo de género usar (sex o gender)
+    if (isProfessionalProfile(professionalData.value)) {
+        const gender = professionalData.value.sex.toLowerCase();
+        return gender === 'female' ? 'Bienvenida,' : 'Bienvenido,';
     }
+    // Si no es Professional (es Patient o superuser), usamos el campo gender del paciente o un default.
+    // Asumimos que si no es profesional, debe ser un paciente que usa 'gender'.
+    else if (isPatientProfile(professionalData.value)) {
+        const gender = professionalData.value.gender.toLowerCase();
+        return gender === 'female' ? 'Bienvenida,' : 'Bienvenido,';
+    }
+
     return 'Bienvenido,';
 });
 
-// Función para simular la carga de datos del backend
+// Función para carga de datos del backend
 async function loadProfessionalData() {
+    const authStore = useAuthStore();
+
+    if (!authStore.authToken){
+        console.error('No hay token de autenticación. Redirigiendo a login.');
+        router.push({ name: 'login' });
+        return;
+    }
+
     try {
-        // Simulación de datos recibidos del backend
-        const dataFromBackend = {
-            name: 'Ana Sofía',
-            gender: 'female',
-            link_code: 'XYZ7J9L2',
-            changes_today: 1
-        };
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Llamada unificada a la API
+        const response = await AuthServices.fetchUserProfile();
 
-        // Asignar los datos recibidos a las variables reactivas
-        professionalName.value = dataFromBackend.name;
-        professionalGender.value = dataFromBackend.gender;
-        linkCode.value = dataFromBackend.link_code;
-        dailyCodeChanges.value = dataFromBackend.changes_today;
+        professionalData.value = response.data;
 
-    } catch (error) {
+        // ----------------------------------------------------
+        // LÓGICA DE ASIGNACIÓN CONDICIONAL
+        // ----------------------------------------------------
+        if (isProfessionalProfile(response.data)) {
+            // Si es un perfil de profesional, asignamos el link code real
+            linkCode.value = response.data.link_code;
+        } else {
+            // Si el paciente accede a la vista de profesional, limpiamos el link code
+            // y lo redirigimos si es necesario (el Navigation Guard debería prevenir esto).
+            linkCode.value = '';
+            // Si quieres redirigir a los pacientes a su propia vista:
+            // router.push({ name: 'home-patient' });
+        }
+
+    } catch (error: unknown) {
+        if (isAxiosError(error) && error.response && error.response.status === 401) {
+            console.error('Token expirado. Forzando logout.');
+            authStore.logout(); // Forzar el cierre de sesión y limpieza de tokens
+            router.push({ name: 'login' });
+        }
         console.error('Error al cargar datos del perfil:', error);
+    } finally {
+        loadingProfile.value = false;
     }
 }
+
 
 // ----------------------------------------------------
 // --- Lógica del Código de Enlace (Del Código Original) ---
@@ -342,34 +396,48 @@ function openConfirmationModal() {
     showCodeModal.value = true;
 }
 
-function confirmCodeGeneration() {
+async function confirmCodeGeneration() {
     showCodeModal.value = false; // Cerrar modal de confirmación
 
+    // 1. CHEQUEO DEL LÍMITE DIARIO (se mantiene como simulación en el frontend)
     if (dailyCodeChanges.value >= maxDailyChanges) {
-        alert("Límite diario alcanzado. No se puede generar un nuevo código.");
+        // El botón debería estar deshabilitado, pero comprobamos de nuevo
         return;
     }
 
-    console.log("Solicitando nuevo código de enlace...");
+    // 2. LLAMADA REAL A LA API
+    try {
+        // En un escenario real, aquí podrías llamar a un endpoint para
+        // obtener el contador de cambios de la DB para hacer esta verificación
 
-    // Simulación de API call y generación del nuevo código
-    setTimeout(() => {
-        // Generar código de 8 caracteres (letras mayúsculas y números)
-        const newCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+        const response = await AuthServices.regenerateLinkCode();
 
-        // 1. Asignar el nuevo código al campo principal
-        linkCode.value = newCode;
+        // 3. ACTUALIZAR ESTADO LOCAL
+        if (response.status === 200) {
+            const newCode = response.data.new_link_code;
 
-        // 2. Incrementar el contador diario (Simulación)
-        dailyCodeChanges.value++;
+            // Asignar el nuevo código al campo principal
+            linkCode.value = newCode;
 
-        // 3. ASIGNAR EL CÓDIGO A LA VARIABLE DEL MODAL
-        newGeneratedCode.value = newCode;
+            // Incrementar el contador diario (Simulación, debe ser del backend en prod.)
+            dailyCodeChanges.value++;
 
-        // 4. MOSTRAR EL MODAL DE ÉXITO
-        showSuccessUpdateModal.value = true;
+            // Asignar el código a la variable del modal de éxito
+            newGeneratedCode.value = newCode;
 
-    }, 500);
+            // Mostrar el modal de éxito
+            showSuccessUpdateModal.value = true;
+        }
+
+    } catch (error: unknown) {
+        if (isAxiosError(error) && error.response && error.response.status === 403) {
+             errorMessage.value = 'No tienes permiso para realizar esta acción.';
+        } else {
+             errorMessage.value = 'Error al generar el código. Inténtelo de nuevo.';
+        }
+        showErrorModal.value = true;
+        console.error('Error al generar código:', error);
+    }
 }
 
 
@@ -717,7 +785,7 @@ function closeDeleteSuccessModal() {
     // Simulación de cierre de sesión y redirección
     localStorage.removeItem('authToken');
     localStorage.removeItem('userProfile');
-    router.push('/login'); 
+    router.push('/login');
 }
 
 // Ciclo de vida para cargar los datos al inicio

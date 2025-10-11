@@ -1,10 +1,9 @@
 <template>
     <div class="flex flex-col min-h-screen grid grid-rows-[auto_1fr_auto] min-h-screen">
         <!-- Professional Header -->
-        <ProfessionalHeader />
-        <!-- Contenido principal -->       
+        <!-- Contenido principal -->
             <ManagePatients />
-        <router-view />  
+        <router-view />
         <!-- Footer común -->
         <WelcomeFooter />
     </div>
@@ -12,7 +11,6 @@
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import ProfessionalHeader from '../components/ProfessionalHeader.vue';
 import WelcomeFooter from '@/modules/auth/components/WelcomeFooter.vue';
 import ManagePatients from '@/modules/professional/components/PatientManagement.vue';
 

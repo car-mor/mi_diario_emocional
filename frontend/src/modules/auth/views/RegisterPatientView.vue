@@ -216,7 +216,9 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { isAxiosError } from 'axios';
 import BackgroundWrapper from '@/modules/auth/components/BackgroundWrapper.vue'
+import * as AuthServices from '@/modules/auth/services/authServices';
 import {
   IconLink,
   IconUser,
@@ -237,6 +239,7 @@ const professionalId = ref('')
 const error = ref('')
 const passwordError = ref('')
 const loading = ref(false)
+const linkCodeError = ref('') // Nueva variable para errores del código de enlace
 
 const form = reactive({
   name: '',
@@ -252,51 +255,35 @@ const form = reactive({
 
 async function verifyLinkCode() {
   loading.value = true
-  error.value = ''
-  try {
-    // Aquí iría la llamada a tu API de Django para validar el código
-    // const response = await api.post('/api/validate-link-code/', { link_code: linkCode.value });
-    // if (response.data.professional_id) {
-    //   professionalId.value = response.data.professional_id;
-    //   step.value = 2; // Avanzar al siguiente paso
-    // } else {
-    //   error.value = 'Código de enlace inválido. Por favor, verifica el código e inténtalo de nuevo.';
-    // }
+  linkCodeError.value = ''
 
-    // Simulación de respuesta exitosa
-    if (linkCode.value === '123456') {
-      professionalId.value = 'prof-uuid-123'
-      step.value = 2
-    } else {
-      error.value = 'Código de enlace inválido. Por favor, verifica el código e inténtalo de nuevo.'
+  try {
+    const response = await AuthServices.validateLinkCode(linkCode.value);
+
+    if (response.status === 200) {
+      professionalId.value = response.data.professional_id // Guardamos el ID del terapeuta
+      step.value = 2 // Avanzar al paso de Datos Personales
     }
   } catch (err: unknown) {
-    // Ahora 'err' es de tipo 'unknown', más seguro que 'any'.
-    // Debes verificar su tipo antes de usarlo.
-    if (err instanceof Error) {
-      error.value = err.message
+    if (isAxiosError(err) && err.response && err.response.data.error) {
+        linkCodeError.value = err.response.data.error;
+        //Mostrar el error en la interfaz
+        error.value = linkCodeError.value;
     } else {
-      error.value = 'Ocurrió un error. Por favor, inténtalo de nuevo.'
+        linkCodeError.value = 'El servidor no pudo verificar el código. Inténtalo de nuevo.';
     }
-    console.error(err)
   } finally {
     loading.value = false
   }
 }
 
 function submitPersonalData() {
-  // Lógica de validación básica de los campos personales
-  if (
-    form.name &&
-    form.alias &&
-    form.paternalLastName &&
-    form.maternalLastName &&
-    form.dateOfBirth &&
-    form.gender
-  ) {
-    step.value = 3 // Avanzar al siguiente paso
+  // Lógica de validación básica (como la tenías)
+  if (form.name && form.alias && form.paternalLastName && form.maternalLastName && form.dateOfBirth && form.gender) {
+    step.value = 3 // Avanzar al paso de Credenciales
   } else {
     // Manejar error de campos incompletos
+    error.value = 'Por favor, completa todos los campos obligatorios.'
   }
 }
 
@@ -310,34 +297,69 @@ async function createAccount() {
   passwordError.value = ''
 
   try {
-    const registrationData = {
-      ...form,
-      professional_id: professionalId.value,
+    // 1. Prepara el payload con la estructura anidada y la vinculación
+    const registrationPayload = {
+  // Los campos del 'user' ahora están en el nivel principal
+  email: form.email,
+  password: form.password,
+  name: form.name,
+  paternal_last_name: form.paternalLastName, // <-- Asegúrate que los nombres coincidan
+  maternal_last_name: form.maternalLastName,
+  date_of_birth: form.dateOfBirth,
+  role: 'patient', // Rol fijo
+
+  // Campos del modelo Patient
+  alias: form.alias,
+  gender: form.gender,
+  professional_id: professionalId.value, // Este campo no lo usas en PreRegistration, pero no causa error
+}
+
+    // 2. Envía la solicitud al endpoint de registro
+    const response = await AuthServices.registerPatient(registrationPayload);
+    if (response.status === 201) {
+        step.value = 4 // Mostrar el mensaje de éxito
     }
 
-    // Aquí iría la llamada a tu API de Django para registrar al usuario
-    // Esta línea se descomentará cuando la API esté lista.
-    // const response = await api.post('/api/register-patient/', registrationData);
-    // console.log(response.data); // Usar la variable para evitar el error de linter
-
-    console.log(registrationData) // Se usa la variable para evitar el error de linter
-
-    step.value = 4 // Mostrar el mensaje de éxito
   } catch (err: unknown) {
-    // Ahora 'err' es de tipo 'unknown', más seguro que 'any'.
-    // Debes verificar su tipo antes de usarlo.
-    if (err instanceof Error) {
-      passwordError.value = err.message
+    if (isAxiosError(err) && err.response && err.response.data) {
+
+        let msg = 'Error de registro. Verifique su información.';
+        const data = err.response.data;
+
+        // Intentamos extraer el error del campo 'user' (que es el serializador anidado)
+        if (data.user) {
+            const userErrors = data.user;
+            if (userErrors.email) msg = `Correo: ${userErrors.email[0]}`;
+            else if (userErrors.date_of_birth) msg = `Fecha de Nacimiento: ${userErrors.date_of_birth[0]}`;
+            else if (userErrors.password) msg = `Contraseña: ${userErrors.password[0]}`;
+            else msg = 'Campos de usuario incompletos.';
+        }
+        // Si el error es del serializer Patient (ej. alias o gender)
+        else if (data.alias) {
+            msg = `Alias: ${data.alias[0]}`;
+        }
+        else if (data.professional_id) {
+            msg = `Terapeuta: ${data.professional_id[0]}`;
+        }
+        else if (data.detail) {
+             msg = data.detail; // Error genérico de DRF
+        }
+
+        passwordError.value = msg;
+
     } else {
-      passwordError.value = 'Ocurrió un error al crear la cuenta. Por favor, inténtalo de nuevo.'
+        passwordError.value = 'Ocurrió un error en el servidor. Inténtalo de nuevo.'
     }
-    console.error(err)
   } finally {
     loading.value = false
   }
 }
 
 function goToLogin() {
-  router.push('/first-login')
+  router.push({
+    name: 'first-login',
+    params: { type: 'patient' }, // 1. Le pasamos el parámetro 'type'
+    query: { email: form.email }    // 2. Le pasamos el email para que el formulario se auto-rellene
+  });
 }
 </script>

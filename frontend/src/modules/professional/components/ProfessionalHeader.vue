@@ -25,6 +25,7 @@
         </a>
         <a
           href="/"
+          @click="handleLogout"
           class="text-xl text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
         >
           Cerrar sesión
@@ -46,16 +47,16 @@
           @click="toggleSettingsMenu"
           :class="[
             'hidden sm:block p-2 rounded-full transition-all duration-200 hover:scale-105',
-            showSettingsMenu 
-              ? 'bg-[#70BFE9] text-white' 
+            showSettingsMenu
+              ? 'bg-[#70BFE9] text-white'
               : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
           ]"
         >
-          <IconSettingsFilled 
+          <IconSettingsFilled
             :class="[
               'w-8 h-8 transition-transform duration-200',
               showSettingsMenu ? 'rotate-45 text-white' : 'text-gray-600 dark:text-gray-300'
-            ]" 
+            ]"
           />
         </button>
 
@@ -67,7 +68,7 @@
           <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Soporte</h3>
           </div>
-          
+
           <nav class="py-2">
             <a
               href="/faqs-tutorials-professional"
@@ -79,7 +80,7 @@
                 <span>Preguntas frecuentes</span>
               </div>
             </a>
-            
+
             <a
               href="/videos-tutorials-professional"
               class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
@@ -90,7 +91,7 @@
                 <span>Video tutoriales</span>
               </div>
             </a>
-            
+
           </nav>
         </div>
       </div>
@@ -138,6 +139,7 @@
         </a>
         <a href="/">
             <button
+                @click="handleLogout"
             class="text-left text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
             >
                 Cerrar sesión
@@ -153,7 +155,11 @@ import { ref } from 'vue'
 // Importando solo los iconos de Tabler que necesitas
 import { IconMenu2, IconSettingsFilled, IconZoomQuestion, IconVideo} from '@tabler/icons-vue'
 import { useThemeStore } from '@/store/theme'
+import { useAuthStore } from '@/store/auth';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+const authStore = useAuthStore();
 const theme = useThemeStore()
 
 // Estados para los menús
@@ -180,5 +186,13 @@ const toggleSettingsMenu = () => {
 
 const closeSettingsMenu = () => {
   showSettingsMenu.value = false
+}
+
+const handleLogout = async () => {
+    // Llama al store para limpiar tokens y notificar al backend
+    await authStore.logout();
+
+    // Redirige al usuario a la página de login
+    router.push({ name: 'login' });
 }
 </script>

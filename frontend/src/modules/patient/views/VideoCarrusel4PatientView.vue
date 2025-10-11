@@ -1,6 +1,5 @@
 <template>
     <div class="dark:bg-gray-800 transition-colors flex h-screen bg-gray-100">
-        <Sidebar />
         <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-1">
             <StreakAndTitle title="VIDEO - Mindfulness" :streakCount="2" />
             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-16 max-w-4xl mx-auto my-6">
@@ -15,7 +14,7 @@
                 <p class="text-xl md:text-2xl font-light text-gray-700 italic text-center leading-relaxed mb-8">
                     ““Hay que ser conscientes de que lo que nos provoca malestar o ansiedad no son los eventos, sino como vinculamos las emociones a éstos - Jonathan García-Allen. ”
                 </p>
-        
+
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
                     <p class="mb-6 text-justify">
                         El mindfulness es una práctica popular, pero… ¿sabes qué es mindfulness y para qué sirve? En esencia, se trata de una herramienta para alcanzar tu bienestar en medio del estrés diario. <br></br>
@@ -31,12 +30,12 @@
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
                     <div class="mb-8">
                         <div class="relative overflow-hidden w-full" style="padding-top: 56.25%">
-                            <iframe 
+                            <iframe
                                 class="absolute top-0 left-0 w-full h-full rounded-2xl"
-                                src="https://www.youtube.com/embed/RdAhXhP26Uo?si=fZZzIsgyUmSO-lun" 
-                                title="YouTube video player" 
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                src="https://www.youtube.com/embed/RdAhXhP26Uo?si=fZZzIsgyUmSO-lun"
+                                title="YouTube video player"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowfullscreen>
                             </iframe>
                         </div>
@@ -66,7 +65,6 @@
 </template>
 
 <script setup lang="ts">
-import Sidebar from "../components/SidebarPatient.vue";
 import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
 import UserProfile from "../components/PatientProfile.vue";
 </script>

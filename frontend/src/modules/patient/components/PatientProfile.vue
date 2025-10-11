@@ -9,15 +9,26 @@
         </div>
 
         <div class="mt-13 flex flex-col items-center text-center relative group">
-            <div class="relative">
+            <!-- Estado de carga -->
+            <div class="relative w-40 h-40">
+                <div
+                    v-if="loadingProfile"
+                    class="w-full h-full rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"
+                ></div>
+
+                <!-- Imagen del avatar -->
                 <img
-                    :src="finalAvatarSrc"
+                    v-else
+                    :src="avatarUrl || 'http://localhost:8000/static/images/avatar-icon.png'"
                     alt="User avatar"
                     class="w-40 h-40 rounded-xl object-cover cursor-pointer hover:opacity-80 transition-opacity"
                     @click="clickAvatarInput"
+                    @error="handleImageError"
                 />
+
+                <!-- Botón para eliminar -->
                 <button
-                    v-if="hasCustomAvatar"
+                    v-if="!loadingProfile && hasCustomAvatar"
                     @click="removeAvatar"
                     class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
                     title="Eliminar foto"
@@ -27,6 +38,7 @@
                     </svg>
                 </button>
             </div>
+
             <input
                 type="file"
                 ref="avatarInput"
@@ -34,12 +46,12 @@
                 accept="image/*"
                 class="hidden"
             />
-            
+
             <h2 class="mt-3 text-lg font-semibold text-gray-800 dark:text-gray-200">
                 {{ userAlias }}
             </h2>
             <p class="text-sm text-gray-500">{{ userEmail }}</p>
-            
+
             <p class="text-sm text-gray-500 mt-2">
                 {{ hasCustomAvatar ? 'Haz clic en la foto para cambiarla' : 'Haz clic en la foto para agregar una' }}
             </p>
@@ -71,19 +83,42 @@
 
         <div class="mt-6 flex flex-col gap-3">
             <router-link
-                to="/account-settings" 
+                to="/account-settings"
                 class="w-full bg-[#7DBFF8] hover:bg-[#3457B2] text-white font-semibold py-3 px-6 rounded-lg transition-colors mb-4 inline-block text-center"
             >
                 Configurar cuenta
             </router-link>
-            <router-link
-                to="/"
+            <button
+                @click.prevent="handleLogout"
                 class="w-full inline-block text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-lg transition-colors"
             >
                 Cerrar sesión
-            </router-link>
+            </button>
         </div>
 
+        <!-- ✅ MODAL DE ERROR/WARNING -->
+        <div v-if="showErrorModal" class="fixed inset-0 flex items-center justify-center z-50">
+            <div class="fixed inset-0" @click="closeErrorModal"></div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-md w-full text-center relative z-10">
+                <div class="flex justify-center mb-4">
+                    <div class="bg-orange-500 p-3 rounded-full inline-flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-3 dark:text-white">{{ errorTitle }}</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">{{ errorMessage }}</p>
+                <button
+                    @click="closeErrorModal"
+                    class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg w-full transition-colors"
+                >
+                    Entendido
+                </button>
+            </div>
+        </div>
+
+        <!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN -->
         <div v-if="showDeleteModal" class="fixed inset-0 flex items-center justify-center z-50">
             <div class="fixed inset-0" @click="closeDeleteModal"></div>
             <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-sm w-full text-center relative z-10">
@@ -99,14 +134,14 @@
                     </div>
                 </div>
                 <div class="flex gap-3">
-                    <button 
-                        @click="closeDeleteModal" 
+                    <button
+                        @click="closeDeleteModal"
                         class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold rounded-lg transition-colors"
                     >
                         Cancelar
                     </button>
-                    <button 
-                        @click="confirmDeleteAvatar" 
+                    <button
+                        @click="confirmDeleteAvatar"
                         class="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors"
                     >
                         Eliminar
@@ -115,6 +150,7 @@
             </div>
         </div>
 
+        <!-- MODAL DE ÉXITO -->
         <div v-if="showSuccessModal" class="fixed inset-0 flex items-center justify-center z-50">
             <div class="fixed inset-0" @click="closeSuccessModal"></div>
             <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-sm w-full text-center relative z-10">
@@ -127,8 +163,8 @@
                         </svg>
                     </div>
                 </div>
-                <button 
-                    @click="closeSuccessModal" 
+                <button
+                    @click="closeSuccessModal"
                     class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg w-full transition-colors"
                 >
                     Entendido
@@ -139,37 +175,200 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted} from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
+import * as AuthServices from '@/modules/auth/services/authServices';
 import { IconEdit } from '@tabler/icons-vue';
+import { type PatientUpdatePayload } from '@/modules/auth/services/authServices';
+// NOTA: PatientProfile ya es accesible como AuthServices.PatientProfile
 
-// --- NUEVAS VARIABLES PARA ALIAS Y CORREO ---
-const userAlias = ref(''); // Se llena desde el backend
-const userEmail = ref(''); // Se llena desde el backend
-// --- FIN NUEVAS VARIABLES ---
+const isPatientProfile = (data: AuthServices.UserProfileData): data is AuthServices.PatientProfile => {
+    // Si tiene la propiedad 'alias' y no tiene 'link_code' (lo que define a un Profesional)
+    return (data as AuthServices.PatientProfile).alias !== undefined;
+};
 
+const router = useRouter();
+const authStore = useAuthStore();
+const loading = ref(false);
+const patientData = ref<AuthServices.UserProfileData | null>(null); // Declaración para TypeScript
+const loadingProfile = ref(true);
+
+
+const userAlias = computed(() => {
+    if (!patientData.value) return 'Cargando...';
+
+    if (isPatientProfile(patientData.value)) {
+        return patientData.value.alias;
+    }
+
+    // Fallback: Si no es PatientProfile (ej. Superuser logueado en esta vista),
+    // podemos mostrar el nombre completo.
+    return patientData.value.name;
+});
+const userEmail = computed(() => {
+    // Si los datos están cargados, muestra el email
+    return patientData.value ? patientData.value.email : 'Cargando...';
+});
 //----------- constantes para el alias y descripción ---------------------
-const userDescription = ref(""); 
+const userDescription = ref("");
 const originalDescription = ref(""); // Para guardar la descripción original antes de editar
 const isEditingDescription = ref(false);
 const descriptionError = ref<string | null>(null);
 
 //-------------- constantes para la foto ------------------
 const avatarInput = ref<HTMLInputElement | null>(null);
-const defaultAvatar = '/src/assets/images/avatar-icon.png'; 
-const avatarUrl = ref<string | null>(null); 
+const avatarUrl = ref<string | null>(null);
 
 //-------------- constantes para modales ------------------
 const showDeleteModal = ref(false);
 const showSuccessModal = ref(false);
 const successTitle = ref('');
 const successMessage = ref('');
+// Variables para el modal de error
+const showErrorModal = ref(false);
+const errorTitle = ref('');
+const errorMessage = ref('');
 
-// Computed para determinar qué imagen mostrar
-const finalAvatarSrc = computed(() => avatarUrl.value || defaultAvatar);
+function showError(title: string, message: string) {
+    errorTitle.value = title;
+    errorMessage.value = message;
+    showErrorModal.value = true;
+}
+
+function closeErrorModal() {
+    showErrorModal.value = false;
+}
+
 
 // Computed para saber si el usuario tiene una foto personalizada
-const hasCustomAvatar = computed(() => avatarUrl.value !== null && avatarUrl.value !== defaultAvatar);
+const hasCustomAvatar = computed(() => {
+    // Una foto personalizada siempre vendrá de la carpeta 'media'
+    return avatarUrl.value?.includes('/media/') || false;
+});
+function clickAvatarInput() {
+    if (avatarInput.value) {
+        avatarInput.value.click(); // Dispara el clic en el input de tipo file
+    }
+}
+async function saveDescription() {
+    if (!validateDescription(userDescription.value)) {
+        return;
+    }
 
+    try {
+        // CORRECCIÓN 2: Tipamos payload con la interfaz importada
+        const payload: PatientUpdatePayload = { description: userDescription.value };
+        await AuthServices.updatePatientProfile(payload);
+
+        // Lógica de éxito...
+        originalDescription.value = userDescription.value;
+        isEditingDescription.value = false;
+
+        successTitle.value = '¡Actualizado!';
+        successMessage.value = 'Tu descripción ha sido guardada correctamente.';
+        showSuccessModal.value = true;
+
+    } catch (error) {
+        // ... (Manejo de errores) ...
+        console.error('Error al guardar descripción:', error);
+    }
+}
+function handleImageError(event: Event) {
+  console.error('❌ Error al cargar imagen:', avatarUrl.value);
+  const target = event.target as HTMLImageElement;
+  target.src = 'http://localhost:8000/static/images/avatar-icon.png';
+}
+
+async function handleAvatarChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) return;
+
+    // Validación 1: Tipo de archivo
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validImageTypes.includes(file.type)) {
+        showError(
+            'Formato no válido',
+            'El archivo seleccionado no es una imagen válida. Por favor, selecciona un archivo en formato JPG, PNG, GIF o WEBP.'
+        );
+        target.value = '';
+        return;
+    }
+
+    // Validación 2: Tamaño de archivo (50MB máximo)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        showError(
+            'Archivo muy grande',
+            `La imagen seleccionada pesa ${fileSizeMB} MB, pero el límite máximo es de 50 MB. Por favor, comprime la imagen o selecciona una más pequeña.`
+        );
+        target.value = '';
+        return;
+    }
+
+    // Si pasa todas las validaciones, proceder con la subida
+    try {
+        console.log('📤 Subiendo imagen:', file.name, `(${(file.size / (1024 * 1024)).toFixed(2)} MB)`);
+
+        const formData = new FormData();
+        formData.append('profile_picture', file);
+
+        const response = await AuthServices.updatePatientProfile(formData);
+
+        console.log('✅ Respuesta de actualización:', response.data);
+
+        // Actualizar la URL del avatar
+        if (response.data.profile_picture_url) {
+            avatarUrl.value = response.data.profile_picture_url;
+        } else if (response.data.profile_picture) {
+            avatarUrl.value = response.data.profile_picture;
+        }
+
+        // Mostrar modal de éxito
+        successTitle.value = '¡Foto actualizada!';
+        successMessage.value = 'Tu foto de perfil ha sido actualizada correctamente.';
+        showSuccessModal.value = true;
+
+    } catch (error) {
+        console.error('❌ Error al subir avatar:', error);
+        showError(
+            'Error al subir',
+            'Hubo un problema al subir tu imagen. Por favor, intenta nuevamente o selecciona otra imagen.'
+        );
+    } finally {
+        if (target) {
+            target.value = '';
+        }
+    }
+}
+
+
+
+const handleLogout = async () => {
+    loading.value = true;
+
+    try {
+        // La función logout de Pinia ya maneja la llamada al endpoint /api/logout/
+        await authStore.logout();
+
+        // Redirigir a la página de login
+        router.push({ name: 'login' });
+
+    } catch (error) {
+        // Si hay un error de red o el servidor no responde (ej. 500)
+        console.error('Error al cerrar sesión, forzando cierre local:', error);
+
+        // Forzamos la redirección aunque el blacklisting del token haya fallado,
+        // para garantizar que el usuario salga de la sesión local.
+        router.push({ name: 'login' });
+
+    } finally {
+        loading.value = false;
+    }
+};
 //-----------------------------------------------------------------------
 //------------------- Funciones de Validación y Edición -----------------
 //-----------------------------------------------------------------------
@@ -192,15 +391,6 @@ function validateDescription(text: string): boolean {
     return true;
 }
 
-function saveDescription() {
-    if (validateDescription(userDescription.value)) {
-        // LLAMADA AXIOS/FETCH AL BACKEND para guardar userDescription.value
-        console.log("Guardando descripción:", userDescription.value);
-        originalDescription.value = userDescription.value;
-        isEditingDescription.value = false;
-    }
-}
-
 function cancelEdit() {
     // Revertir a la última versión guardada
     userDescription.value = originalDescription.value;
@@ -210,35 +400,8 @@ function cancelEdit() {
 
 //------------------- Funciones para avatar --------------------------
 
-function handleAvatarChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
 
-    if (file) {
-        if (!file.type.startsWith('image/')) {
-            console.error('El archivo debe ser una imagen');
-            return;
-        }
-        const maxSize = 5 * 1024 * 1024; // 5MB en bytes
-        if (file.size > maxSize) {
-            console.error('La imagen es demasiado grande. Máximo 5MB.');
-            return;
-        }
 
-        if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
-            URL.revokeObjectURL(avatarUrl.value);
-        }
-
-        avatarUrl.value = URL.createObjectURL(file);
-        uploadAvatar(file);
-    }
-}
-
-function showUploadSuccess() {
-    successTitle.value = '¡Foto actualizada!';
-    successMessage.value = 'Tu foto de perfil ha sido actualizada correctamente.';
-    showSuccessModal.value = true;
-}
 
 function removeAvatar() {
     showDeleteModal.value = true;
@@ -248,81 +411,101 @@ function closeDeleteModal() {
     showDeleteModal.value = false;
 }
 
-function confirmDeleteAvatar() {
-    showDeleteModal.value = false;
-    
-    if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
-        URL.revokeObjectURL(avatarUrl.value);
+async function confirmDeleteAvatar() {
+    try {
+        console.log('🗑️ Eliminando avatar...');
+
+        // ✅ Crear FormData con el flag de eliminación
+        const formData = new FormData();
+        formData.append('delete_picture', 'true');
+
+        // DEBUG: Ver qué contiene el FormData antes de enviarlo
+        console.log('📤 Contenido del FormData:');
+        for (const pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        const response = await AuthServices.updatePatientProfile(formData);
+
+        console.log('✅ Respuesta de eliminación:', response.data);
+
+        // Actualizar con la URL del avatar por defecto
+        if (response.data.profile_picture_url) {
+            avatarUrl.value = response.data.profile_picture_url;
+        } else if (response.data.profile_picture) {
+            avatarUrl.value = response.data.profile_picture;
+        }
+
+        console.log('✅ Avatar eliminado, nueva URL:', avatarUrl.value);
+
+        // Mostrar modal de éxito
+        successTitle.value = '¡Foto eliminada!';
+        successMessage.value = 'Tu foto de perfil ha sido eliminada correctamente.';
+        showSuccessModal.value = true;
+        closeDeleteModal();
+
+    } catch (error: unknown) {
+        console.error('❌ Error completo al eliminar avatar:', error);
+
+        // ✅ Type guard para verificar si es un error de Axios
+        if (error && typeof error === 'object' && 'response' in error) {
+            const axiosError = error as { response?: { data: unknown; status: number } };
+            if (axiosError.response) {
+                console.error('❌ Respuesta del servidor:', axiosError.response.data);
+                console.error('❌ Status:', axiosError.response.status);
+            }
+        }
+
+        showError(
+            'Error al eliminar',
+            'Hubo un problema al eliminar tu foto. Por favor, intenta nuevamente.'
+        );
     }
-    
-    avatarUrl.value = null;
-    deleteAvatarFromServer();
-    
-    successTitle.value = '¡Foto eliminada!';
-    successMessage.value = 'Tu foto de perfil ha sido eliminada correctamente. Ahora se muestra la imagen predeterminada.';
-    showSuccessModal.value = true;
-    console.log("Foto de perfil eliminada");
 }
+
+
+
 
 function closeSuccessModal() {
     showSuccessModal.value = false;
 }
 
-async function uploadAvatar(file: File) {
-    // Lógica para subir el archivo al backend
-    console.log("Simulación: Subiendo archivo al servidor...");
-    // Simular éxito y asignar la URL permanente si tuvieras una
-    // avatarUrl.value = data.avatarUrl; 
-    showUploadSuccess();
-}
-
-async function deleteAvatarFromServer() {
-    // Lógica para notificar al backend que elimine la foto
-    console.log("Simulación: Solicitud de eliminación enviada al servidor.");
-}
-
-function clickAvatarInput() {
-    if (avatarInput.value) {
-        avatarInput.value.click();
-    }
-}
 
 // ----------------------------------------------------
 // Lógica de Carga Inicial (Backend)
 // ----------------------------------------------------
+// Función para carga de datos del backend
+async function loadPatientData() {
+    loadingProfile.value = true;
+    const authStore = useAuthStore();
 
-async function loadUserProfileData() {
+    if (!authStore.authToken) {
+        router.push({ name: 'login' });
+        loadingProfile.value = false;
+        return;
+    }
+
     try {
-        // Simulación de datos recibidos del backend
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        const dataFromBackend = {
-            alias: 'Alias de María',
-            email: 'maria@correo.com',
-            description: 'Duis a lacus in arcu ultrices sodales vel in urna. Donec lacinia facilisis dui.',
-            // El backend envía la URL si existe, o null si no hay foto personalizada
-            avatar_url: null as string | null, 
-        };
+        const response = await AuthServices.fetchUserProfile();
+        const patientProfile = response.data as AuthServices.PatientProfile;
 
-        // Asignar los valores a las variables reactivas
-        userAlias.value = dataFromBackend.alias;
-        userEmail.value = dataFromBackend.email;
-        userDescription.value = dataFromBackend.description;
-        originalDescription.value = dataFromBackend.description; // Establece el valor de reversión
-        
-        // CORRECCIÓN de la asignación del avatar:
-        // Asignamos el valor del backend. Si es null, el computed se encarga del default.
-        avatarUrl.value = dataFromBackend.avatar_url; 
-        
+        patientData.value = patientProfile;
+        userDescription.value = patientProfile.description || 'Añade una breve descripción sobre ti...';
+        originalDescription.value = userDescription.value;
+
+        // ✅ USAR EL CAMPO CORRECTO
+        avatarUrl.value = patientProfile.profile_picture;
+
     } catch (error) {
-        console.error('Error al cargar datos del perfil:', error);
+        console.error("Falló la carga del perfil de usuario:", error);
+    } finally {
+        loadingProfile.value = false;
     }
 }
-
 // Ciclo de vida
 onMounted(() => {
-    loadUserProfileData();
-    
+    loadPatientData();
+
     // Cleanup function que se ejecuta cuando el componente se desmonta
     return () => {
         if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {

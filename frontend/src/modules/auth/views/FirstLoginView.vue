@@ -11,9 +11,11 @@
         <div
           class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-lg border border-gray-200 dark:border-gray-700"
         >
-          <h1 class="mb-8 text-2xl font-bold text-center text-[#70BFE9]">
-            Inicia sesión por primera vez como Paciente
-          </h1>
+         <h1 class="mb-8 text-2xl font-bold text-center text-[#70BFE9]">
+          {{ title }}
+        </h1>
+
+          <p v-if="errorMessage" class="text-sm text-red-500 text-center mb-4 font-semibold">{{ errorMessage }}</p>
 
           <form @submit.prevent="firstTimeLogin">
             <div class="mb-6">
@@ -87,12 +89,14 @@
             <button
               type="submit"
               class="w-full bg-[#70BFE9] hover:bg-[#5a9cbf] text-white font-semibold py-3 px-6 rounded-lg transition-colors mb-4"
+              :disabled="loading"
             >
-              Iniciar sesión
+              {{ loading ? 'Verificando y logueando...' : 'Iniciar sesión' }}
             </button>
             <button
               @click.prevent="resendCode"
               class="w-full inline-block text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-lg transition-colors"
+              :disabled="loading"
             >
               Volver a enviar código
             </button>
@@ -118,6 +122,24 @@
     </div>
   </div>
 
+  <div v-if="successPopup" class="fixed inset-0 flex items-center justify-center z-50">
+  <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-xl max-w-sm w-full text-center">
+    <div class="flex flex-col items-center justify-center">
+      <IconCircleCheckFilled class="text-green-500 w-16 h-16 mb-4" />
+      <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">¡Éxito!</h3>
+      <p class="text-gray-600 dark:text-gray-300 mb-4">
+        Tu cuenta ha sido activada correctamente. Serás redirigido en unos segundos...
+      </p>
+      <button
+        @click="closeSuccessPopup"
+        class="bg-green-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-600 transition-colors"
+      >
+        Ir ahora
+      </button>
+    </div>
+  </div>
+</div>
+
   <div v-if="resendPopup" class="fixed inset-0 flex items-center justify-center z-50">
     <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-xl max-w-sm w-full text-center">
       <div class="flex flex-col items-center justify-center">
@@ -139,85 +161,181 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import {
   IconLockSquareRounded,
   IconMail,
   IconAlertCircle,
   IconCircleXFilled,
   IconCircleCheckFilled,
-} from '@tabler/icons-vue'
-import WomanHeart from '../components/WomanHeart.vue'
+} from '@tabler/icons-vue';
+import WomanHeart from '../components/WomanHeart.vue';
+import { isAxiosError } from 'axios';
+import * as AuthServices from '@/modules/auth/services/authServices';
+import { useAuthStore, type UserType } from '@/store/auth';
 
-const email = ref('')
-const password = ref('')
-const validationCode = ref('')
-const errorPopup = ref(false)
-const resendPopup = ref(false)
-const errorMessage = ref('')
-const lastResendTimestamp = ref(0)
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+
+// --- Lógica de Título Dinámico ---
+const userType = computed(() => route.params.type as string);
+const title = computed(() => {
+  if (userType.value === 'professional') {
+    return 'Activación de Cuenta de Terapeuta';
+  }
+  return 'Activa tu cuenta de Paciente';
+});
+
+// --- Refs del Formulario y Popups ---
+const email = ref('');
+const password = ref('');
+const validationCode = ref('');
+const loading = ref(false);
+const errorPopup = ref(false);
+const successPopup = ref(false);
+const resendPopup = ref(false);
+const successMessage = ref('');
+const errorMessage = ref('');
+
+// --- Lógica del Temporizador para Reenvío ---
+const lastResendTimestamp = ref(0);
+const currentTime = ref(Date.now());
+const fiveMinutesInMs = 5 * 60 * 1000;
+let timeInterval: number | null = null;
+
+const remainingTime = computed(() => {
+  if (lastResendTimestamp.value === 0) return 0;
+  const elapsed = currentTime.value - lastResendTimestamp.value;
+  return Math.max(0, fiveMinutesInMs - elapsed);
+});
+
+const isResendDisabled = computed(() => remainingTime.value > 0);
+
+onMounted(() => {
+  const emailFromUrl = route.query.email;
+  if (emailFromUrl) {
+    email.value = String(emailFromUrl);
+  }
+  // Inicia un intervalo para actualizar el tiempo actual cada segundo
+  timeInterval = setInterval(() => {
+    currentTime.value = Date.now();
+  }, 1000);
+});
+
+onUnmounted(() => {
+  // Limpia el intervalo cuando el componente se destruye
+  if (timeInterval) {
+    clearInterval(timeInterval);
+  }
+});
 
 const isEmailValid = (email: string): boolean => {
-  const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/
-  return re.test(String(email).toLowerCase())
-}
+  const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  return re.test(String(email).toLowerCase());
+};
 
-const firstTimeLogin = () => {
+const firstTimeLogin = async () => {
   if (!isEmailValid(email.value)) {
-    errorMessage.value = 'Por favor, ingresa un correo electrónico con un formato válido.'
-    errorPopup.value = true
-    return
+    errorMessage.value = 'Por favor, ingresa un correo electrónico con un formato válido.';
+    errorPopup.value = true;
+    return;
   }
 
-  // Lógica de autenticación
-  console.log('Intento de inicio de sesión por primera vez con:', {
-    email: email.value,
-    password: password.value,
-    validationCode: validationCode.value,
-  })
+  loading.value = true;
+  errorMessage.value = '';
+  try {
+    const activationPayload = { email: email.value, password: password.value, verification_code: validationCode.value };
 
-  // Simulación de respuesta de API:
-  const isLoginSuccessful =
-    email.value === 'test@example.com' &&
-    password.value === 'password123' &&
-    validationCode.value === '123456'
-
-  if (!isLoginSuccessful) {
-    errorMessage.value =
-      'Las credenciales no son correctas. Por favor, verifica tu correo, contraseña o el código de validación.'
-    errorPopup.value = true
-  } else {
-    // Si la autenticación es exitosa, redirige al usuario
-    console.log('Inicio de sesión exitoso. Redirigiendo...')
-    // router.push('/dashboard');
+    if (userType.value === 'patient') {
+      const response = await AuthServices.activateAccount(activationPayload);
+      authStore.setTokens(response.data.access, response.data.refresh);
+      authStore.setUserData(response.data.user.role as UserType);
+      successMessage.value = '¡Cuenta activada! Serás redirigido a tu panel.';
+      successPopup.value = true;
+    } else { // Flujo para Profesional
+      await AuthServices.verifyProfessionalEmail(activationPayload);
+      successMessage.value = '¡Correo verificado! Ahora serás redirigido para que inicies sesión.';
+      successPopup.value = true;
+    }
+  } catch (error: unknown) {
+    if (isAxiosError(error) && error.response) {
+      errorMessage.value = error.response.data.error || 'Credenciales o código incorrectos.';
+    } else {
+      errorMessage.value = 'Ocurrió un error desconocido.';
+    }
+    errorPopup.value = true;
+  } finally {
+    loading.value = false;
   }
-}
+};
 
-const resendCode = () => {
-  const currentTime = Date.now()
-  const fiveMinutesInMs = 5 * 60 * 1000
-
-  if (currentTime - lastResendTimestamp.value < fiveMinutesInMs) {
-    errorMessage.value = 'Debes esperar 5 minutos antes de volver a enviar el código.'
-    errorPopup.value = true
-    return
+const resendCode = async () => {
+  if (isResendDisabled.value) {
+    errorMessage.value = `Debes esperar ${Math.ceil(remainingTime.value / 1000)} segundos.`;
+    errorPopup.value = true;
+    return;
+  }
+  if (!isEmailValid(email.value)) {
+    errorMessage.value = 'Por favor, ingresa un correo electrónico válido.';
+    errorPopup.value = true;
+    return;
   }
 
-  // Lógica para reenviar el código de validación
-  console.log('Solicitud para reenviar código a:', email.value)
-  // Aquí llamarías a una API para reenviar el código
+  loading.value = true;
+  errorMessage.value = '';
 
-  // Simulación de respuesta exitosa de API
-  resendPopup.value = true
-  lastResendTimestamp.value = currentTime
-}
+  try {
+    const payload: { email: string, role: string, password?: string } = {
+      email: email.value,
+      role: userType.value,
+    };
+
+    // Si es profesional, añadimos la contraseña (requerida por tu backend para seguridad)
+    if (userType.value === 'professional') {
+      if (!password.value) {
+        errorMessage.value = 'La contraseña es necesaria para reenviar el código de profesional.';
+        errorPopup.value = true;
+        loading.value = false;
+        return;
+      }
+      payload.password = password.value;
+    }
+
+    await AuthServices.resendActivationCode(payload);
+
+    resendPopup.value = true;
+    lastResendTimestamp.value = Date.now();
+
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      errorMessage.value = error.response.data.error || 'No se pudo reenviar el código.';
+    } else {
+      errorMessage.value = 'Ocurrió un error desconocido.';
+    }
+    errorPopup.value = true;
+  } finally {
+    loading.value = false;
+  }
+};
 
 const closeErrorPopup = () => {
-  errorPopup.value = false
-  errorMessage.value = ''
-}
+  errorPopup.value = false;
+  errorMessage.value = '';
+};
+
+const closeSuccessPopup = () => {
+  successPopup.value = false;
+  if (userType.value === 'patient') {
+    router.push({ name: 'home-patient' });
+  } else {
+    router.push({ name: 'login' });
+  }
+};
 
 const closeResendPopup = () => {
-  resendPopup.value = false
-}
+  resendPopup.value = false;
+};
+
 </script>

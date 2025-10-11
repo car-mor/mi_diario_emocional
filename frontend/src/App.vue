@@ -1,25 +1,36 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import { useAuthStore } from '@/store/auth' // Asegúrate de que la ruta es correcta
+import { onMounted, computed } from 'vue';
+import { RouterView } from 'vue-router'; // Ya no necesitamos useRoute
+import { useAuthStore } from '@/store/auth';
 
-// Importa los tres componentes de header con sus nombres correspondientes
-// import PacienteHeader from '@/modules/patient/components/PatientHeader.vue'
-// import TerapeutaHeader from '@/modules/professional/components/ProfessionalHeader.vue'
-import AnonymusHeader from '@/modules/auth/components/WelcomeHeader.vue'
+// Importa solo el componente ANÓNIMO
+import AnonymusHeader from '@/modules/auth/components/WelcomeHeader.vue';
 
-const authStore = useAuthStore()
-// Inicializa el tipo de usuario en 'anónimo' al cargar la aplicación
-authStore.loginAs('anónimo') // Cambia esto para probar diferentes tipos de usuario
+const authStore = useAuthStore();
+
+// Propiedad calculada: Verifica si el usuario está logueado con un rol específico.
+// Si esta es TRUE, la vista cargada es el dashboard (Layout Padre).
+const isAuthenticatedUser = computed(() => {
+    const role = authStore.userType;
+    return role === 'patient' || role === 'professional' || role === 'superuser';
+});
+
+onMounted(() => {
+    // La verificación de la sesión se hace aquí al montar
+    authStore.checkInitialAuth();
+});
 </script>
 
 <template>
-  <header>
-    <div class="wrapper">
-      <PacienteHeader v-if="authStore.userType === 'paciente'" />
-      <TerapeutaHeader v-else-if="authStore.userType === 'terapeuta'" />
-      <AnonymusHeader v-else />
-    </div>
-  </header>
+  <div :class="{ 'min-h-screen': !isAuthenticatedUser }">
 
-  <RouterView />
+    <header v-if="!isAuthenticatedUser" class="w-full">
+      <div class="wrapper">
+        <AnonymusHeader />
+      </div>
+    </header>
+
+    <RouterView :class="{ 'flex-1': !isAuthenticatedUser }" />
+
+  </div>
 </template>

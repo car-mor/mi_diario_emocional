@@ -1,19 +1,17 @@
 <template>
   <div class="flex h-screen">
-    <Sidebar />
-    
     <main class="flex-1 flex flex-col overflow-hidden">
       <StreakAndTitle title="Inicio: Recursos de Autoayuda" :streakCount="2" />
-      
+
       <div class="dark:bg-gray-800 transition-colors flex-1 p-6 overflow-y-auto">
 
         <div class="mb-8 relative bg-gradient-to-r overflow-hidden h-96 flex items-center justify-center">
-          <img 
-            src="https://img.europapress.es/fotoweb/fotonoticia_20220430132209_690.jpg" 
-            alt="Artículo destacado" 
+          <img
+            src="https://img.europapress.es/fotoweb/fotonoticia_20220430132209_690.jpg"
+            alt="Artículo destacado"
             class="w-3/5 h-full object-cover rounded-2xl opacity-100"
           />
-          
+
           <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 text-white text-center w-full px-4">
             <router-link to="/article-weekly-patient">
               <button
@@ -36,9 +34,9 @@
             </button>
 
             <!-- Botón con ubicación centros de salud mental en la zona metropolitana-->
-            <a href="https://www.google.com/maps/search/centros+de+salud+psicol%C3%B3gica+CDMX"      
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a href="https://www.google.com/maps/search/centros+de+salud+psicol%C3%B3gica+CDMX"
+              target="_blank"
+              rel="noopener noreferrer"
               class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-300 hover:bg-blue-400 rounded-2xl flex items-center justify-center text-white shadow-lg transition-colors">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -70,11 +68,11 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
             </svg>
           </button>
-          
+
           <!-- Botón con ubicación centros de salud mental en la zona metropolitana-->
-          <a href="https://www.google.com/maps/search/centros+de+salud+psicol%C3%B3gica+CDMX"      
-              target="_blank" 
-              rel="noopener noreferrer" 
+          <a href="https://www.google.com/maps/search/centros+de+salud+psicol%C3%B3gica+CDMX"
+              target="_blank"
+              rel="noopener noreferrer"
               class="w-12 h-12 bg-blue-500 hover:bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -111,7 +109,7 @@
         <p class="text-lg text-gray-600 dark:text-gray-300 mb-6 text-center">
           Si te sientes en una crisis, recuerda que no estás solo. Puedes llamar a estos números para recibir ayuda de inmediato.
         </p>
-        
+
         <ul class="space-y-3">
           <li>
             <p class="text-blue-600 text-lg dark:text-blue-400 hover:underline font-semibold text-center w-full block">
@@ -150,14 +148,14 @@
         <div class="flex items-center justify-center w-14 h-14 mx-auto">
           <IconMoodHeart class="center w-14 h-14 mb-4 items-center mx-auto text-[#F38386]" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-          
+
         </div>
 
         <h3 class="text-xl text-center font-bold mb-4 text-gray-800 dark:text-white">✨ Tu Frase del Día</h3>
         <p class="text-xl text-gray-600 dark:text-gray-300 mb-6 text-center">
           Una pequeña dosis de inspiración para alegrar tu día
         </p>
-        
+
         <!-- Contenido de la frase -->
         <div class="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 mb-6">
           <p class="text-lg font-medium text-gray-800 dark:text-gray-200 leading-relaxed mb-3 text-center">
@@ -170,14 +168,14 @@
 
         <!-- Botones -->
         <div class="flex gap-3">
-          <button 
-            @click="showMotivationalQuote" 
+          <button
+            @click="showMotivationalQuote"
             class="flex-1 bg-[#7DBFF8] hover:bg-[#3457B2] text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
             Otra Frase
           </button>
-          <button 
-            @click="showQuoteModal = false" 
+          <button
+            @click="showQuoteModal = false"
             class="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold py-3 px-6 rounded-lg transition-colors"
           >
             Cerrar
@@ -190,18 +188,43 @@
 
 <script setup lang="ts">
 import { IconPhoneCall, IconMoodHeart } from "@tabler/icons-vue"
-import Sidebar from "../components/SidebarPatient.vue"
 import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
 import UserProfile from "../components/PatientProfile.vue"
 import Carrusel from "../components/CarruselPatient.vue"
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
+import { isAxiosError } from 'axios';
+import * as AuthServices from '@/modules/auth/services/authServices';
 
+// ----------------------------------------------------
+// DEFINICIONES DE TIPO (PatientProfile)
+// ----------------------------------------------------
+interface PatientProfile {
+    name: string;
+    paternal_last_name: string;
+    maternal_last_name: string;
+    email: string;
+    alias: string;
+    gender: string;
+    professional_name?: string; // Es opcional y puede ser nulo
+}
+
+// ----------------------------------------------------
+// VARIABLES REACTIVAS
+// ----------------------------------------------------
+const patientData = ref<PatientProfile | null>(null);
+const loadingProfile = ref(true);
+const authStore = useAuthStore();
+const router = useRouter();
+
+// Variables de UI y modales
 const showEmergencyNumbers = ref(false);
 const showQuoteModal = ref(false);
 const currentQuote = ref({ text: '', author: '' });
 let lastQuoteIndex = -1;
 
-// Base de datos de frases organizadas por categorías
+// Base de datos de frases (Tu lógica de frases permanece igual)
         const quotes = {
             motivacional: [
                 { text: "El único modo de hacer un gran trabajo es amar lo que haces.", author: "Steve Jobs" },
@@ -244,28 +267,84 @@ let lastQuoteIndex = -1;
                 { text: "El conocimiento te da poder, pero el carácter te da respeto.", author: "Bruce Lee" }
             ]
         };
-
-// Función para obtener todas las frases
-const getAllQuotes = () => {
-  let allQuotes: { text: string; author: string }[] = [];
+const getAllQuotes = () => {  let allQuotes: { text: string; author: string }[] = [];
   Object.values(quotes).forEach(categoryQuotes => {
     allQuotes = allQuotes.concat(categoryQuotes);
   });
-  return allQuotes;
-};
+  return allQuotes; };
 
-// Función para mostrar una frase aleatoria
 const showMotivationalQuote = () => {
-  const availableQuotes = getAllQuotes();
-  
+    const availableQuotes = getAllQuotes();
+
   // Evitar mostrar la misma frase consecutiva
   let randomIndex;
   do {
     randomIndex = Math.floor(Math.random() * availableQuotes.length);
   } while (randomIndex === lastQuoteIndex && availableQuotes.length > 1);
-  
+
   lastQuoteIndex = randomIndex;
   currentQuote.value = availableQuotes[randomIndex];
   showQuoteModal.value = true;
-};
+ };
+
+
+// ----------------------------------------------------
+// LÓGICA COMPUTADA (Uso de datos)
+// ----------------------------------------------------
+
+const patientFullName = computed(() => {
+    if (loadingProfile.value || !patientData.value) return 'Cargando...';
+    // Muestra el nombre y el primer apellido del paciente
+    return `${patientData.value.name} ${patientData.value.paternal_last_name}`;
+});
+
+const welcomeSalutation = computed(() => {
+    if (!patientData.value) return 'Hola,';
+    const gender = patientData.value.gender.toLowerCase();
+    return (gender === 'female') ? '¡Bienvenida,' : '¡Bienvenido,';
+});
+
+
+// ----------------------------------------------------
+// FUNCIÓN DE CARGA DE DATOS REALES (loadPatientData)
+// ----------------------------------------------------
+
+async function loadPatientData() {
+    loadingProfile.value = true;
+
+    if (!authStore.authToken) {
+        router.push({ name: 'login' });
+        return;
+    }
+
+    try {
+        // Llama al endpoint unificado /profile/me/
+        const response = await AuthServices.fetchUserProfile();
+
+        // Asignar los datos recibidos
+        patientData.value = response.data as PatientProfile;
+
+        // Integrar el nombre del paciente en el título principal
+        const titleElement = document.querySelector('.streak-title h1');
+        if (titleElement) {
+            titleElement.textContent = `${welcomeSalutation.value} ${patientFullName.value}!`;
+        }
+
+    } catch (error: unknown) {
+        if (isAxiosError(error) && error.response && error.response.status === 401) {
+            console.error('Sesión expirada. Forzando logout.');
+            authStore.logout();
+            router.push({ name: 'login' });
+        }
+        console.error('Error al cargar datos del perfil del paciente:', error);
+    } finally {
+        loadingProfile.value = false;
+    }
+}
+
+// Ciclo de vida para cargar los datos al inicio
+onMounted(() => {
+    loadPatientData();
+    showMotivationalQuote();
+});
 </script>

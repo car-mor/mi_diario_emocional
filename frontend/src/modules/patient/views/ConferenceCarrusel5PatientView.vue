@@ -1,6 +1,5 @@
 <template>
     <div class="dark:bg-gray-800 transition-colors flex h-screen bg-gray-100">
-        <Sidebar />
         <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-1">
             <StreakAndTitle title="Conferencia - TEDxTecdeMty" :streakCount="2" />
             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-16 max-w-4xl mx-auto my-6">
@@ -15,7 +14,7 @@
                 <p class="text-xl md:text-2xl font-light text-gray-700 italic text-center leading-relaxed mb-8">
                     “La salud mental no es un destino, sino un proceso - Noah Shpancer.”
                 </p>
-        
+
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
                     <p class="mb-6 text-justify">
                         Fernando nos enseña a cuidar nuestra salud mental y el empezar a ver por nuestro propio bienestar. <br></br>
@@ -28,12 +27,12 @@
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
                     <div class="mb-8">
                         <div class="relative overflow-hidden w-full" style="padding-top: 56.25%">
-                            <iframe 
+                            <iframe
                                 class="absolute top-0 left-0 w-full h-full rounded-2xl"
-                                src="https://www.youtube.com/embed/_9agX3gY1jU?si=D_wsV1jekRcSt964" 
-                                title="YouTube video player" 
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                src="https://www.youtube.com/embed/_9agX3gY1jU?si=D_wsV1jekRcSt964"
+                                title="YouTube video player"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowfullscreen>
                             </iframe>
                         </div>
@@ -46,7 +45,7 @@
                     <div class="mt-8 pt-4 border-t border-gray-200 text-gray-600 text-sm">
                         <h3 class="text-base font-bold text-gray-800 mb-2">Sobre él</h3>
                         <p class="mb-2">
-                            **Fernando Lemarroy** 
+                            **Fernando Lemarroy**
                         </p>
                         <p class="text-xs text-gray-500">
                             **Fuente:** Adaptado de: #AprendemosJuntosBBVA2030. <br></br>
@@ -63,7 +62,6 @@
 </template>
 
 <script setup lang="ts">
-import Sidebar from "../components/SidebarPatient.vue";
 import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
 import UserProfile from "../components/PatientProfile.vue";
 </script>

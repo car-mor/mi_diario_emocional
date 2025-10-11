@@ -1,6 +1,5 @@
 <template>
     <div class="dark:bg-gray-800 transition-colors flex h-screen bg-gray-100">
-        <Sidebar />
         <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-1">
             <StreakAndTitle title="Podcast - Vamos a Meditar" :streakCount="2" />
             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-16 max-w-4xl mx-auto my-6">
@@ -15,7 +14,7 @@
                 <p class="text-xl md:text-2xl font-light text-gray-700 italic text-center leading-relaxed mb-8">
                     “Toma un momento para calmar tu mente, regálate unos minutos, libera tensiones, duerme mejor.”
                 </p>
-        
+
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
                     <p class="mb-6 text-justify">
                         ¿Sabías que tan sólo con respirar de manera adecuada puedes bajar la ansiedad y el estrés? En este podcast te guiaré en un ejercicio de respiración consciente que puedes hacer en cualquier momento del día para calmar tu mente y cuerpo. La respiración es una herramienta poderosa que todos tenemos a nuestro alcance, y aprender a utilizarla correctamente puede mejorar significativamente tu bienestar emocional y físico.
@@ -24,13 +23,13 @@
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
                     <div class="mb-8">
                         <div class="relative overflow-hidden w-full" style="padding-top: 5%">
-                            <iframe 
-                                style="border-radius:12px" 
-                                src="https://open.spotify.com/embed/episode/5kVQKI7fpewVRVzEnOFxoM?utm_source=generator" 
-                                width="100%" 
-                                height="352" 
-                                frameBorder="0" 
-                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                            <iframe
+                                style="border-radius:12px"
+                                src="https://open.spotify.com/embed/episode/5kVQKI7fpewVRVzEnOFxoM?utm_source=generator"
+                                width="100%"
+                                height="352"
+                                frameBorder="0"
+                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                 loading="lazy">
                             </iframe>
                         </div>
@@ -59,7 +58,6 @@
 </template>
 
 <script setup lang="ts">
-import Sidebar from "../components/SidebarPatient.vue";
 import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
 import UserProfile from "../components/PatientProfile.vue";
 </script>

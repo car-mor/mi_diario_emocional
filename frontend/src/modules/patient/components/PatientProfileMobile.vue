@@ -1,21 +1,27 @@
 <template>
     <div class="flex h-screen">
-
         <!-- Área principal central -->
         <main class="dark:bg-gray-800 flex-1 flex flex-col overflow-hidden">
 
             <!-- Avatar -->
             <div class="mt-13 flex flex-col items-center text-center">
-                <div class="relative">
+                <div class="relative w-40 h-40">
+                    <div
+                        v-if="loadingProfile"
+                        class="w-full h-full rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"
+                    ></div>
+
                     <img
-                        :src="finalAvatarSrc"
+                        v-else
+                        :src="avatarUrl || 'http://localhost:8000/static/images/avatar-icon.png'"
                         alt="User avatar"
                         class="w-40 h-40 rounded-xl object-cover cursor-pointer hover:opacity-80 transition-opacity"
                         @click="clickAvatarInput"
+                        @error="handleImageError"
                     />
-                    <!-- Botón eliminar foto (solo se muestra si hay una foto personalizada) -->
+
                     <button
-                        v-if="hasCustomAvatar"
+                        v-if="!loadingProfile && hasCustomAvatar"
                         @click="removeAvatar"
                         class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
                         title="Eliminar foto"
@@ -25,6 +31,7 @@
                         </svg>
                     </button>
                 </div>
+
                 <input
                     type="file"
                     ref="avatarInput"
@@ -32,6 +39,7 @@
                     accept="image/*"
                     class="hidden"
                 />
+
                 <h2 class="mt-3 text-lg font-semibold text-gray-800 dark:text-gray-200">
                     {{ userAlias }}
                 </h2>
@@ -39,8 +47,8 @@
                 <p class="text-xs text-gray-500 mt-1">
                     {{ hasCustomAvatar ? 'Toca la imagen para cambiar la foto' : 'Toca la imagen para agregar una foto' }}
                 </p>
-            </div> 
-        
+            </div>
+
             <!-- Descripción -->
             <div @dblclick="isEditingDescription = true" class="group relative cursor-pointer mx-6">
                 <IconEdit
@@ -60,14 +68,14 @@
                     ></textarea>
                     <p v-if="descriptionError" class="text-red-500 text-xs mt-1">{{ descriptionError }}</p>
                     <div class="flex justify-end space-x-2 mt-2">
-                        <button 
-                            @click="cancelEdit" 
+                        <button
+                            @click="cancelEdit"
                             class="text-xs text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-1 px-3 rounded-lg transition-colors"
                         >
                             Cancelar
                         </button>
-                        <button 
-                            @click="saveDescription" 
+                        <button
+                            @click="saveDescription"
                             class="text-xs bg-[#7DBFF8] hover:bg-[#3457B2] text-white font-semibold py-1 px-3 rounded-lg transition-colors text-center"
                         >
                             Guardar
@@ -76,7 +84,7 @@
                 </div>
             </div>
 
-            <!-- Botón Configurar cuenta -->
+            <!-- Botones -->
             <div class="mt-6 flex flex-col gap-3 items-center">
                 <router-link
                     to="/account-settings"
@@ -85,12 +93,34 @@
                     Configurar cuenta
                 </router-link>
 
-                <router-link
-                    to="/"
-                    class="w-60 sm:w-auto text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-lg transition-colors inline-block"
+                <button
+                    @click="handleLogout"
+                    class="w-60 text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-lg transition-colors"
                 >
                     Cerrar sesión
-                </router-link>
+                </button>
+            </div>
+
+            <!-- ✅ MODAL DE ERROR/WARNING -->
+            <div v-if="showErrorModal" class="fixed inset-0 flex items-center justify-center z-50">
+                <div class="fixed inset-0 bg-black bg-opacity-50" @click="closeErrorModal"></div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-md w-full text-center relative z-10 mx-4">
+                    <div class="flex justify-center mb-4">
+                        <div class="bg-orange-500 p-3 rounded-full inline-flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 dark:text-white">{{ errorTitle }}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">{{ errorMessage }}</p>
+                    <button
+                        @click="closeErrorModal"
+                        class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg w-full transition-colors"
+                    >
+                        Entendido
+                    </button>
+                </div>
             </div>
 
             <!-- Modal de confirmación para eliminar foto -->
@@ -109,14 +139,14 @@
                         </div>
                     </div>
                     <div class="flex gap-3">
-                        <button 
-                            @click="closeDeleteModal" 
+                        <button
+                            @click="closeDeleteModal"
                             class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold rounded-lg transition-colors"
                         >
                             Cancelar
                         </button>
-                        <button 
-                            @click="confirmDeleteAvatar" 
+                        <button
+                            @click="confirmDeleteAvatar"
                             class="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors"
                         >
                             Eliminar
@@ -138,8 +168,8 @@
                             </svg>
                         </div>
                     </div>
-                    <button 
-                        @click="closeSuccessModal" 
+                    <button
+                        @click="closeSuccessModal"
                         class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg w-full transition-colors"
                     >
                         Entendido
@@ -152,43 +182,160 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
+import * as AuthServices from '@/modules/auth/services/authServices';
 import { IconEdit } from '@tabler/icons-vue';
+import { type PatientUpdatePayload } from '@/modules/auth/services/authServices';
 
-//----------- constantes para el perfil ---------------------
-const userAlias = ref("Alias de María");
-const userEmail = ref("maria@correo.com");
+const isPatientProfile = (data: AuthServices.UserProfileData): data is AuthServices.PatientProfile => {
+    return (data as AuthServices.PatientProfile).alias !== undefined;
+};
 
-//----------- constantes para la descripción ----------------
-const userDescription = ref("Duis a lacus in arcu ultrices sodales vel in urna. Donec lacinia facilisis dui. Duis a lacus in arcu ultrices sodales vel in urna. Donec lacinia facilisis dui."); 
-const originalDescription = ref(""); // Para guardar la descripción original
+const router = useRouter();
+const authStore = useAuthStore();
+const loading = ref(false);
+const patientData = ref<AuthServices.UserProfileData | null>(null);
+const loadingProfile = ref(true);
+
+const userAlias = computed(() => {
+    if (!patientData.value) return 'Cargando...';
+    if (isPatientProfile(patientData.value)) {
+        return patientData.value.alias;
+    }
+    return patientData.value.name;
+});
+
+const userEmail = computed(() => {
+    return patientData.value ? patientData.value.email : 'Cargando...';
+});
+
+// Constantes para descripción
+const userDescription = ref("");
+const originalDescription = ref("");
 const isEditingDescription = ref(false);
 const descriptionError = ref<string | null>(null);
 
-//-------------- constantes para la foto ------------------
+// Constantes para foto
 const avatarInput = ref<HTMLInputElement | null>(null);
-// Ruta relativa a la imagen por defecto en tu carpeta public
-const defaultAvatar = 'src/assets/images/avatar-icon.png'; 
-const avatarUrl = ref<string | null>(null); // ejemplo: https://i.pravatar.cc/150?img=38
+const avatarUrl = ref<string | null>(null);
 
-//-------------- constantes para modales ------------------
+// Constantes para modales
 const showDeleteModal = ref(false);
 const showSuccessModal = ref(false);
 const successTitle = ref('');
 const successMessage = ref('');
+const showErrorModal = ref(false);
+const errorTitle = ref('');
+const errorMessage = ref('');
 
-// Computed para determinar qué imagen mostrar
-const finalAvatarSrc = computed(() => avatarUrl.value || defaultAvatar);
+function showError(title: string, message: string) {
+    errorTitle.value = title;
+    errorMessage.value = message;
+    showErrorModal.value = true;
+}
 
-// Computed para saber si el usuario tiene una foto personalizada
-const hasCustomAvatar = computed(() => avatarUrl.value !== null);
+function closeErrorModal() {
+    showErrorModal.value = false;
+}
 
-//-----------------------------------------------------------------------
-//------------------- Funciones para editar descripción -----------------
-//-----------------------------------------------------------------------
+const hasCustomAvatar = computed(() => {
+    return avatarUrl.value?.includes('/media/') || false;
+});
+
+function clickAvatarInput() {
+    if (avatarInput.value) {
+        avatarInput.value.click();
+    }
+}
+
+function handleImageError(event: Event) {
+    console.error('❌ Error al cargar imagen:', avatarUrl.value);
+    const target = event.target as HTMLImageElement;
+    target.src = 'http://localhost:8000/static/images/avatar-icon.png';
+}
+
+async function handleAvatarChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) return;
+
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validImageTypes.includes(file.type)) {
+        showError(
+            'Formato no válido',
+            'El archivo seleccionado no es una imagen válida. Por favor, selecciona un archivo en formato JPG, PNG, GIF o WEBP.'
+        );
+        target.value = '';
+        return;
+    }
+
+    const maxSize = 50 * 1024 * 1024;
+    if (file.size > maxSize) {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        showError(
+            'Archivo muy grande',
+            `La imagen seleccionada pesa ${fileSizeMB} MB, pero el límite máximo es de 50 MB. Por favor, comprime la imagen o selecciona una más pequeña.`
+        );
+        target.value = '';
+        return;
+    }
+
+    try {
+        console.log('📤 Subiendo imagen:', file.name, `(${(file.size / (1024 * 1024)).toFixed(2)} MB)`);
+
+        const formData = new FormData();
+        formData.append('profile_picture', file);
+
+        const response = await AuthServices.updatePatientProfile(formData);
+
+        if (response.data.profile_picture_url) {
+            avatarUrl.value = response.data.profile_picture_url;
+        } else if (response.data.profile_picture) {
+            avatarUrl.value = response.data.profile_picture;
+        }
+
+        successTitle.value = '¡Foto actualizada!';
+        successMessage.value = 'Tu foto de perfil ha sido actualizada correctamente.';
+        showSuccessModal.value = true;
+
+    } catch (error) {
+        console.error('❌ Error al subir avatar:', error);
+        showError(
+            'Error al subir',
+            'Hubo un problema al subir tu imagen. Por favor, intenta nuevamente o selecciona otra imagen.'
+        );
+    } finally {
+        if (target) {
+            target.value = '';
+        }
+    }
+}
+
+async function saveDescription() {
+    if (!validateDescription(userDescription.value)) {
+        return;
+    }
+
+    try {
+        const payload: PatientUpdatePayload = { description: userDescription.value };
+        await AuthServices.updatePatientProfile(payload);
+
+        originalDescription.value = userDescription.value;
+        isEditingDescription.value = false;
+
+        successTitle.value = '¡Actualizado!';
+        successMessage.value = 'Tu descripción ha sido guardada correctamente.';
+        showSuccessModal.value = true;
+
+    } catch (error) {
+        console.error('Error al guardar descripción:', error);
+    }
+}
 
 function validateDescription(text: string): boolean {
     const cleanText = text.trim();
-
     if (cleanText.length === 0) {
         descriptionError.value = "La descripción no puede estar vacía.";
         return false;
@@ -201,72 +348,17 @@ function validateDescription(text: string): boolean {
         descriptionError.value = "Máximo 150 caracteres.";
         return false;
     }
-
     descriptionError.value = null;
     return true;
 }
 
-function saveDescription() {
-    if (validateDescription(userDescription.value)) {
-        // AQUÍ VA LA LLAMADA AXIOS/FETCH AL BACKEND para guardar userDescription.value
-        console.log("Guardando descripción:", userDescription.value);
-        
-        // Actualizar la descripción original
-        originalDescription.value = userDescription.value;
-        isEditingDescription.value = false;
-        descriptionError.value = null;
-        
-        // Mostrar modal de éxito
-        successTitle.value = '¡Descripción guardada!';
-        successMessage.value = 'Tu descripción ha sido actualizada correctamente.';
-        showSuccessModal.value = true;
-    }
-}
-
 function cancelEdit() {
-    // Revertir a la última versión guardada
     userDescription.value = originalDescription.value;
     isEditingDescription.value = false;
     descriptionError.value = null;
 }
 
-//-----------------------------------------------------------------------
-//------------------- Funciones para editar foto -------------------------
-//-----------------------------------------------------------------------
-
-function handleAvatarChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
-
-    if (file) {
-        // Validar que sea una imagen
-        if (!file.type.startsWith('image/')) {
-            console.error('El archivo debe ser una imagen');
-            return;
-        }
-
-        // Validar tamaño del archivo (ej: máximo 5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB en bytes
-        if (file.size > maxSize) {
-            console.error('La imagen es demasiado grande. Máximo 5MB.');
-            return;
-        }
-
-        // Limpiar URL anterior si existe
-        if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
-            URL.revokeObjectURL(avatarUrl.value);
-        }
-
-        // Mostrar vista previa temporal al usuario
-        avatarUrl.value = URL.createObjectURL(file);
-
-        // AQUÍ deberías hacer la llamada al backend para subir el archivo
-        uploadAvatar(file);
-    }
-}
-
 function removeAvatar() {
-    // Mostrar modal de confirmación
     showDeleteModal.value = true;
 }
 
@@ -274,120 +366,90 @@ function closeDeleteModal() {
     showDeleteModal.value = false;
 }
 
-function confirmDeleteAvatar() {
-    // Cerrar modal de confirmación
-    showDeleteModal.value = false;
-    
-    // Limpiar URL blob si existe
-    if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
-        URL.revokeObjectURL(avatarUrl.value);
+async function confirmDeleteAvatar() {
+    try {
+        console.log('🗑️ Eliminando avatar...');
+
+        const formData = new FormData();
+        formData.append('delete_picture', 'true');
+
+        const response = await AuthServices.updatePatientProfile(formData);
+
+        if (response.data.profile_picture_url) {
+            avatarUrl.value = response.data.profile_picture_url;
+        } else if (response.data.profile_picture) {
+            avatarUrl.value = response.data.profile_picture;
+        }
+
+        successTitle.value = '¡Foto eliminada!';
+        successMessage.value = 'Tu foto de perfil ha sido eliminada correctamente.';
+        showSuccessModal.value = true;
+        closeDeleteModal();
+
+    } catch (error: unknown) {
+        console.error('❌ Error al eliminar avatar:', error);
+
+        if (error && typeof error === 'object' && 'response' in error) {
+            const axiosError = error as { response?: { data: unknown; status: number } };
+            if (axiosError.response) {
+                console.error('❌ Respuesta del servidor:', axiosError.response.data);
+                console.error('❌ Status:', axiosError.response.status);
+            }
+        }
+
+        showError(
+            'Error al eliminar',
+            'Hubo un problema al eliminar tu foto. Por favor, intenta nuevamente.'
+        );
     }
-    
-    // Resetear a null para usar la imagen por defecto
-    avatarUrl.value = null;
-    
-    // AQUÍ harías la llamada al backend para eliminar la foto del servidor
-    deleteAvatarFromServer();
-    
-    // Mostrar modal de éxito
-    successTitle.value = '¡Foto eliminada!';
-    successMessage.value = 'Tu foto de perfil ha sido eliminada correctamente. Ahora se muestra la imagen predeterminada.';
-    showSuccessModal.value = true;
-    
-    console.log("Foto de perfil eliminada");
 }
 
 function closeSuccessModal() {
     showSuccessModal.value = false;
 }
 
-// También puedes mostrar modal de éxito después de subir una foto
-function showUploadSuccess() {
-    successTitle.value = '¡Foto actualizada!';
-    successMessage.value = 'Tu foto de perfil ha sido actualizada correctamente.';
-    showSuccessModal.value = true;
-}
+const handleLogout = async () => {
+    loading.value = true;
 
-async function uploadAvatar(file: File) {
     try {
-        // Ejemplo de subida de archivo
-        const formData = new FormData();
-        formData.append('avatar', file);
-
-        // DESCOMENTA Y ADAPTA SEGÚN TU API
-        /*
-        const response = await fetch('/api/upload-avatar', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                // Agregar headers de autenticación si es necesario
-            }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            // Limpiar URL temporal
-            if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
-                URL.revokeObjectURL(avatarUrl.value);
-            }
-            // Usar URL permanente del servidor
-            avatarUrl.value = data.avatarUrl;
-            
-            // Mostrar modal de éxito
-            showUploadSuccess();
-        } else {
-            throw new Error('Error al subir la imagen');
-        }
-        */
-
-        console.log("Archivo listo para subir:", file.name);
-        
-        // Comentado para demo: showUploadSuccess();
+        await authStore.logout();
+        router.push({ name: 'login' });
     } catch (error) {
-        console.error('Error al subir avatar:', error);
-        // Revertir a imagen anterior o por defecto
-        if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
-            URL.revokeObjectURL(avatarUrl.value);
-        }
-        avatarUrl.value = null;
+        console.error('Error al cerrar sesión:', error);
+        router.push({ name: 'login' });
+    } finally {
+        loading.value = false;
     }
-}
+};
 
-async function deleteAvatarFromServer() {
+async function loadPatientData() {
+    loadingProfile.value = true;
+
+    if (!authStore.authToken) {
+        router.push({ name: 'login' });
+        loadingProfile.value = false;
+        return;
+    }
+
     try {
-        // DESCOMENTA Y ADAPTA SEGÚN TU API
-        /*
-        const response = await fetch('/api/delete-avatar', {
-            method: 'DELETE',
-            headers: {
-                // Agregar headers de autenticación si es necesario
-            }
-        });
+        const response = await AuthServices.fetchUserProfile();
+        const patientProfile = response.data as AuthServices.PatientProfile;
 
-        if (!response.ok) {
-            throw new Error('Error al eliminar la imagen del servidor');
-        }
-        */
+        patientData.value = patientProfile;
+        userDescription.value = patientProfile.description || 'Añade una breve descripción sobre ti...';
+        originalDescription.value = userDescription.value;
+        avatarUrl.value = patientProfile.profile_picture;
 
-        console.log("Solicitud de eliminación enviada al servidor");
     } catch (error) {
-        console.error('Error al eliminar avatar del servidor:', error);
-        // Opcionalmente, podrías revertir el cambio local si falla la eliminación en el servidor
+        console.error("Falló la carga del perfil de usuario:", error);
+    } finally {
+        loadingProfile.value = false;
     }
 }
 
-function clickAvatarInput() {
-    if (avatarInput.value) {
-        avatarInput.value.click();
-    }
-}
-
-// Cleanup cuando el componente se desmonte
 onMounted(() => {
-    // Guardar descripción original
-    originalDescription.value = userDescription.value;
-    
-    // Cleanup function que se ejecuta cuando el componente se desmonta
+    loadPatientData();
+
     return () => {
         if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
             URL.revokeObjectURL(avatarUrl.value);

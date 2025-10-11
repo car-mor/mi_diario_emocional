@@ -13,6 +13,24 @@
         >
           <h1 class="mb-8 text-3xl font-bold text-center text-[#70BFE9]">Iniciar sesión</h1>
 
+          <p v-if="errorMessage" class="text-base text-red-500 text-center mb-4 font-semibold">
+              {{ errorMessage }}
+          </p>
+<div v-if="showRedirectButton" class="text-center">
+    <p class="text-gray-600 dark:text-gray-400 mb-6">
+        Haz clic en el botón de abajo para ir a la página de activación y solicitar un nuevo código.
+    </p>
+    <button
+        @click="redirectToVerification"
+        class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+    >
+        Activar mi Cuenta
+    </button>
+</div>
+
+<form v-else @submit.prevent="login">
+
+    </form>
           <form @submit.prevent="login">
             <div class="mb-6">
               <label
@@ -63,8 +81,9 @@
             <button
               type="submit"
               class="w-full bg-[#70BFE9] hover:bg-[#3457B2] text-white font-semibold py-3 px-6 rounded-lg transition-colors mb-4"
+              :disabled="authStore.loading"
             >
-              Iniciar sesión
+              {{authStore.loading ? 'Iniciando sesión...' : 'Iniciar sesión'}}
             </button>
             <router-link
               to="/"
@@ -94,29 +113,82 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { IconLockSquareRounded, IconMail } from '@tabler/icons-vue'
-import WomanHeart from '../components/WomanHeart.vue'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { IconLockSquareRounded, IconMail } from '@tabler/icons-vue';
+import WomanHeart from '../components/WomanHeart.vue';
+import { useAuthStore } from '@/store/auth';
+import { isAxiosError } from 'axios';
 
-const email = ref('')
-const password = ref('')
+const email = ref('');
+const password = ref('');
+const router = useRouter();
+const authStore = useAuthStore();
+const errorMessage = ref('');
+const showRedirectButton = ref(false);
+const inactiveUserRole = ref<string | null>(null); // Variable clave para guardar el rol
 
-const login = () => {
-  // Aquí iría tu lógica de autenticación
-  console.log('Intento de inicio de sesión con:', email.value, password.value)
-  // Por ejemplo, enviar a una API
-  // fetch('/api/login', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ email: email.value, password: password.value })
-  // })
-  // .then(response => response.json())
-  // .then(data => {
-  //   if (data.success) {
-  //     router.push('/dashboard'); // Redirige al usuario
-  //   } else {
-  //     alert(data.message);
-  //   }
-  // });
-}
+const redirectToVerification = () => {
+  if (!inactiveUserRole.value) {
+    console.error("No se pudo determinar el rol del usuario para la redirección.");
+    return;
+  }
+
+  const routePayload = {
+    name: 'first-login',
+    params: { type: inactiveUserRole.value }, // <-- ¡Esto pasa el rol a la URL!
+    query: { email: email.value }
+  };
+
+  // --- AÑADIDO PARA DEPURACIÓN ---
+  // Revisa en la consola que los parámetros de la ruta sean correctos antes de navegar.
+  console.log("Redirigiendo a 'first-login' con los siguientes parámetros:", routePayload);
+  // ---------------------------------
+
+  router.push(routePayload);
+};
+
+const login = async () => {
+  errorMessage.value = '';
+  showRedirectButton.value = false;
+  inactiveUserRole.value = null;
+
+  try {
+    // La acción de login de la tienda devuelve la ruta a la que debemos ir.
+    const redirectPath = await authStore.login({ email: email.value, password: password.value });
+
+    // Si el login es exitoso, redirigimos a la ruta que nos indicó la tienda.
+    router.push(redirectPath);
+
+  } catch (error: unknown) {
+    let finalMessage = 'Credenciales inválidas. Verifique su correo y contraseña.';
+
+    // Esta lógica ahora es crucial para detectar el rol del usuario inactivo.
+    if (isAxiosError(error) && error.response) {
+      const errorData = error.response.data;
+
+      // --- AÑADIDO PARA DEPURACIÓN ---
+      // Revisa en la consola el objeto de error completo que envía el backend.
+      console.log("Error recibido del backend:", errorData);
+      // ---------------------------------
+
+      // Verificamos si es el error de cuenta inactiva que viene del backend.
+      if (errorData.code === 'account_not_active') {
+        finalMessage = '¡Cuenta inactiva! Haz clic abajo para validarla.';
+        showRedirectButton.value = true;
+        inactiveUserRole.value = errorData.role; // <-- Guardamos el rol desde la respuesta del error.
+
+        // --- AÑADIDO PARA DEPURACIÓN ---
+        // Confirma que el rol se guardó correctamente en nuestra variable local.
+        console.log("Rol de usuario inactivo guardado:", inactiveUserRole.value);
+        // ---------------------------------
+
+      } else if (errorData.detail) {
+        finalMessage = errorData.detail;
+      }
+    }
+
+    errorMessage.value = finalMessage;
+  }
+};
 </script>

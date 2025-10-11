@@ -1,7 +1,5 @@
 <template>
     <div class="flex h-screen">
-        <!-- Sidebar izquierdo component -->
-        <Sidebar />
         <!-- Área principal central -->
         <main class="flex-1 flex flex-col overflow-hidden">
             <!-- header con título y racha component-->
@@ -20,7 +18,7 @@
                 </div>
                 <!-- Contenido principal - component  -->
                 <DiaryRegister />
-                <router-view /> 
+                <router-view />
             </div>
         </main>
         <!-- Perfil del usuario component -->
@@ -29,7 +27,6 @@
 </template>
 
 <script setup lang="ts">
-    import Sidebar from "../components/SidebarPatient.vue"
     import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
     import UserProfile from "../components/PatientProfile.vue"
     import DiaryRegister from "../components/DiaryRegister.vue"

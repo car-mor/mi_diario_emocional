@@ -1,6 +1,5 @@
 <template>
     <div class="dark:bg-gray-800 transition-colors flex h-screen bg-gray-100">
-        <Sidebar />
         <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-1">
             <StreakAndTitle title="Audiolibro Completo" :streakCount="2" />
 
@@ -14,10 +13,10 @@
                 </div>
 
                 <p class="text-xl md:text-2xl font-light text-gray-700 italic text-center leading-relaxed mb-8">
-                    “Un método sencillo y comprobado para desarrollar buenos hábitos y eliminar los malos.” 
+                    “Un método sencillo y comprobado para desarrollar buenos hábitos y eliminar los malos.”
                 </p>
 
-        
+
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
                     <p class="mb-6 text-justify">
                         HÁBITOS ATÓMICOS parte de una simple pero poderosa pregunta: ¿Cómo podemos vivir mejor? Sabemos que unos buenos hábitos nos permiten mejorar significativamente nuestra vida, pero con frecuencia nos desviamos del camino: dejamos de hacer ejercicio, comemos mal, dormimos poco, despilfarramos. ¿Por qué es tan fácil caer en los malos hábitos y tan complicado seguir los buenos?
@@ -25,7 +24,7 @@
 
                     <p class="mb-6 text-justify">
                         James Clear nos brinda fantásticas ideas basadas en investigaciones científicas, que le permiten revelarnos cómo podemos transformar pequeños hábitos cotidianos para cambiar nuestra vida y mejorarla. Esta guía pone al descubierto las fuerzas ocultas que moldean nuestro comportamiento
-                        <br></br>—desde nuestra mentalidad, pasando por el ambiente y hasta la genética<br></br>— y nos demuestra cómo aplicar cada cambio a nuestra vida y a nuestro trabajo. 
+                        <br></br>—desde nuestra mentalidad, pasando por el ambiente y hasta la genética<br></br>— y nos demuestra cómo aplicar cada cambio a nuestra vida y a nuestro trabajo.
                         Después de leer este libro, tendrás un método sencillo para desarrollar un sistema eficaz que te conducirá al éxito.
                     </p>
 
@@ -40,13 +39,13 @@
                 <div class="text-gray-700 leading-relaxed text-base md:text-lg">
                     <div class="mb-8">
                         <div class="relative overflow-hidden w-full" style="padding-top: 5%">
-                            <iframe 
-                                style="border-radius:12px" 
-                                src="https://open.spotify.com/embed/episode/5lS59Jy9mZHvkuAzYUrvnW?utm_source=generator" 
-                                width="100%" 
-                                height="352" 
-                                frameBorder="0" 
-                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                            <iframe
+                                style="border-radius:12px"
+                                src="https://open.spotify.com/embed/episode/5lS59Jy9mZHvkuAzYUrvnW?utm_source=generator"
+                                width="100%"
+                                height="352"
+                                frameBorder="0"
+                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                 loading="lazy">
                             </iframe>
                         </div>
@@ -74,7 +73,6 @@
 </template>
 
 <script setup lang="ts">
-import Sidebar from "../components/SidebarPatient.vue";
 import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
 import UserProfile from "../components/PatientProfile.vue";
 </script>

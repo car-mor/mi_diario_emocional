@@ -7,7 +7,7 @@
         Crear una cuenta para: Profesional de la Salud Mental
       </h2>
 
-      <form v-if="step === 1" @submit.prevent="createInitialAccount">
+      <form v-if="step === 1" @submit.prevent="submitRegistration">
         <div class="space-y-4">
           <div class="relative">
             <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2"
@@ -54,68 +54,8 @@
               />
             </div>
           </div>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">* Campos obligatorios</p>
-          <button
-            type="submit"
-            class="w-full mt-6 py-3 px-4 rounded-lg bg-[#70BFE9] text-white font-semibold hover:bg-[#5a9cbf] transition-colors duration-300"
-            :disabled="loading"
-          >
-            {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
-          </button>
-        </div>
-      </form>
+           <p v-if="passwordError" class="text-sm text-red-500 mt-2">{{ passwordError }}</p>
 
-      <div v-else-if="step === 2" class="text-center">
-        <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-          Verificación de correo electrónico
-        </h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-4">
-          Se envió a tu correo electrónico un código de verificación para comprobar su validez.
-        </p>
-        <form @submit.prevent="verifyEmail">
-          <div class="relative">
-            <input
-              v-model="form.verificationCode"
-              type="text"
-              placeholder="Ingresa el código de verificación"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9] text-center"
-              required
-            />
-          </div>
-          <p v-if="verificationError" class="text-sm text-red-500 mt-2">
-            {{ verificationError }}
-          </p>
-
-          <!-- Mostrar tiempo restante para reenvío -->
-          <p v-if="isResendDisabled && remainingTime > 0" class="text-sm text-gray-500 mt-2">
-            Podrás reenviar el código en {{ Math.ceil(remainingTime / 1000) }} segundos
-          </p>
-
-          <button
-            type="submit"
-            class="w-full mt-6 py-3 px-4 rounded-lg bg-[#70BFE9] text-white font-semibold hover:bg-[#5a9cbf] transition-colors duration-300"
-            :disabled="loading"
-          >
-            {{ loading ? 'Verificando...' : 'Verificar' }}
-          </button>
-          <button
-            @click.prevent="resendVerificationCode"
-            class="w-full mt-4 py-3 px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent text-gray-800 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="loading || isResendDisabled"
-          >
-            {{
-              loading
-                ? 'Enviando...'
-                : isResendDisabled
-                  ? `Esperar ${Math.ceil(remainingTime / 1000)}s`
-                  : 'Volver a enviar código'
-            }}
-          </button>
-        </form>
-      </div>
-
-      <form v-else-if="step === 3" @submit.prevent="submitProfessionalData">
-        <div class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="relative">
               <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2"
@@ -180,8 +120,6 @@
                 <option value="" disabled>Selecciona el sexo...</option>
                 <option value="male">Masculino</option>
                 <option value="female">Femenino</option>
-                <option value="non_binary">No binario</option>
-                <option value="other">Otro</option>
               </select>
             </div>
             <div class="relative">
@@ -235,13 +173,14 @@
               required
             />
           </div>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">* Campos obligatorios</p>
+
+          <p class="text-sm text-gray-500 dark:text-gray-400 pt-2">* Campos obligatorios</p>
           <button
             type="submit"
             class="w-full mt-6 py-3 px-4 rounded-lg bg-[#70BFE9] text-white font-semibold hover:bg-[#5a9cbf] transition-colors duration-300"
             :disabled="loading"
           >
-            {{ loading ? 'Procesando...' : 'Siguiente' }}
+            {{ loading ? 'Enviando solicitud...' : 'Enviar para Revisión' }}
           </button>
         </div>
       </form>
@@ -253,7 +192,7 @@
             ¡Gracias por completar el registro!
           </h3>
           <p class="text-gray-600 dark:text-gray-400 leading-relaxed text-center">
-            Te notificaremos cuando se hayan validado tus datos y cédula profesional para que puedas
+            Te notificaremos por correo cuando hayamos validado tus datos y cédula profesional para que puedas
             comenzar a usar la aplicación. Este proceso puede tardar de 1 a 3 días hábiles.
           </p>
         </div>
@@ -267,36 +206,9 @@
     </div>
   </BackgroundWrapper>
 
-  <!-- Popup de éxito mejorado -->
-  <div
-    v-if="successPopup"
-    class="fixed inset-0 flex items-center justify-center z-50"
-    @click="closeSuccessPopup"
-  >
-    <div
-      class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-xl max-w-sm w-full text-center m-4"
-      @click.stop
-    >
-      <div class="flex flex-col items-center justify-center">
-        <IconCircleCheckFilled class="text-green-500 w-16 h-16 mb-4" />
-        <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-          {{ successType === 'resend' ? 'Código reenviado' : 'Correo enviado' }}
-        </h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">{{ successMessage }}</p>
-        <button
-          @click="closeSuccessPopup"
-          class="bg-green-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-600 transition-colors"
-        >
-          Entendido
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Popup de error -->
   <div
     v-if="errorPopup"
-    class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50"
+    class="fixed inset-0 flex items-center justify-center z-50"
     @click="closeErrorPopup"
   >
     <div
@@ -319,156 +231,95 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { isAxiosError } from 'axios';
+import * as AuthServices from '@/modules/auth/services/authServices';
 import BackgroundWrapper from '@/modules/auth/components/BackgroundWrapper.vue'
 import { IconMail, IconLock, IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-vue'
 
 const router = useRouter()
 
-const step = ref(1)
+const step = ref(1) // 1 para el formulario, 4 para el mensaje de éxito
 const loading = ref(false)
-const successPopup = ref(false)
 const errorPopup = ref(false)
-const successMessage = ref('')
 const errorMessage = ref('')
-const successType = ref('') // 'resend' o 'initial'
-const verificationError = ref('')
-const lastResendTimestamp = ref(0)
-const currentTime = ref(Date.now())
-const fiveMinutesInMs = 1 * 60 * 1000
-
-// Intervalo para actualizar el tiempo
-let timeInterval: number | null = null
+const passwordError = ref(''); // Para el error de contraseñas que no coinciden
 
 const form = reactive({
   email: '',
   password: '',
   confirmPassword: '',
-  verificationCode: '',
   name: '',
   paternalLastName: '',
   maternalLastName: '',
   dateOfBirth: '',
-  gender: '',
+  gender: '', // 'sex' en el backend
   professionalLicense: '',
   curp: '',
   institution: '',
   career: '',
 })
 
-const remainingTime = computed(() => {
-  if (lastResendTimestamp.value === 0) return 0
-  const elapsed = currentTime.value - lastResendTimestamp.value
-  return Math.max(0, fiveMinutesInMs - elapsed)
-})
-
-const isResendDisabled = computed(() => {
-  return remainingTime.value > 0
-})
-
-// Iniciar el contador de tiempo
-const startTimer = () => {
-  if (timeInterval) clearInterval(timeInterval)
-  timeInterval = setInterval(() => {
-    currentTime.value = Date.now()
-  }, 1000)
-}
-
-// Limpiar el contador
-const stopTimer = () => {
-  if (timeInterval) {
-    clearInterval(timeInterval)
-    timeInterval = null
-  }
-}
-
-onMounted(() => {
-  startTimer()
-})
-
-onUnmounted(() => {
-  stopTimer()
-})
-
-const createInitialAccount = () => {
+// Función única para enviar todo el formulario
+const submitRegistration = async () => {
+  // 1. Validación de contraseña en el frontend
   if (form.password !== form.confirmPassword) {
-    errorMessage.value = 'Las contraseñas no coinciden.'
-    errorPopup.value = true
-    return
+    passwordError.value = 'Las contraseñas no coinciden.';
+    return;
   }
+  passwordError.value = '';
+  loading.value = true;
 
-  loading.value = true
+  // 2. Construir el payload EXACTAMENTE como lo espera tu ProfessionalSerializer
+  const registrationPayload = {
+      user: {
+          email: form.email,
+          password: form.password,
+          name: form.name,
+          paternal_last_name: form.paternalLastName,
+          maternal_last_name: form.maternalLastName,
+          date_of_birth: form.dateOfBirth,
+          role: "professional"
+      },
+      sex: form.gender,
+      professional_license: form.professionalLicense,
+      curp: form.curp,
+      institution: form.institution,
+      career: form.career,
+      // El link_code se genera en el backend, no es necesario enviarlo
+  };
 
-  // Simular llamada a API
-  setTimeout(() => {
-    loading.value = false
-    successType.value = 'initial'
-    successMessage.value =
-      'Se te ha enviado un correo electrónico con un código de verificación para confirmar tu cuenta.'
-    successPopup.value = true
-    step.value = 2
-    lastResendTimestamp.value = Date.now()
-  }, 1000)
-}
-
-const verifyEmail = () => {
-  loading.value = true
-
-  setTimeout(() => {
-    if (form.verificationCode === '123456') {
-      loading.value = false
-      step.value = 3
-      verificationError.value = ''
-    } else {
-      loading.value = false
-      verificationError.value = 'Código de verificación incorrecto. Por favor, inténtalo de nuevo.'
+  try {
+    const response = await AuthServices.registerProfessional(registrationPayload);
+    if (response.status === 201) {
+        // Éxito: El profesional está pre-registrado y pendiente de revisión.
+        step.value = 4; // Avanza a la pantalla de "Gracias, estamos revisando"
     }
-  }, 800)
-}
+  } catch (error: unknown) {
+    if (isAxiosError(error) && error.response) {
+      const data = error.response.data;
+      let msg = 'Error de registro. Verifique sus datos.';
 
-const resendVerificationCode = () => {
-  if (isResendDisabled.value) {
-    errorMessage.value = `Debes esperar ${Math.ceil(remainingTime.value / 1000)} segundos antes de volver a solicitar un código.`
-    errorPopup.value = true
-    return
+      // Manejo de errores anidados
+      if (data.user && data.user.email) msg = `Email: ${data.user.email[0]}`;
+      else if (data.professional_license) msg = `Cédula: ${data.professional_license[0]}`;
+      else if (data.curp) msg = `CURP: ${data.curp[0]}`;
+      else if (data.detail) msg = data.detail;
+
+      errorMessage.value = msg;
+      errorPopup.value = true;
+    } else {
+      errorMessage.value = 'Ocurrió un error desconocido. Inténtelo de nuevo.';
+      errorPopup.value = true;
+    }
+  } finally {
+    loading.value = false;
   }
-
-  loading.value = true
-
-  // Simular llamada a API para reenvío
-  setTimeout(() => {
-    loading.value = false
-    successType.value = 'resend'
-    successMessage.value =
-      'Se ha enviado un nuevo código de verificación a tu correo electrónico. Revisa también tu carpeta de spam.'
-    successPopup.value = true
-    lastResendTimestamp.value = Date.now()
-
-    // Limpiar el código anterior
-    form.verificationCode = ''
-    verificationError.value = ''
-
-    console.log('Código reenviado exitosamente') // Debug
-  }, 1000)
-}
-
-const submitProfessionalData = () => {
-  loading.value = true
-  setTimeout(() => {
-    loading.value = false
-    step.value = 4
-  }, 1000)
 }
 
 const goToLogin = () => {
   router.push('/login')
-}
-
-const closeSuccessPopup = () => {
-  successPopup.value = false
-  successType.value = ''
-  successMessage.value = ''
 }
 
 const closeErrorPopup = () => {
@@ -476,19 +327,3 @@ const closeErrorPopup = () => {
   errorMessage.value = ''
 }
 </script>
-
-<style scoped>
-/* Animaciones para los popups */
-.fixed {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-</style>

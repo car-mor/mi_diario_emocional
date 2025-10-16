@@ -46,7 +46,7 @@
     <div v-else-if="currentStep === 2" class="text-center">
       <p class="mb-6 text-gray-600 dark:text-gray-400 leading-relaxed">
         Se envió a tu correo electrónico un código de confirmación para la recuperación de la
-        contraseña. Este código expirará una vez transcurrido 1 minuto.
+        contraseña. Este código expirará una vez transcurridos 5 minutos.
       </p>
       <div class="mb-6">
         <label for="code" class="sr-only">Código de verificación</label>

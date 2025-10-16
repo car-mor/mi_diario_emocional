@@ -10,12 +10,12 @@ from users.models import Patient
 
 class DiaryEntry(models.Model):
     EMOTION_CHOICES = (
-        ("joy", "Joy"),
-        ("sadness", "Sadness"),
-        ("fear", "Fear"),
-        ("anger", "Anger"),
-        ("disgust", "Disgust"),
-        ("surprise", "Surprise"),
+        ("alegria", "Alegría"),
+        ("tristeza", "Tristeza"),
+        ("ira", "Ira"),
+        ("miedo", "Miedo"),
+        ("asco", "Asco"),
+        ("sorpresa", "Sorpresa"),
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

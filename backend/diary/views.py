@@ -21,7 +21,7 @@ class DiaryEntryViewSet(
     """
 
     serializer_class = DiaryEntrySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsPatient]
 
     def get_queryset(self):
         user = self.request.user

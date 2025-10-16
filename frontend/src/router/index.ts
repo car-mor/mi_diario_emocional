@@ -193,13 +193,7 @@ const routes = [
       meta: { requiresAuth: true, requiredRole: 'professional' } // Ruta protegida
     },
     {
-      path: '/patient-management',
-      name: 'patient-management',
-      component: () => import('@/modules/professional/views/ManagementProfessionalView.vue'),
-      meta: { requiresAuth: true, requiredRole: 'professional' } // Ruta protegida
-    },
-    {
-      path: '/patient-details',
+      path: '/patient-details/:id',
       name: 'patient-details',
       component: () => import('../modules/professional/views/PatientDetailsProfessionalView.vue'),
       meta: { requiresAuth: true, requiredRole: 'professional' } // Ruta protegida

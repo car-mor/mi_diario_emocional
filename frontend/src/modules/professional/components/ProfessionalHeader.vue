@@ -11,25 +11,23 @@
 
       <!-- Navegación central -->
       <nav class="hidden md:flex items-center space-x-8">
-        <a
-          href="/home-professional"
+        <router-link to="/professional-layout"
           class="text-xl text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
         >
           Inicio
-        </a>
-        <a
-          href="/patient-management"
+        </router-link>
+        <router-link to="/patient-management"
           class="text-xl text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
         >
           Gestionar pacientes
-        </a>
+        </router-link>
         <a
-          href="/"
-          @click="handleLogout"
-          class="text-xl text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
-        >
-          Cerrar sesión
-        </a>
+        href="#"
+        @click.prevent="handleLogout"
+        class="text-xl text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
+    >
+        Cerrar sesión
+    </a>
       </nav>
 
       <!-- Botones de la derecha -->
@@ -70,8 +68,7 @@
           </div>
 
           <nav class="py-2">
-            <a
-              href="/faqs-tutorials-professional"
+            <router-link to="/faqs-tutorials-professional"
               class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
               @click="closeSettingsMenu"
             >
@@ -79,10 +76,9 @@
                 <IconZoomQuestion class="w-5 h-5" />
                 <span>Preguntas frecuentes</span>
               </div>
-            </a>
+            </router-link>
 
-            <a
-              href="/videos-tutorials-professional"
+            <router-link to="/videos-tutorials-professional"
               class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
               @click="closeSettingsMenu"
             >
@@ -90,7 +86,7 @@
                 <IconVideo class="w-5 h-5" />
                 <span>Video tutoriales</span>
               </div>
-            </a>
+            </router-link>
 
           </nav>
         </div>
@@ -113,38 +109,33 @@
       class="md:hidden mt-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4"
     >
       <nav class="flex flex-col space-y-4">
-        <a
-          href="/home-professional"
+        <router-link to="/home-professional"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Inicio
-        </a>
-        <a
-          href="/patient-management"
+        </router-link>
+        <router-link to="/patient-management"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Gestionar pacientes
-        </a>
-        <a
-          href="/videos-tutorials-professional"
+        </router-link>
+        <router-link to="/videos-tutorials-professional"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Video tutoriales
-        </a>
-        <a
-          href="/faqs-tutorials-professional"
+        </router-link>
+        <router-link to="/faqs-tutorials-professional"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Preguntas frecuentes
-        </a>
-        <a href="/">
-            <button
-                @click="handleLogout"
-            class="text-left text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
-            >
-                Cerrar sesión
-            </button>
-        </a>
+        </router-link>
+        <a
+        href="#"
+        @click.prevent="handleLogout"
+        class="text-xl text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
+    >
+        Cerrar sesión
+    </a>
       </nav>
     </div>
   </header>

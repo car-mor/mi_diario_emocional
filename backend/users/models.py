@@ -1,6 +1,7 @@
 # Create your models here.
 import uuid
 
+from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
@@ -123,12 +124,22 @@ class EmailChangeRequest(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     new_email = models.EmailField()
-    token = models.UUIDField(default=uuid.uuid4, unique=True)
+    # Guardamos el hash del código, no el código en texto plano
+    hashed_verification_code = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 
+    def set_code(self, raw_code):
+        self.hashed_verification_code = make_password(raw_code)
+
+    def check_code(self, raw_code):
+        return check_password(raw_code, self.hashed_verification_code)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
     def __str__(self):
-        return f"Email change token for {self.user.email}"
+        return f"Solicitud de cambio de email para {self.user.email}"
 
 
 class PreRegistration(models.Model):

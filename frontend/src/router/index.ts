@@ -167,6 +167,13 @@ const routes = [
       component: () => import('../modules/professional/views/ProfessionalLayout.vue'),
       meta: { requiresAuth: true, requiredRole: 'professional' }, // METADATOS DE PROTECCIÓN
       children: [
+        {
+            path: '', // Se activa cuando visitas /professional-layout
+            name: 'home-professional',
+            // Asegúrate de que la ruta al componente sea la correcta
+            component: () => import('@/modules/professional/components/ProfessionalHome.vue'),
+            meta: { requiresAuth: true, requiredRole: 'professional' }
+        },
     {
         path: '/patient-management',
         name: 'patient-management',

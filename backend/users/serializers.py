@@ -1,7 +1,9 @@
+import re
 import secrets
 from datetime import timedelta
 
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
 from django.templatetags.static import static
 from django.utils import timezone
 from rest_framework import exceptions, serializers
@@ -198,11 +200,24 @@ class PatientProfileUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ["description", "profile_picture", "profile_picture_url"]
+        fields = ["alias", "description", "profile_picture", "profile_picture_url"]
         extra_kwargs = {
+            "alias": {"required": False},
             "description": {"required": False},
             "profile_picture": {"required": False, "allow_null": True},
         }
+
+    def validate_alias(self, value):
+        if len(value.strip()) == 0:
+            raise serializers.ValidationError("El alias no puede consistir solo en espacios.")
+        if len(value) > 40:
+            raise serializers.ValidationError("El alias no puede exceder los 40 caracteres.")
+        if not re.search(r"\d", value):
+            raise serializers.ValidationError("El alias debe contener al menos un número.")
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>_\-+=~`/\\[\]]', value):
+            raise serializers.ValidationError("El alias debe contener al menos un carácter especial.")
+
+        return value
 
     def validate_profile_picture(self, value):
         """Validar el tamaño del archivo de imagen"""
@@ -232,6 +247,14 @@ class PatientProfileUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Manejar la actualización del perfil"""
+        # Actualizar alias
+        if "alias" in validated_data:
+            instance.alias = validated_data["alias"]
+
+            # Actualizar descripción
+        if "description" in validated_data:
+            instance.description = validated_data["description"]
+
         request = self.context.get("request")
 
         # Verificar si viene el flag de eliminación
@@ -242,7 +265,6 @@ class PatientProfileUpdateSerializer(serializers.ModelSerializer):
             if instance.profile_picture:
                 instance.profile_picture.delete(save=False)
             instance.profile_picture = None
-            print("🗑️ Foto eliminada")
         elif "profile_picture" in validated_data:
             # Subir nueva foto
             new_picture = validated_data.get("profile_picture")
@@ -250,11 +272,6 @@ class PatientProfileUpdateSerializer(serializers.ModelSerializer):
                 if instance.profile_picture:
                     instance.profile_picture.delete(save=False)
                 instance.profile_picture = new_picture
-                print(f"📸 Nueva foto guardada")
-
-        # Actualizar descripción
-        if "description" in validated_data:
-            instance.description = validated_data["description"]
 
         instance.save()
         return instance
@@ -396,3 +413,75 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
         pre_registration, created = PreRegistration.objects.update_or_create(email=email, defaults=defaults)
 
         return pre_registration
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    Serializer para el cambio de contraseña de un usuario autenticado.
+    """
+
+    current_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    new_password_confirm = serializers.CharField(required=True)
+
+    def validate(self, data):
+        # 1. Comprobar que la nueva contraseña y su confirmación coincidan
+        if data["new_password"] != data["new_password_confirm"]:
+            raise serializers.ValidationError({"new_password_confirm": "Las nuevas contraseñas no coinciden."})
+
+        # 2. Comprobar que la contraseña actual sea correcta
+        user = self.context["request"].user
+        if not user.check_password(data["current_password"]):
+            raise serializers.ValidationError({"current_password": "La contraseña actual es incorrecta."})
+
+        # 3. Validar la nueva contraseña con las reglas de Django
+        try:
+            validate_password(data["new_password"], user)
+        except serializers.ValidationError as e:
+            raise serializers.ValidationError({"new_password": list(e.messages)})
+
+        return data
+
+    def save(self, **kwargs):
+        # El método save se llamará solo si la validación es exitosa
+        user = self.context["request"].user
+        user.set_password(self.validated_data["new_password"])
+        user.save()
+        return user
+
+
+class RequestEmailChangeSerializer(serializers.Serializer):
+    current_password = serializers.CharField(required=True)
+    new_email = serializers.EmailField(required=True)
+
+    def validate_current_password(self, value):
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("La contraseña actual es incorrecta.")
+        return value
+
+    def validate_new_email(self, value):
+        # Normalizar y comprobar que no esté ya en uso
+        normalized_email = value.lower()
+        if User.objects.filter(email__iexact=normalized_email).exists():
+            raise serializers.ValidationError("Esta dirección de correo electrónico ya está en uso.")
+        return normalized_email
+
+
+class ConfirmEmailChangeSerializer(serializers.Serializer):
+    new_email = serializers.EmailField(required=True)
+    verification_code = serializers.CharField(required=True, max_length=6)
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    """
+    Serializer para validar la contraseña al eliminar la cuenta.
+    """
+
+    password = serializers.CharField(required=True)
+
+    def validate_password(self, value):
+        user = self.context["request"].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("La contraseña es incorrecta.")
+        return value

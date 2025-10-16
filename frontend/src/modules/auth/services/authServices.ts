@@ -55,9 +55,33 @@ interface VerificationPayload {
 
 // Tipo para el payload de restablecimiento de contraseña
 interface PasswordResetConfirmPayload {
-  token: string;
-  new_password: string;
-  confirm_password: string;
+    code: string; // ANTES: token
+    new_password: string;
+    confirm_password: string;
+}
+
+export interface PatientAliasUpdatePayload {
+    alias: string;
+}
+
+export interface ChangePasswordPayload {
+    current_password: string;
+    new_password: string;
+    new_password_confirm: string;
+}
+
+export interface RequestEmailChangePayload {
+    current_password: string;
+    new_email: string;
+}
+
+export interface ConfirmEmailChangePayload {
+    new_email: string;
+    verification_code: string;
+}
+
+export interface DeleteAccountPayload {
+    password: string;
 }
 
 interface ActivationPayload {
@@ -76,6 +100,22 @@ export const activateAccount = async (data: ActivationPayload): Promise<AxiosRes
 
 export const verifyProfessionalEmail = async (data: ActivationPayload): Promise<AxiosResponse> => {
   return api.post('verify-professional-email/', data);
+};
+
+export const changePassword = async (data: ChangePasswordPayload): Promise<AxiosResponse> => {
+    return api.post('profile/change-password/', data);
+};
+
+export const requestEmailChange = async (data: RequestEmailChangePayload): Promise<AxiosResponse> => {
+    return api.post('profile/request-email-change/', data);
+};
+
+export const confirmEmailChange = async (data: ConfirmEmailChangePayload): Promise<AxiosResponse> => {
+    return api.post('profile/confirm-email-change/', data);
+};
+
+export const deleteAccount = async (data: DeleteAccountPayload): Promise<AxiosResponse> => {
+    return api.post('profile/delete-account/', data);
 };
 
 export const registerPatient = async (data: PatientRegistrationPayload): Promise<AxiosResponse> => {
@@ -102,12 +142,21 @@ export const requestPasswordReset = async (data: { email: string }): Promise<Axi
   return api.post('password-reset/', data);
 };
 
+export const verifyPasswordResetCode = async (data: { code: string }): Promise<AxiosResponse> => {
+    return api.post('password-reset/verify/', data);
+};
+
 export const passwordResetConfirm = async (data: PasswordResetConfirmPayload): Promise<AxiosResponse> => {
-  return api.post('password-reset/confirm/', data);
+    return api.post('password-reset/confirm/', data);
 };
 
 export const resendVerificationCode = async (data: { email: string, password: string }): Promise<AxiosResponse> => {
     return api.post('resend-verification/', data);
+};
+
+export const updatePatientAlias = async (data: PatientAliasUpdatePayload): Promise<AxiosResponse> => {
+    // Usamos el mismo endpoint 'profile/me/' con el método PATCH
+    return api.patch('profile/me/', data);
 };
 
 export interface ProfessionalProfile {

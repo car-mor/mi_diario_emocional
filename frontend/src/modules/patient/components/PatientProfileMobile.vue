@@ -7,7 +7,7 @@
             <div class="mt-13 flex flex-col items-center text-center">
                 <div class="relative w-40 h-40">
                     <div
-                        v-if="loadingProfile"
+                        v-if="loading"
                         class="w-full h-full rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"
                     ></div>
 
@@ -21,7 +21,7 @@
                     />
 
                     <button
-                        v-if="!loadingProfile && hasCustomAvatar"
+                        v-if="hasCustomAvatar"
                         @click="removeAvatar"
                         class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
                         title="Eliminar foto"
@@ -181,44 +181,53 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
+import { storeToRefs } from 'pinia';
 import * as AuthServices from '@/modules/auth/services/authServices';
 import { IconEdit } from '@tabler/icons-vue';
 import { type PatientUpdatePayload } from '@/modules/auth/services/authServices';
 
+const router = useRouter();
+const authStore = useAuthStore();
+// Obtenemos el estado reactivo directamente del store
+const { userProfile, loading } = storeToRefs(authStore);
+
+// const patientData = ref<AuthServices.UserProfileData | null>(null);
+// const loadingProfile = ref(true);
 const isPatientProfile = (data: AuthServices.UserProfileData): data is AuthServices.PatientProfile => {
     return (data as AuthServices.PatientProfile).alias !== undefined;
 };
 
-const router = useRouter();
-const authStore = useAuthStore();
-const loading = ref(false);
-const patientData = ref<AuthServices.UserProfileData | null>(null);
-const loadingProfile = ref(true);
-
+// const userAlias = computed(() => {
+//     if (!patientData.value) return 'Cargando...';
+//     if (isPatientProfile(patientData.value)) {
+//         return patientData.value.alias;
+//     }
+//     return patientData.value.name;
+// });
 const userAlias = computed(() => {
-    if (!patientData.value) return 'Cargando...';
-    if (isPatientProfile(patientData.value)) {
-        return patientData.value.alias;
+    if (!userProfile.value) return 'Cargando...';
+    if (isPatientProfile(userProfile.value)) {
+        return userProfile.value.alias;
     }
-    return patientData.value.name;
+    return userProfile.value.name;
 });
 
 const userEmail = computed(() => {
-    return patientData.value ? patientData.value.email : 'Cargando...';
+    return userProfile.value ? userProfile.value.email : 'Cargando...';
 });
 
-// Constantes para descripción
-const userDescription = ref("");
+// Constantes para descripción (inicializadas desde el store)
+const userDescription = ref((userProfile.value as AuthServices.PatientProfile)?.description || '');
 const originalDescription = ref("");
 const isEditingDescription = ref(false);
 const descriptionError = ref<string | null>(null);
 
 // Constantes para foto
 const avatarInput = ref<HTMLInputElement | null>(null);
-const avatarUrl = ref<string | null>(null);
+// const avatarUrl = ref<string | null>(null);
 
 // Constantes para modales
 const showDeleteModal = ref(false);
@@ -239,10 +248,11 @@ function closeErrorModal() {
     showErrorModal.value = false;
 }
 
+const avatarUrl = computed(() => (userProfile.value as AuthServices.PatientProfile)?.profile_picture);
+
 const hasCustomAvatar = computed(() => {
     return avatarUrl.value?.includes('/media/') || false;
 });
-
 function clickAvatarInput() {
     if (avatarInput.value) {
         avatarInput.value.click();
@@ -290,12 +300,12 @@ async function handleAvatarChange(event: Event) {
 
         const response = await AuthServices.updatePatientProfile(formData);
 
-        if (response.data.profile_picture_url) {
-            avatarUrl.value = response.data.profile_picture_url;
-        } else if (response.data.profile_picture) {
-            avatarUrl.value = response.data.profile_picture;
-        }
-
+        // if (response.data.profile_picture_url) {
+        //     avatarUrl.value = response.data.profile_picture_url;
+        // } else if (response.data.profile_picture) {
+        //     avatarUrl.value = response.data.profile_picture;
+        // }
+        authStore.updateUserProfile({ profile_picture: response.data.profile_picture_url });
         successTitle.value = '¡Foto actualizada!';
         successMessage.value = 'Tu foto de perfil ha sido actualizada correctamente.';
         showSuccessModal.value = true;
@@ -321,6 +331,8 @@ async function saveDescription() {
     try {
         const payload: PatientUpdatePayload = { description: userDescription.value };
         await AuthServices.updatePatientProfile(payload);
+
+        authStore.updateUserProfile({ description: userDescription.value });
 
         originalDescription.value = userDescription.value;
         isEditingDescription.value = false;
@@ -375,11 +387,12 @@ async function confirmDeleteAvatar() {
 
         const response = await AuthServices.updatePatientProfile(formData);
 
-        if (response.data.profile_picture_url) {
-            avatarUrl.value = response.data.profile_picture_url;
-        } else if (response.data.profile_picture) {
-            avatarUrl.value = response.data.profile_picture;
-        }
+        // if (response.data.profile_picture_url) {
+        //     avatarUrl.value = response.data.profile_picture_url;
+        // } else if (response.data.profile_picture) {
+        //     avatarUrl.value = response.data.profile_picture;
+        // }
+        authStore.updateUserProfile({ profile_picture: response.data.profile_picture_url });
 
         successTitle.value = '¡Foto eliminada!';
         successMessage.value = 'Tu foto de perfil ha sido eliminada correctamente.';
@@ -422,38 +435,38 @@ const handleLogout = async () => {
     }
 };
 
-async function loadPatientData() {
-    loadingProfile.value = true;
+// async function loadPatientData() {
+//     loadingProfile.value = true;
 
-    if (!authStore.authToken) {
-        router.push({ name: 'login' });
-        loadingProfile.value = false;
-        return;
-    }
+//     if (!authStore.authToken) {
+//         router.push({ name: 'login' });
+//         loadingProfile.value = false;
+//         return;
+//     }
 
-    try {
-        const response = await AuthServices.fetchUserProfile();
-        const patientProfile = response.data as AuthServices.PatientProfile;
+//     try {
+//         const response = await AuthServices.fetchUserProfile();
+//         const patientProfile = response.data as AuthServices.PatientProfile;
 
-        patientData.value = patientProfile;
-        userDescription.value = patientProfile.description || 'Añade una breve descripción sobre ti...';
-        originalDescription.value = userDescription.value;
-        avatarUrl.value = patientProfile.profile_picture;
+//         patientData.value = patientProfile;
+//         userDescription.value = patientProfile.description || 'Añade una breve descripción sobre ti...';
+//         originalDescription.value = userDescription.value;
+//         avatarUrl.value = patientProfile.profile_picture;
 
-    } catch (error) {
-        console.error("Falló la carga del perfil de usuario:", error);
-    } finally {
-        loadingProfile.value = false;
-    }
-}
+//     } catch (error) {
+//         console.error("Falló la carga del perfil de usuario:", error);
+//     } finally {
+//         loadingProfile.value = false;
+//     }
+// }
 
-onMounted(() => {
-    loadPatientData();
+// onMounted(() => {
+//     loadPatientData();
 
-    return () => {
-        if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
-            URL.revokeObjectURL(avatarUrl.value);
-        }
-    };
-});
+//     return () => {
+//         if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
+//             URL.revokeObjectURL(avatarUrl.value);
+//         }
+//     };
+// });
 </script>

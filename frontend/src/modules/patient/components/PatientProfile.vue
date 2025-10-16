@@ -12,7 +12,7 @@
             <!-- Estado de carga -->
             <div class="relative w-40 h-40">
                 <div
-                    v-if="loadingProfile"
+                    v-if="loading"
                     class="w-full h-full rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"
                 ></div>
 
@@ -28,7 +28,7 @@
 
                 <!-- Botón para eliminar -->
                 <button
-                    v-if="!loadingProfile && hasCustomAvatar"
+                    v-if="hasCustomAvatar"
                     @click="removeAvatar"
                     class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
                     title="Eliminar foto"
@@ -175,51 +175,50 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted} from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
+import { storeToRefs } from 'pinia';
 import * as AuthServices from '@/modules/auth/services/authServices';
 import { IconEdit } from '@tabler/icons-vue';
 import { type PatientUpdatePayload } from '@/modules/auth/services/authServices';
-// NOTA: PatientProfile ya es accesible como AuthServices.PatientProfile
+const router = useRouter();
+const authStore = useAuthStore();
 
 const isPatientProfile = (data: AuthServices.UserProfileData): data is AuthServices.PatientProfile => {
     // Si tiene la propiedad 'alias' y no tiene 'link_code' (lo que define a un Profesional)
     return (data as AuthServices.PatientProfile).alias !== undefined;
 };
 
-const router = useRouter();
-const authStore = useAuthStore();
-const loading = ref(false);
-const patientData = ref<AuthServices.UserProfileData | null>(null); // Declaración para TypeScript
-const loadingProfile = ref(true);
 
+const { userProfile, loading } = storeToRefs(authStore);
 
 const userAlias = computed(() => {
-    if (!patientData.value) return 'Cargando...';
+    if (!userProfile.value) return 'Cargando...';
 
-    if (isPatientProfile(patientData.value)) {
-        return patientData.value.alias;
+    if (isPatientProfile(userProfile.value)) {
+        return userProfile.value.alias;
     }
 
     // Fallback: Si no es PatientProfile (ej. Superuser logueado en esta vista),
     // podemos mostrar el nombre completo.
-    return patientData.value.name;
+    return userProfile.value.name;
 });
 const userEmail = computed(() => {
     // Si los datos están cargados, muestra el email
-    return patientData.value ? patientData.value.email : 'Cargando...';
+    return userProfile.value ? userProfile.value.email : 'Cargando...';
 });
 //----------- constantes para el alias y descripción ---------------------
-const userDescription = ref("");
+const userDescription = ref( (userProfile.value as AuthServices.PatientProfile)?.description || '');
 const originalDescription = ref(""); // Para guardar la descripción original antes de editar
 const isEditingDescription = ref(false);
 const descriptionError = ref<string | null>(null);
 
 //-------------- constantes para la foto ------------------
 const avatarInput = ref<HTMLInputElement | null>(null);
-const avatarUrl = ref<string | null>(null);
-
+// const avatarUrl = ref<string | null>(null);
+// Lee directamente del 'userProfile' del store. Ya no es una variable local.
+const avatarUrl = computed(() => (userProfile.value as AuthServices.PatientProfile)?.profile_picture);
 //-------------- constantes para modales ------------------
 const showDeleteModal = ref(false);
 const showSuccessModal = ref(false);
@@ -246,6 +245,15 @@ const hasCustomAvatar = computed(() => {
     // Una foto personalizada siempre vendrá de la carpeta 'media'
     return avatarUrl.value?.includes('/media/') || false;
 });
+
+// const startEditingDescription = () => {
+//     if (userProfile.value) {
+//         userDescription.value = (userProfile.value as AuthServices.PatientProfile).description;
+//         originalDescription.value = userDescription.value;
+//         isEditingDescription.value = true;
+//     }
+// }
+
 function clickAvatarInput() {
     if (avatarInput.value) {
         avatarInput.value.click(); // Dispara el clic en el input de tipo file
@@ -260,6 +268,8 @@ async function saveDescription() {
         // CORRECCIÓN 2: Tipamos payload con la interfaz importada
         const payload: PatientUpdatePayload = { description: userDescription.value };
         await AuthServices.updatePatientProfile(payload);
+
+        authStore.updateUserProfile({ description: userDescription.value });
 
         // Lógica de éxito...
         originalDescription.value = userDescription.value;
@@ -319,13 +329,7 @@ async function handleAvatarChange(event: Event) {
         const response = await AuthServices.updatePatientProfile(formData);
 
         console.log('✅ Respuesta de actualización:', response.data);
-
-        // Actualizar la URL del avatar
-        if (response.data.profile_picture_url) {
-            avatarUrl.value = response.data.profile_picture_url;
-        } else if (response.data.profile_picture) {
-            avatarUrl.value = response.data.profile_picture;
-        }
+        authStore.updateUserProfile({ profile_picture: response.data.profile_picture_url });
 
         // Mostrar modal de éxito
         successTitle.value = '¡Foto actualizada!';
@@ -428,14 +432,7 @@ async function confirmDeleteAvatar() {
         const response = await AuthServices.updatePatientProfile(formData);
 
         console.log('✅ Respuesta de eliminación:', response.data);
-
-        // Actualizar con la URL del avatar por defecto
-        if (response.data.profile_picture_url) {
-            avatarUrl.value = response.data.profile_picture_url;
-        } else if (response.data.profile_picture) {
-            avatarUrl.value = response.data.profile_picture;
-        }
-
+        authStore.updateUserProfile({ profile_picture: response.data.profile_picture_url });
         console.log('✅ Avatar eliminado, nueva URL:', avatarUrl.value);
 
         // Mostrar modal de éxito
@@ -475,42 +472,42 @@ function closeSuccessModal() {
 // Lógica de Carga Inicial (Backend)
 // ----------------------------------------------------
 // Función para carga de datos del backend
-async function loadPatientData() {
-    loadingProfile.value = true;
-    const authStore = useAuthStore();
+// async function loadPatientData() {
+//     loadingProfile.value = true;
+//     const authStore = useAuthStore();
 
-    if (!authStore.authToken) {
-        router.push({ name: 'login' });
-        loadingProfile.value = false;
-        return;
-    }
+//     if (!authStore.authToken) {
+//         router.push({ name: 'login' });
+//         loadingProfile.value = false;
+//         return;
+//     }
 
-    try {
-        const response = await AuthServices.fetchUserProfile();
-        const patientProfile = response.data as AuthServices.PatientProfile;
+//     try {
+//         const response = await AuthServices.fetchUserProfile();
+//         const patientProfile = response.data as AuthServices.PatientProfile;
 
-        patientData.value = patientProfile;
-        userDescription.value = patientProfile.description || 'Añade una breve descripción sobre ti...';
-        originalDescription.value = userDescription.value;
+//         patientData.value = patientProfile;
+//         userDescription.value = patientProfile.description || 'Añade una breve descripción sobre ti...';
+//         originalDescription.value = userDescription.value;
 
-        // ✅ USAR EL CAMPO CORRECTO
-        avatarUrl.value = patientProfile.profile_picture;
+//         // ✅ USAR EL CAMPO CORRECTO
+//         avatarUrl.value = patientProfile.profile_picture;
 
-    } catch (error) {
-        console.error("Falló la carga del perfil de usuario:", error);
-    } finally {
-        loadingProfile.value = false;
-    }
-}
+//     } catch (error) {
+//         console.error("Falló la carga del perfil de usuario:", error);
+//     } finally {
+//         loadingProfile.value = false;
+//     }
+// }
 // Ciclo de vida
-onMounted(() => {
-    loadPatientData();
+// onMounted(() => {
+//     loadPatientData();
 
-    // Cleanup function que se ejecuta cuando el componente se desmonta
-    return () => {
-        if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
-            URL.revokeObjectURL(avatarUrl.value);
-        }
-    };
-});
+//     // Cleanup function que se ejecuta cuando el componente se desmonta
+//     return () => {
+//         if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
+//             URL.revokeObjectURL(avatarUrl.value);
+//         }
+//     };
+// });
 </script>

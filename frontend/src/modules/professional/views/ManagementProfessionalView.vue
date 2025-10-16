@@ -5,13 +5,11 @@
             <ManagePatients />
         <router-view />
         <!-- Footer común -->
-        <WelcomeFooter />
     </div>
 </template>
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import WelcomeFooter from '@/modules/auth/components/WelcomeFooter.vue';
 import ManagePatients from '@/modules/professional/components/PatientManagement.vue';
 
 </script>

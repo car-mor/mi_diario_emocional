@@ -8,7 +8,7 @@ from django.contrib.auth.hashers import check_password
 from django.db import transaction
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
-from rest_framework import exceptions, status
+from rest_framework import exceptions, generics, status
 from rest_framework.generics import GenericAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 
@@ -21,19 +21,23 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import PasswordReset, Patient, PreRegistration, Professional, User
+from .models import EmailChangeRequest, PasswordReset, Patient, PreRegistration, Professional, User
 
 # Importa los serializadores y modelos
 from .serializers import (
+    ChangePasswordSerializer,
+    ConfirmEmailChangeSerializer,
     CustomTokenObtainPairSerializer,
+    DeleteAccountSerializer,
     PatientProfileSerializer,
     PatientProfileUpdateSerializer,
     PatientSerializer,
     PreRegistrationSerializer,
     ProfessionalProfileSerializer,
     ProfessionalSerializer,
+    RequestEmailChangeSerializer,
 )
-from .services import send_verification_email
+from .services import send_password_reset_email, send_verification_change_email, send_verification_email
 
 # Importa tus funciones de servicio para correos, etc. (simuladas aquí)
 # from .services import send_verification_email, send_password_reset_email
@@ -238,16 +242,17 @@ class RequestPasswordResetView(APIView):
         email = request.data.get("email")
         try:
             user = User.objects.get(email=email)
-            # Elimina tokens viejos para evitar múltiples solicitudes
             PasswordReset.objects.filter(user=user).delete()
 
-            # Crea un nuevo token
-            token = uuid.uuid4()
-            expires_at = timezone.now() + timedelta(minutes=5)
-            PasswordReset.objects.create(user=user, token=token, expires_at=expires_at)
+            # El modelo 'PasswordReset' usa un token UUID, pero para el usuario es más fácil un código corto.
+            # Usaremos el UUID como 'token' interno y le enviaremos un código corto derivado de él.
+            reset_instance = PasswordReset.objects.create(user=user, expires_at=timezone.now() + timedelta(minutes=5))
 
-            # Enviar el correo con el token
-            # send_password_reset_email(user.email, token)
+            # Generamos un código corto para el usuario a partir del token UUID
+            user_friendly_code = str(reset_instance.token)[:6].upper()
+
+            # Enviar el correo con el código corto
+            send_password_reset_email(user.email, user_friendly_code)  # <-- LLAMA A LA NUEVA FUNCIÓN
 
             return Response(
                 {"message": "Se ha enviado un código de recuperación a tu correo electrónico."},
@@ -260,25 +265,50 @@ class RequestPasswordResetView(APIView):
             )
 
 
+class PasswordResetVerifyCodeView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        code = request.data.get("code")
+        if not code:
+            return Response({"error": "El código es requerido."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Buscamos una solicitud que coincida con el inicio del token y que no haya expirado
+            PasswordReset.objects.get(token__startswith=code.lower(), expires_at__gt=timezone.now())
+            # Si la encuentra y no lanza error, el código es válido
+            return Response({"detail": "Código válido."}, status=status.HTTP_200_OK)
+
+        except PasswordReset.DoesNotExist:
+            return Response(
+                {"error": "El código de recuperación es inválido o ha expirado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
 # Vista para restablecer la contraseña
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        token = request.data.get("token")
+        # Ahora recibimos 'code' en lugar de 'token'
+        code = request.data.get("code")
         new_password = request.data.get("new_password")
         confirm_password = request.data.get("confirm_password")
+
+        if not all([code, new_password, confirm_password]):
+            return Response({"error": "Todos los campos son requeridos."}, status=status.HTTP_400_BAD_REQUEST)
 
         if new_password != confirm_password:
             return Response({"error": "Las contraseñas no coinciden."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            password_reset = PasswordReset.objects.get(token=token, expires_at__gt=timezone.now())
+            # Buscamos la solicitud por la parte inicial del token
+            password_reset = PasswordReset.objects.get(token__startswith=code.lower(), expires_at__gt=timezone.now())
+
             user = password_reset.user
             user.set_password(new_password)
             user.save()
-
-            # Elimina el token una vez que la contraseña ha sido cambiada
             password_reset.delete()
 
             return Response(
@@ -471,3 +501,106 @@ class MyTokenObtainPairView(TokenObtainPairView):
     """
 
     serializer_class = CustomTokenObtainPairSerializer
+
+
+class ChangePasswordView(generics.GenericAPIView):
+    """
+    Endpoint para que un usuario autenticado cambie su propia contraseña.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "Contraseña actualizada con éxito."}, status=status.HTTP_200_OK)
+
+
+class RequestEmailChangeView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RequestEmailChangeSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        new_email = serializer.validated_data["new_email"]
+
+        # Eliminar solicitudes anteriores para este usuario
+        EmailChangeRequest.objects.filter(user=user).delete()
+
+        # Crear código y solicitud
+        code = secrets.token_hex(3).upper()  # Genera un código de 6 caracteres
+        email_request = EmailChangeRequest.objects.create(
+            user=user, new_email=new_email, expires_at=timezone.now() + timedelta(minutes=5)
+        )
+        email_request.set_code(code)
+        email_request.save()
+
+        send_verification_change_email(new_email, code)
+
+        return Response(
+            {"detail": f"Se ha enviado un código de verificación a {new_email}."}, status=status.HTTP_200_OK
+        )
+
+
+class ConfirmEmailChangeView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ConfirmEmailChangeSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        new_email = serializer.validated_data["new_email"]
+        code = serializer.validated_data["verification_code"]
+
+        try:
+            # email_request = EmailChangeRequest.objects.get(user=user, new_email__iexact=new_email)
+            # Usamos filter().latest() para obtener la solicitud más reciente porque podría haber múltiples entradas
+            email_request = EmailChangeRequest.objects.filter(user=user, new_email__iexact=new_email).latest(
+                "created_at"
+            )
+            if email_request.is_expired():
+                raise exceptions.ValidationError("El código de verificación ha expirado.")
+
+            if not email_request.check_code(code):
+                raise exceptions.ValidationError("El código de verificación es incorrecto.")
+
+            # ¡Éxito! Actualizamos el email del usuario
+            user.email = new_email
+            user.save()
+
+            # Limpiamos la solicitud
+            email_request.delete()
+
+            return Response(
+                {"detail": "Tu correo electrónico ha sido actualizado con éxito."}, status=status.HTTP_200_OK
+            )
+
+        except EmailChangeRequest.DoesNotExist:
+            raise exceptions.ValidationError("No se encontró una solicitud de cambio de correo válida.")
+
+
+class DeleteAccountView(generics.GenericAPIView):
+    """
+    Endpoint para que un usuario autenticado elimine su propia cuenta.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = DeleteAccountSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Si el serializer es válido, la contraseña es correcta.
+        # Procedemos a eliminar el usuario.
+        user = request.user
+        user.delete()
+
+        return Response({"detail": "Tu cuenta ha sido eliminada permanentemente."}, status=status.HTTP_204_NO_CONTENT)

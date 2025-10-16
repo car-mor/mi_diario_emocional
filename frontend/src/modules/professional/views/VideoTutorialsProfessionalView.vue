@@ -4,14 +4,11 @@
         <VideoTutorialsProfessional />
 
         <router-view />
-        <!-- Footer común -->
-        <WelcomeFooter />
     </div>
 </template>
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import WelcomeFooter from '@/modules/auth/components/WelcomeFooter.vue';
 import VideoTutorialsProfessional from '@/modules/professional/components/VideoTutorialsProfessional.vue';
 
 </script>

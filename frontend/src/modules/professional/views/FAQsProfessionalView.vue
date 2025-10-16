@@ -4,14 +4,12 @@
         <!-- Contenido principal -->
             <FAQsProfessionalView />
         <router-view />
-        <!-- Footer común -->
-        <WelcomeFooter />
+
     </div>
 </template>
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import WelcomeFooter from '@/modules/auth/components/WelcomeFooter.vue';
 import FAQsProfessionalView from '@/modules/professional/components/FAQsProfessional.vue';
 
 </script>

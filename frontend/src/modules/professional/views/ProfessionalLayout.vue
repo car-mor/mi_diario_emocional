@@ -9,7 +9,6 @@
 
 
       <div class="flex-1 p-6 overflow-y-auto">
-        <ProfessionalHome />
         <router-view />
       </div>
     </main>
@@ -23,6 +22,5 @@
 // 4. Imports necesarios para todos los componentes
 import WelcomeFooter from '@/modules/auth/components/WelcomeFooter.vue';
 import ProfessionalHeader from '../components/ProfessionalHeader.vue';
-import ProfessionalHome from '../components/ProfessionalHome.vue';
 
 </script>

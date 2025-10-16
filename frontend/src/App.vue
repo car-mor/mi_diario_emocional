@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue';
-import { RouterView } from 'vue-router'; // Ya no necesitamos useRoute
+import { RouterView } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
 
-// Importa solo el componente ANÓNIMO
 import AnonymusHeader from '@/modules/auth/components/WelcomeHeader.vue';
 
 const authStore = useAuthStore();

@@ -48,6 +48,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  const updateUserProfile = (newData: Partial<UserProfileData>) => {
+        // Verificamos que el perfil del usuario ya se haya cargado
+        if (userProfile.value) {
+            // Usamos el spread operator (...) para fusionar los datos existentes
+            // con los nuevos datos. Esto actualiza solo los campos que vienen en newData.
+            userProfile.value = { ...userProfile.value, ...newData };
+        }
+    };
+
   const login = async (credentials: BaseCredentials): Promise<string> => {
     loading.value = true;
     try {
@@ -57,7 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
       setUserData(role, review_status);
       await fetchUserProfile();
 
-      if (role === 'patient') return '/patient-layout';
+      if (role === 'patient') return '/home-patient';
       if (role === 'professional') {
         return review_status === 'APPROVED' ? '/professional-layout' : '/pending-approval';
       }
@@ -108,7 +117,8 @@ export const useAuthStore = defineStore('auth', () => {
     userProfile,
     fetchUserProfile,
     checkInitialAuth,
-    reviewStatus // <-- ¡AÑADIDO AQUÍ!
+    reviewStatus,
+    updateUserProfile
   };
 });
 

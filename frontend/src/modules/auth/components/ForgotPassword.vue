@@ -46,7 +46,7 @@
     <div v-else-if="currentStep === 2" class="text-center">
       <p class="mb-6 text-gray-600 dark:text-gray-400 leading-relaxed">
         Se envió a tu correo electrónico un código de confirmación para la recuperación de la
-        contraseña. Este código expirará una vez transcurridos 5 minutos.
+        contraseña. Este código expirará una vez transcurrido 1 minuto.
       </p>
       <div class="mb-6">
         <label for="code" class="sr-only">Código de verificación</label>
@@ -104,6 +104,12 @@
       <p class="mb-6 text-gray-600 dark:text-gray-400 leading-relaxed">
         Por favor, escribe tu nueva contraseña a utilizar
       </p>
+      <div class="text-sm text-left text-gray-600 dark:text-gray-400 mb-4">
+        <p v-for="req in passwordValidation" :key="req.text" class="transition-colors"
+           :class="{'text-green-500': req.met, 'text-red-500': !req.met && newPassword.length > 0}">
+            {{ req.met ? '✓' : '✗' }} {{ req.text }}
+        </p>
+    </div>
       <div class="mb-4">
         <label for="new-password" class="sr-only">Nueva contraseña</label>
         <input
@@ -197,7 +203,7 @@
 
   <div
     v-if="errorPopup"
-    class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50"
+    class="fixed inset-0 flex items-center justify-center z-50"
     @click="closeErrorPopup"
   >
     <div
@@ -222,6 +228,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { isAxiosError } from 'axios'
+import { requestPasswordReset, passwordResetConfirm, verifyPasswordResetCode } from '../services/authServices'
 import { IconMail, IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-vue'
 
 const router = useRouter() // Inicializa el router
@@ -247,7 +255,7 @@ const passwordError = ref('')
 // Control de tiempo para reenvío
 const lastResendTimestamp = ref(0)
 const currentTime = ref(Date.now())
-const fiveMinutesInMs = 1 * 60 * 1000
+const fiveMinutesInMs = 5 * 60 * 1000
 
 // Intervalo para actualizar el tiempo
 let timeInterval: number | null = null
@@ -287,19 +295,12 @@ onUnmounted(() => {
 })
 
 const goToStep = (step: number) => {
-  if (step === 0) {
-    // Si se hace clic en Cancelar, volvemos al paso 1 y limpiamos el formulario
-    currentStep.value = 1
-    email.value = ''
-    code.value = ''
-    newPassword.value = ''
-    confirmPassword.value = ''
-  } else {
-    currentStep.value = step
-  }
-  // Limpiar errores al cambiar de paso
-  codeError.value = ''
-  passwordError.value = ''
+    // Ya no es necesario el if (step === 0)
+    currentStep.value = step;
+
+    // Limpiar errores al cambiar de paso
+    codeError.value = '';
+    passwordError.value = '';
 }
 
 // Función para redireccionar a la página de login
@@ -307,101 +308,127 @@ const goToLogin = () => {
   router.push('/login')
 }
 
-const sendRecoveryCode = () => {
-  if (!email.value) {
-    errorMessage.value = 'Por favor, ingresa tu correo electrónico.'
-    errorPopup.value = true
-    return
-  }
-
-  loading.value = true
-
-  // Simular llamada a API
-  setTimeout(() => {
-    loading.value = false
-    successType.value = 'initial'
-    successMessage.value =
-      'Se ha enviado un código de recuperación a tu correo electrónico. Revisa también tu carpeta de spam.'
-    successPopup.value = true
-    currentStep.value = 2
-    lastResendTimestamp.value = Date.now()
-
-    console.log('Código de recuperación enviado') // Debug
-  }, 1000)
-}
-
-const verifyCode = () => {
-  if (!code.value) {
-    codeError.value = 'Por favor, ingresa el código de verificación.'
-    return
-  }
-
-  loading.value = true
-
-  // Simular verificación de código (código correcto: '123456')
-  setTimeout(() => {
-    loading.value = false
-    if (code.value === '123456') {
-      currentStep.value = 3
-      codeError.value = ''
-    } else {
-      codeError.value = 'Código de verificación incorrecto. Por favor, inténtalo de nuevo.'
+const sendRecoveryCode = async () => {
+    if (!email.value) { /* ... */ return }
+    loading.value = true
+    try {
+        await requestPasswordReset({ email: email.value })
+        successType.value = 'initial'
+        successMessage.value = 'Se ha enviado un código de recuperación a tu correo. Revisa también tu carpeta de spam.'
+        successPopup.value = true
+        currentStep.value = 2
+        lastResendTimestamp.value = Date.now()
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            errorMessage.value = error.response.data.error || 'Ocurrió un error.'
+        } else {
+            errorMessage.value = 'No se pudo conectar con el servidor.'
+        }
+        errorPopup.value = true
+    } finally {
+        loading.value = false
     }
-  }, 800)
 }
 
-const resendRecoveryCode = () => {
-  if (isResendDisabled.value) {
-    errorMessage.value = `Debes esperar ${Math.ceil(remainingTime.value / 1000)} segundos antes de volver a solicitar un código.`
-    errorPopup.value = true
-    return
-  }
+// El backend ahora hace todo en un solo paso. Podemos saltar al paso 3
+// si el usuario introduce un código. Lo verificaremos al cambiar la contraseña.
+const verifyCode = async () => {
+    if (!code.value) {
+        codeError.value = 'Por favor, ingresa el código de verificación.';
+        return;
+    }
+    codeError.value = '';
+    loading.value = true;
 
-  loading.value = true
+    try {
+        await verifyPasswordResetCode({ code: code.value });
+        // Si la llamada es exitosa, el código es correcto y podemos avanzar
+        currentStep.value = 3;
 
-  // Simular llamada a API para reenvío
-  setTimeout(() => {
-    loading.value = false
-    successType.value = 'resend'
-    successMessage.value =
-      'Se ha enviado un nuevo código de recuperación a tu correo electrónico. Revisa también tu carpeta de spam.'
-    successPopup.value = true
-    lastResendTimestamp.value = Date.now()
-
-    // Limpiar el código anterior y errores
-    code.value = ''
-    codeError.value = ''
-
-    console.log('Código de recuperación reenviado exitosamente') // Debug
-  }, 1000)
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            codeError.value = error.response.data.error || 'Ocurrió un error al verificar el código.';
+        } else {
+            codeError.value = 'No se pudo conectar con el servidor.';
+        }
+    } finally {
+        loading.value = false;
+    }
 }
+// 1. Añade los requisitos y las propiedades computadas
+const passwordRequirements = [
+    { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
+    { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
+    { regex: /\d/, text: 'Al menos un número' },
+    { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
+    { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres' }
+];
 
-const confirmNewPassword = () => {
-  if (!newPassword.value || !confirmPassword.value) {
-    passwordError.value = 'Por favor, completa ambos campos de contraseña.'
-    return
-  }
+const passwordValidation = computed(() => {
+    return passwordRequirements.map(req => ({
+        ...req,
+        met: req.regex.test(newPassword.value)
+    }));
+});
 
-  if (newPassword.value !== confirmPassword.value) {
-    passwordError.value = 'Las contraseñas no coinciden.'
-    return
-  }
+const isPasswordValid = computed(() => passwordValidation.value.every(req => req.met));
 
-  if (newPassword.value.length < 8) {
-    passwordError.value = 'La contraseña debe tener al menos 8 caracteres.'
-    return
-  }
+const confirmNewPassword = async () => {
+    if (!newPassword.value || !confirmPassword.value) {
+        passwordError.value = 'Por favor, completa ambos campos de contraseña.'
+        return
+    }
+    if (newPassword.value !== confirmPassword.value) {
+        passwordError.value = 'Las contraseñas no coinciden.'
+        return
+    }
 
-  loading.value = true
-
-  // Simular actualización de contraseña
-  setTimeout(() => {
-    loading.value = false
+    if (!isPasswordValid.value) {
+        passwordError.value = "La contraseña no cumple con los requisitos de seguridad.";
+        return;
+    }
     passwordError.value = ''
-    currentStep.value = 4
+    loading.value = true
+    try {
+        await passwordResetConfirm({
+            code: code.value,
+            new_password: newPassword.value,
+            confirm_password: confirmPassword.value,
+        })
+        currentStep.value = 4 // Éxito
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            passwordError.value = error.response.data.error || 'Ocurrió un error.'
+        } else {
+            passwordError.value = 'No se pudo conectar con el servidor.'
+        }
+    } finally {
+        loading.value = false
+    }
+}
 
-    console.log('Contraseña actualizada exitosamente') // Debug
-  }, 1000)
+const resendRecoveryCode = async () => {
+    if (isResendDisabled.value) { /* ... */ return }
+    loading.value = true;
+    try {
+        // La lógica es la misma que el envío inicial
+        await requestPasswordReset({ email: email.value });
+        successType.value = 'resend';
+        successMessage.value = 'Se ha reenviado el código. Revisa tu correo.';
+        successPopup.value = true;
+        lastResendTimestamp.value = Date.now();
+        code.value = '';
+        codeError.value = '';
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            errorMessage.value = error.response.data.error || 'Ocurrió un error.';
+        } else {
+            errorMessage.value = 'No se pudo conectar con el servidor.';
+        }
+        errorPopup.value = true;
+    } finally {
+        loading.value = false;
+    }
 }
 
 const closeSuccessPopup = () => {

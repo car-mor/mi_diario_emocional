@@ -73,14 +73,17 @@
       <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-sm w-full border border-gray-300">
         <h3 class="text-xl font-bold mb-4 dark:text-white text-center">Cambiar contraseña</h3>
         <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-4">
-          Recuerda que la contraseña debe cumplir con:
-          <ul class="list-disc list-inside mt-2 text-left dark:text-white">
-            <li>- Longitud de 8 a 32 caracteres.</li>
-            <li>- Al menos una mayúscula.</li>
-            <li>- Al menos un número.</li>
-            <li>- Al menos un carácter especial.</li>
-          </ul>
-        </p>
+          Recuerda que la contraseña debe cumplir con:</p>
+          <div class="text-sm text-left text-gray-600 dark:text-gray-400 mb-4">
+            <p
+                v-for="req in passwordValidation"
+                :key="req.text"
+                class="transition-colors"
+                :class="{'text-green-500 dark:text-green-400': req.met, 'text-red-500 dark:text-red-400': !req.met && newPassword.length > 0}"
+            >
+                {{ req.met ? '✓' : '✗' }} {{ req.text }}
+            </p>
+        </div>
         <form @submit.prevent="changePassword">
           <div class="mb-4">
             <label for="current-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña actual</label>
@@ -175,12 +178,16 @@
         <h3 class="text-xl font-bold mb-4 dark:text-white">Editar alias</h3>
         <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-4">
           Recuerda que el alias debe cumplir con:</p>
-          <ul class="list-disc list-inside mt-2 text-left dark:text-white">
-            <li>- Longitud de 1 a 40 caracteres.</li>
-            <li>- No consisitir sólo en espacios.</li>
-            <li>- Al menos un número.</li>
-            <li>- Al menos un carácter especial.</li>
-          </ul>
+          <div class="text-sm text-left text-gray-600 dark:text-gray-400 mb-4">
+            <p
+                v-for="req in aliasValidation"
+                :key="req.text"
+                class="transition-colors"
+                :class="{'text-green-500 dark:text-green-400': req.met, 'text-red-500 dark:text-red-400': !req.met && newAlias.length > 0}"
+            >
+                {{ req.met ? '✓' : '✗' }} {{ req.text }}
+            </p>
+        </div>
 
         <form @submit.prevent="editAlias">
           <div class="mb-4">
@@ -223,13 +230,19 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+// import { useRouter } from "vue-router";
 import { IconLock, IconTrash, IconMail, IconEdit } from "@tabler/icons-vue";
 import { useThemeStore } from '@/store/theme'
+import { updatePatientAlias, requestEmailChange, confirmEmailChange } from "@/modules/auth/services/authServices";
+import { isAxiosError } from "axios";
+import { useAuthStore } from "@/store/auth";
+import { changePassword as apiChangePassword } from "@/modules/auth/services/authServices";
+import { deleteAccount as apiDeleteAccount } from "@/modules/auth/services/authServices";
+const authStore = useAuthStore();
 
 const theme = useThemeStore()
 
-const router = useRouter();
+// const router = useRouter();
 
 // Variables para controlar los modales
 const activeModal = ref<string | null>(null);
@@ -345,42 +358,65 @@ function closeSuccessModal() {
 
 //Borrar cuenta*****************************************
 async function deleteAccount() {
-  if (deletePassword.value !== deletePasswordConfirm.value) {
-    deleteError.value = "Las contraseñas no coinciden. Inténtalo de nuevo.";
-    return;
-  } else if (deletePassword.value.length === 0 || deletePasswordConfirm.value.length === 0) {
-    deleteError.value = "Por favor, completa ambos campos de contraseña.";
-    return;
-  }
-
-  deleteError.value = null;
-
-  try {
-    // Simulación: lanzar error si la contraseña es "error"
-    if (deletePassword.value === "error") {
-      throw new Error("La contraseña proporcionada es incorrecta.");
+    // Tus validaciones del frontend se mantienen
+    if (deletePassword.value !== deletePasswordConfirm.value) {
+        deleteError.value = "Las contraseñas no coinciden. Inténtalo de nuevo.";
+        return;
     }
+    if (deletePassword.value.length === 0) {
+        deleteError.value = "Por favor, completa el campo de contraseña.";
+        return;
+    }
+    deleteError.value = null;
 
-    console.log("Simulando eliminación de cuenta...");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Contraseña enviada:", deletePassword.value);
+    try {
+        await apiDeleteAccount({ password: deletePassword.value });
 
-    closeModal();
-    showDeleteSuccessModal.value = true;
-  } catch (err: unknown) {
-    console.error(err);
-    const error = err as Error;
-    errorMessage.value = error.message || "Hubo un problema al eliminar la cuenta. Por favor, inténtalo de nuevo.";
-    showErrorModal.value = true;
-  }
+        // Si la llamada es exitosa, el backend ya eliminó la cuenta.
+        // Mostramos el modal de éxito final.
+        closeModal();
+        showDeleteSuccessModal.value = true;
+
+    } catch (err: unknown) {
+        console.error(err);
+        if (isAxiosError(err) && err.response) {
+            const errorData = err.response.data;
+            if (errorData.password) {
+                deleteError.value = errorData.password[0]; // Ej: "La contraseña es incorrecta."
+            } else {
+                deleteError.value = "Ocurrió un error al verificar tu contraseña.";
+            }
+        } else {
+            errorMessage.value = "No se pudo conectar con el servidor.";
+            showErrorModal.value = true;
+        }
+    }
 }
+
 //borrar cuenta, eliminar datos del local storage - cerrar modal y redirigir a login
 function closeDeleteSuccessModal() {
   showDeleteSuccessModal.value = false;
   localStorage.removeItem('authToken');
   localStorage.removeItem('userProfile');
-  router.push('/login');
+  authStore.logout();
 }
+  const passwordRequirements = [
+    { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
+    { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
+    { regex: /\d/, text: 'Al menos un número' },
+    { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
+    { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres de longitud' }
+];
+
+const passwordValidation = computed(() => {
+    return passwordRequirements.map(req => {
+        // .test() devuelve true si la contraseña cumple con la regex
+        const isMet = req.regex.test(newPassword.value);
+        return { ...req, met: isMet };
+    });
+});
+
+const isPasswordValid = computed(() => passwordValidation.value.every(req => req.met));
 
 //Cambiar contraseña*****************************************
 async function changePassword() {
@@ -393,35 +429,49 @@ async function changePassword() {
     passwordError.value = "La nueva contraseña y su confirmación no coinciden.";
     return;
   }
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$/;
-  if (!passwordRegex.test(newPassword.value)) {
-    passwordError.value = "La contraseña no cumple con los requisitos de seguridad.";
-    return;
-  }
+
+  if (!isPasswordValid.value) {
+        passwordError.value = "La contraseña no cumple con todos los requisitos de seguridad.";
+        return;
+    }
 
   passwordError.value = null;
 
   try {
-    // Simulación: lanzar error si la contraseña actual es "error"
-    if (currentPassword.value === "error") {
-      throw new Error("La contraseña actual es incorrecta.");
+        const payload = {
+            current_password: currentPassword.value,
+            new_password: newPassword.value,
+            new_password_confirm: newPasswordConfirm.value,
+        };
+
+        await apiChangePassword(payload);
+
+        // Si la llamada es exitosa:
+        closeModal();
+        successTitle.value = "Contraseña actualizada";
+        successMessage.value = "Tu contraseña ha sido actualizada con éxito.";
+        showSuccessModal.value = true;
+
+    } catch (err: unknown) {
+        console.error(err);
+        if (isAxiosError(err) && err.response) {
+            const errorData = err.response.data;
+            // Mapeamos los errores del backend a nuestro 'ref' de error
+            if (errorData.current_password) {
+                passwordError.value = errorData.current_password[0];
+            } else if (errorData.new_password) {
+                passwordError.value = errorData.new_password[0];
+            } else if (errorData.new_password_confirm) {
+                passwordError.value = errorData.new_password_confirm[0];
+            } else {
+                passwordError.value = "Ocurrió un error inesperado. Inténtalo de nuevo.";
+            }
+        } else {
+            // Error genérico si no es de Axios
+            errorMessage.value = "No se pudo conectar con el servidor.";
+            showErrorModal.value = true;
+        }
     }
-
-    console.log("Simulando cambio de contraseña...");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Contraseña actual:", currentPassword.value);
-    console.log("Nueva contraseña:", newPassword.value);
-
-    closeModal();
-    successTitle.value = "Contraseña actualizada";
-    successMessage.value = "Tu contraseña ha sido actualizada con éxito.";
-    showSuccessModal.value = true;
-  } catch (err: unknown) {
-    console.error(err);
-    const error = err as Error;
-    errorMessage.value = error.message || "Hubo un problema al cambiar la contraseña.";
-    showErrorModal.value = true;
-  }
 }
 
 //Cambiar correo*****************************************
@@ -462,55 +512,42 @@ function resetEmailFlow() {
 }
 
 // Lógica para enviar el código de verificación
-// Función para enviar/reenviar el código
 async function sendVerificationCode() {
     if (!currentPasswordEmail.value || !newEmail.value) {
         emailError.value = "Por favor, completa la contraseña y el nuevo correo.";
         return;
     }
-
-    if (isCodeInvalidated.value) {
-        emailError.value = "El código anterior fue invalidado. Cancela y reinicia el proceso.";
-        return;
-    }
-
-    // Comprobación de límite de reenvío (solo para reenvío)
-    if (resendAttempts.value >= maxResendAttempts && emailStep.value === 2) {
-        emailError.value = `Has excedido el límite de ${maxResendAttempts} reenvíos. Reinicia el proceso.`;
-        return;
-    }
-
+    // ... (tus otras validaciones de reintentos)
     emailError.value = null;
 
     try {
-        // --- SIMULACIÓN DE API call para enviar código ---
-        if (currentPasswordEmail.value === "error") {
-            throw new Error("Contraseña actual incorrecta.");
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await requestEmailChange({
+            current_password: currentPasswordEmail.value,
+            new_email: newEmail.value
+        });
 
-        // Si la llamada es exitosa:
+        // La lógica de éxito se mantiene igual
         codeSentTime.value = Date.now();
-
-        if (emailStep.value === 2) { // Es un reenvío
-             resendAttempts.value++;
-             // Resetear intentos de verificación al enviar nuevo código
-             verificationAttempts.value = 0;
-             verificationError.value = null;
+        if (emailStep.value === 2) {
+            resendAttempts.value++;
+            verificationAttempts.value = 0;
+            verificationError.value = null;
         }
-
         emailStep.value = 2;
         verificationCode.value = "";
-        verificationError.value = null;
-        startCountdown(); // Iniciar el contador
+        startCountdown();
 
     } catch (err: unknown) {
-        const error = err as Error;
-        emailError.value = error.message || "Error al enviar el código. Inténtalo de nuevo.";
+        if (isAxiosError(err) && err.response) {
+            const errorData = err.response.data;
+            // Mostramos el error específico del backend
+            emailError.value = errorData.detail || errorData.current_password?.[0] || errorData.new_email?.[0] || "Ocurrió un error.";
+        } else {
+            emailError.value = "Error al conectar con el servidor.";
+        }
     }
 }
 
-// Lógica para cambiar el correo (Paso 2: Verificar Código)
 // Función para verificar el código
 async function changeEmail() {
     if (verificationCode.value.length === 0) {
@@ -538,30 +575,19 @@ async function changeEmail() {
     }
 
     try {
-        // --- SIMULACIÓN DE BACKEND ---
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await confirmEmailChange({
+          new_email: newEmail.value,
+          verification_code: verificationCode.value
+        });
 
-        // Simular código incorrecto
-        if (verificationCode.value !== "123456") {
-            // 3. LÓGICA DE INTENTOS FALLIDOS (Invalidación después de 3)
-            verificationAttempts.value++;
+        authStore.updateUserProfile({ email: newEmail.value });
 
-            if (verificationAttempts.value >= maxVerificationAttempts) {
-                isCodeInvalidated.value = true;
-                throw new Error(`Código incorrecto. El código ha sido invalidado después de ${maxVerificationAttempts} intentos. Reinicia el proceso.`);
-            } else {
-                throw new Error(`Código incorrecto. Te quedan ${maxVerificationAttempts - verificationAttempts.value} intentos.`);
-            }
-        }
-        // --- FIN DE SIMULACIÓN ---
-
-        // Éxito:
         if (countdownTimer) clearInterval(countdownTimer);
         closeModal();
         successTitle.value = "Correo actualizado";
         successMessage.value = `Tu correo electrónico ha sido actualizado a ${newEmail.value} con éxito.`;
         showSuccessModal.value = true;
-        resetEmailFlow(); // Reiniciar todas las variables
+        resetEmailFlow();
 
     } catch (err: unknown) {
         const error = err as Error;
@@ -577,47 +603,57 @@ async function changeEmail() {
     }
 }
 
-/*
-respuesta simulada error por expiración del código
-{
-  "error_type": "EXPIRED_CODE",
-  "message": "El código de verificación ha expirado. Por favor, solicita uno nuevo."
-}*/
-
 //Editar alias*****************************************
+const aliasRequirements = [
+    { regex: /^.{1,40}$/, text: 'Entre 1 y 40 caracteres' },
+    { regex: /^(?!\s*$).+/, text: 'No puede consistir solo en espacios' },
+    { regex: /\d/, text: 'Debe contener al menos un número' },
+    { regex: /[@$!%*?&]/, text: 'Debe contener un carácter especial (@$!%*?&)' }
+];
+
+const aliasValidation = computed(() => {
+    return aliasRequirements.map(req => ({
+        ...req,
+        met: req.regex.test(newAlias.value)
+    }));
+});
+
+const isAliasValid = computed(() => aliasValidation.value.every(req => req.met));
+
 async function editAlias() {
-  if (newAlias.value.length === 0) {
-    aliasError.value = "Por favor, completa el campo.";
-    return;
-  }
-  if (newAlias.value.length > 40) {
-    aliasError.value = "El alias no puede exceder los 40 caracteres.";
-    return;
-  }
-  if (newAlias.value.trim() === "") {
-    aliasError.value = "El alias no puede consistir solo en espacios.";
-    return;
-  }
+  if (!isAliasValid.value) {
+        aliasError.value = "Por favor, cumple con todos los requisitos para el alias.";
+        return;
+    }
   aliasError.value = null;
 
   try {
-    if (newAlias.value === "error") {
-      throw new Error("El alias no es válido.");
+        await updatePatientAlias({ alias: newAlias.value });
+        authStore.updateUserProfile({ alias: newAlias.value });
+
+        // Si la llamada es exitosa, muestra el modal de éxito
+        closeModal();
+        successTitle.value = "Alias actualizado";
+        successMessage.value = "Tu alias ha sido actualizado con éxito.";
+        showSuccessModal.value = true;
+
+
+
+    } catch (err: unknown) {
+        console.error(err);
+        // --- 3. MANEJO DE ERRORES REALES DE LA API ---
+        if (isAxiosError(err) && err.response) {
+            // Si el backend envía un error específico (por ejemplo, desde la validación del serializer)
+            const errorData = err.response.data;
+            if (errorData.alias && Array.isArray(errorData.alias)) {
+                errorMessage.value = errorData.alias[0];
+            } else {
+                errorMessage.value = "Hubo un problema al editar el alias.";
+            }
+        } else {
+            errorMessage.value = "Error de red o problema inesperado.";
+        }
+        showErrorModal.value = true;
     }
-
-    console.log("Simulando edición de alias...");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Nuevo alias:", newAlias.value);
-
-    closeModal();
-    successTitle.value = "Alias actualizado";
-    successMessage.value = "Tu alias ha sido actualizado con éxito.";
-    showSuccessModal.value = true;
-  } catch (err: unknown) {
-    console.error(err);
-    const error = err as Error;
-    errorMessage.value = error.message || "Hubo un problema al editar el alias.";
-    showErrorModal.value = true;
-  }
 }
 </script>

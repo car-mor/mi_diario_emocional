@@ -1,10 +1,10 @@
 <template>
     <div class="p-6 dark:bg-gray-900 min-h-screen">
         <div class="max-w-7xl mx-auto">
-            
+
             <div class="flex items-center justify-between mb-8">
-                <button 
-                    @click="goBack" 
+                <button
+                    @click="goBack"
                     class="p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-800 dark:text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 6l-6 6l6 6"></path></svg>
@@ -38,9 +38,9 @@
                     </table>
                 </div>
             </div>
-            
+
             <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-8 mb-4">Análisis Semanal</h2>
-            
+
             <div class="flex border-b border-gray-300 dark:border-gray-700 mb-6">
                 <button
                     @click="activeTab = 'historial'"
@@ -57,7 +57,7 @@
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 min-h-[500px]">
-                
+
                 <div v-if="activeTab === 'historial'">
                     <div v-if="!hasData" class="flex justify-center items-center h-[400px]">
                         <p class="text-xl text-gray-600 dark:text-gray-300">No hay escritos recientes para mostrar.</p>
@@ -117,11 +117,11 @@
                             <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Nube de palabras</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Esta Nube de Palabras muestra las palabras más frecuentes. Entre más grande es la palabra, más frecuente es.</p>
                         </div>
-                        
+
                         <div class="relative w-full h-auto">
                             <img :src="wordCloud" alt="Nube de Palabras" class="w-full h-full object-contain mx-auto" />
                         </div>
-                        
+
                         <div class="pl-4">
                             <ol class="list-none space-y-1 text-gray-700 dark:text-gray-300 text-lg font-medium">
                                 <li v-for="(word, index) in patientData.nube.frecuentes" :key="index">
@@ -141,7 +141,7 @@
                         El reporte en PDF de esta semana se generará el: <span class="font-semibold">{{ reportDate }}</span>
                     </p>
                 </div>
-                <button 
+                <button
                     @click="downloadPdf"
                     class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors duration-300"
                 >
@@ -178,6 +178,7 @@
 </template>
 
 <script setup lang="ts">
+import router from '@/router';
 import { ref, computed, onMounted } from 'vue';
 // NOTE: Asumiendo que esta es una vista enrutada y que el ID del paciente se pasa por parámetros.
 
@@ -204,14 +205,14 @@ interface Escrito {
 interface PatientAnalysisData {
     hasData: boolean;
     reportAvailable: boolean; // Simula si ha pasado una semana
-    
+
     historial: Escrito[];
-    
+
     grafica: {
         data: any; // Aquí iría la estructura de datos del gráfico (por simplicidad, solo usamos la leyenda)
         legend: { color: string; label: string; percent: number; }[];
     };
-    
+
     nube: {
         frecuentes: string[];
     };
@@ -241,14 +242,14 @@ const patient = ref<PatientInfo>({
 const reportDate = ref('28 de Septiembre 2025');
 
 // 3. Imágenes de las Visualizaciones (Rutas de las imágenes subidas)
-const donutChart = ref('src/assets/images/grafica-de-pastel.png'); 
+const donutChart = ref('src/assets/images/grafica-de-pastel.png');
 const wordCloud = ref('src/assets/images/Nube-de-palabras.png');
 
 
 // 4. Datos de Análisis del Paciente (Se cargarían del backend)
 const patientData = ref<PatientAnalysisData>({
     hasData: true,
-    reportAvailable: true, 
+    reportAvailable: true,
 
     historial: [
         {
@@ -268,7 +269,7 @@ const patientData = ref<PatientAnalysisData>({
             fecha: '3 de Agosto 2022 23:23'
         },
     ],
-    
+
     grafica: {
         data: [], // null - Para simular que el gráfico está cargado
         legend: [
@@ -279,7 +280,7 @@ const patientData = ref<PatientAnalysisData>({
             { color: '#6A5ACD', label: 'Sorpresa, miedo, tristeza', percent: 15 },
         ],
     },
-    
+
     nube: {
         frecuentes: ['Cansada', 'Escuela', 'Navidad', 'Casa', 'Amigos', 'Maria'],
     },
@@ -301,8 +302,7 @@ const patientHeaders = ['No.', 'Nombre', 'Edad', 'Género', 'Correo electrónico
 // --- MÉTODOS DE ACCIÓN ---
 
 function goBack() {
-    // Aquí iría: router.go(-1) o router.push('/manage-patients')
-    alert("Simulación de regreso a Gestionar Pacientes.");
+  router.back();
 }
 
 function downloadPdf() {
@@ -311,10 +311,10 @@ function downloadPdf() {
         showReportUnavailableModal.value = true;
         return;
     }
-    
+
     // Simular la llamada a la API para generar/descargar el PDF
     console.log("Generando y descargando PDF...");
-    
+
     // Simular éxito y mostrar modal
     setTimeout(() => {
         showDownloadSuccessModal.value = true;
@@ -324,7 +324,7 @@ function downloadPdf() {
 
 // --- CARGA DE DATOS AL INICIO ---
 onMounted(() => {
-    
+
 
     // Aquí se haría la llamada real al backend para cargar los datos del paciente y su análisis
     // Por simplicidad, usamos los datos simulados definidos arriba.
@@ -336,7 +336,7 @@ const checkDataAndSetTab = (tabName: 'historial' | 'grafica' | 'nube') => {
     if (!hasData.value) {
         // Forzamos el modal de "No hay suficientes datos" si el paciente no tiene data
         // Esto solo ocurre si patientData.value.hasData es false.
-        showNoDataModal.value = true; 
+        showNoDataModal.value = true;
         return;
     }
     activeTab.value = tabName;
@@ -346,10 +346,10 @@ const checkDataAndSetTab = (tabName: 'historial' | 'grafica' | 'nube') => {
 
 <style scoped>
 /* Estilos necesarios para hacer que la tabla de info del paciente sea responsiva en móvil */
-@media (max-width: 1023px) { 
+@media (max-width: 1023px) {
     .lg\:table { display: block; }
     .lg\:table-header-group { display: none; }
-    
+
     .lg\:table-row {
         display: block;
         border: none !important;
@@ -358,31 +358,31 @@ const checkDataAndSetTab = (tabName: 'historial' | 'grafica' | 'nube') => {
         background: none !important;
         box-shadow: none !important;
     }
-    
+
     .lg\:table-cell {
-        display: flex; 
-        justify-content: space-between; 
+        display: flex;
+        justify-content: space-between;
         align-items: center;
-        padding: 0.2rem 0; 
+        padding: 0.2rem 0;
         text-align: left !important;
-        border-top: none !important; 
+        border-top: none !important;
     }
-    
+
     .lg\:table-cell::before {
-        content: attr(data-label) ":"; 
+        content: attr(data-label) ":";
         font-weight: bold;
-        display: block; 
-        color: #6b7280; 
-        flex-shrink: 0; 
+        display: block;
+        color: #6b7280;
+        flex-shrink: 0;
         margin-right: 1rem;
         width: 120px; /* Ancho fijo para la etiqueta en móvil */
     }
-    
+
     .lg\:table-cell:first-child::before,
     .lg\:table-cell:last-child::before {
-        display: none; 
+        display: none;
     }
-    
+
     .lg\:table-cell:nth-child(1) { padding-top: 1rem; }
     .lg\:table-cell:nth-child(7) { padding-bottom: 1rem; }
     .lg\:table-cell > * {

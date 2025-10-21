@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { isAxiosError } from 'axios'; // Importamos el verificador de tipo de Axios
 import * as DiaryService from '@/modules/diary/services/diaryServices';
+import { useAuthStore } from '@/store/auth';
 
 // 1. Usamos la interfaz limpia del servicio
 export type DiaryEntry = DiaryService.DiaryEntryFromAPI;
@@ -34,10 +35,12 @@ export const useDiaryStore = defineStore('diary', () => {
   const createEntry = async (entryData: DiaryService.CreateDiaryEntryPayload) => {
     loading.value = true;
     error.value = null;
+    const authStore = useAuthStore();
     try {
       const response = await DiaryService.createDiaryEntry(entryData);
       // Añadimos la nueva entrada al principio de la lista para que aparezca primero
       entries.value.unshift(response.data);
+      await authStore.fetchUserProfile();
       return response.data;
     } catch (err: unknown) {
       if (isAxiosError(err) && err.response) {
@@ -96,7 +99,7 @@ export const useDiaryStore = defineStore('diary', () => {
     error,
     fetchEntries,
     createEntry,
-    deleteEntry, // <-- Exportar nueva acción
-    updateEntry, // <-- Exportar nueva acción
+    deleteEntry,
+    updateEntry,
   };
 });

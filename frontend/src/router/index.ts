@@ -11,6 +11,12 @@ const routes = [
       component: () => import('@/modules/auth/views/FirstLoginView.vue'),
       meta: { requiresAuth: false } // Ruta pública
     },
+    {
+      path: '/link-professional',
+      name: 'link-professional',
+      component: () => import('@/modules/auth/views/LinkProfessionalView.vue'),
+      meta: { requiresAuth: true, role: 'patient' }
+    },
   {
     path: '/not-approved-professional',
     name: 'not-approved-professional',
@@ -63,7 +69,7 @@ const routes = [
       component: () => import('../modules/patient/views/PatientLayout.vue'),
       meta: { requiresAuth: true, requiredRole: 'patient' }, // METADATOS DE PROTECCIÓN
       children: [
-        // Aquí puedes definir rutas hijas si es necesario
+
         {
         path: '/home-patient',
         name: 'home-patient',
@@ -213,41 +219,62 @@ const router = createRouter({
 })
 
 // --- GUARDIA DE NAVEGACIÓN GLOBAL ---
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => { // <-- Hacemos la función 'async'
   const authStore = useAuthStore();
+
+  // Es buena práctica esperar a que el estado inicial de auth se resuelva
+  if (!authStore.isAuthReady) {
+    await authStore.checkInitialAuth();
+  }
   const isAuthenticated = !!authStore.authToken;
   const userRole = authStore.userType;
   const reviewStatus = authStore.reviewStatus;
+  const isPatientLinked = authStore.isLinked;
 
-  // Regla 1: Si la ruta es protegida y no está autenticado -> a login
+  // Regla 1: Paciente no vinculado intenta acceder a rutas restringidas
+  // Si es un paciente autenticado, pero no está vinculado...
+  if (userRole === 'patient' && isAuthenticated && !isPatientLinked) {
+    // Y NO está intentando ir a la página de vinculación...
+    if (to.name !== 'link-professional') {
+      // Lo redirigimos forzosamente a la página de vinculación.
+      return next({ name: 'link-professional' });
+    }
+  }
+
+  // --- NUEVA REGLA PARA EVITAR QUE UN PACIENTE VINCULADO VEA LA PÁGINA DE VINCULACIÓN ---
+  if (userRole === 'patient' && isAuthenticated && isPatientLinked && to.name === 'link-professional') {
+    // Si ya está vinculado, lo mandamos a su página de inicio.
+    return next({ name: 'home-patient' });
+  }
+
+  // Regla 2: Si la ruta es protegida y no está autenticado -> a login
   if (to.meta.requiresAuth && !isAuthenticated) {
     return next({ name: 'login' });
   }
 
-  // Regla 2: Si está autenticado y va a una ruta pública -> a su dashboard
-  if (!to.meta.requiresAuth && isAuthenticated) {
+  // Regla 3: Si está autenticado y va a una ruta pública -> a su dashboard
+  // Añadimos una excepción para que puedan ir a /logout
+  if (to.name && ['login', 'register', 'welcome'].includes(to.name as string) && isAuthenticated) {
     if (userRole === 'patient') return next({ name: 'home-patient' });
     if (userRole === 'professional') {
       return reviewStatus === 'APPROVED' ? next({ name: 'professional-layout' }) : next({ name: 'not-approved-professional' });
     }
   }
 
-  // Regla 3: Si está autenticado y va a una ruta protegida -> verificar permisos
-  if (to.meta.requiresAuth && isAuthenticated) {
-    const requiredRole = to.meta.role as string;
-    const requiredStatus = to.meta.status as string;
+  // Regla 4: Si está autenticado y va a una ruta protegida -> verificar permisos
+ if (to.meta.requiresAuth && isAuthenticated) {
+    const requiredRole = to.meta.requiredRole as string;
 
+    // Comprobamos si la ruta requiere un rol y si el usuario no lo cumple
     if (requiredRole && userRole !== requiredRole) {
-      return next({ name: 'welcome' }); // Rol incorrecto, fuera
-    }
-
-    // Profesional no aprobado intenta acceder a su dashboard
-    if (userRole === 'professional' && requiredStatus && reviewStatus !== requiredStatus) {
-      return next({ name: 'not-approved-professional' }); // Forzar a la pantalla de espera
+      // Redirige a una página de "no autorizado" o a la de bienvenida
+      return next({ name: 'welcome' });
     }
   }
 
-  // Si todo está bien, continuar
+
+
+  // Si no se cumple ninguna regla de redirección, continuar.
   next();
 });
 export default router

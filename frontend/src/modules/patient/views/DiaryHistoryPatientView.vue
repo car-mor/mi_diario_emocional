@@ -2,9 +2,10 @@
   <div class="flex h-screen dark:bg-gray-900">
 
     <main class="flex-1 flex flex-col overflow-hidden">
-
-      <StreakAndTitlePatient title="Historial de mi diario de emociones" :streakCount="2" />
-
+        <StreakAndTitle
+          title="Diario: Historial de entradas"
+          :streak-count="streakCount"
+        />
       <div class="flex-1 p-4 sm:p-6 overflow-y-auto">
 
         <div class="p-4">
@@ -68,9 +69,32 @@ import { onMounted } from 'vue';
 import { useDiaryStore } from '@/store/diary';
 import { storeToRefs } from 'pinia';
 import UserProfile from "@/modules/patient/components/PatientProfile.vue";
-import StreakAndTitlePatient from '../components/StreakAndTitlePatient.vue';
+   import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
+import { computed } from 'vue';
+  import { useAuthStore } from '@/store/auth';
+    const authStore = useAuthStore();
 
-
+interface PatientProfile {
+    name: string;
+    paternal_last_name: string;
+    maternal_last_name: string;
+    email: string;
+    alias: string;
+    gender: string;
+    professional_name?: string; // Es opcional y puede ser nulo
+    is_linked: boolean;
+    current_streak: number;
+}
+const streakCount = computed(() => {
+  // Primero, verificamos si el usuario es un paciente y si su perfil ha cargado
+  if (authStore.userType === 'patient' && authStore.userProfile) {
+    // Si es así, le decimos a TypeScript que trate el perfil como un PatientProfile
+    // y accedemos a 'current_streak' de forma segura.
+    return (authStore.userProfile as PatientProfile).current_streak || 0;
+  }
+  // Si no es un paciente, la racha es 0.
+  return 0;
+});
 // 1. Conectar con el Store de Pinia
 const diaryStore = useDiaryStore();
 

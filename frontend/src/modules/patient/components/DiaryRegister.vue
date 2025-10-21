@@ -78,16 +78,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { isAxiosError } from "axios";
-
-import {
-    createDiaryEntry,
-    type CreateDiaryEntryPayload,
-    type EmotionSummary
-} from "@/modules/diary/services/diaryServices";
 import { useRouter } from "vue-router";
-
+import {
+  type CreateDiaryEntryPayload,
+} from "@/modules/diary/services/diaryServices";
+import { useDiaryStore } from '@/store/diary';
 const router = useRouter();
-
+const diaryStore = useDiaryStore();
 const saveError = ref<string | null>(null);
 
 const step = ref(1);
@@ -170,21 +167,21 @@ function closeSuccessModal() {
 }
 
 async function saveEntry() {
-    showConfirmationModal.value = false;
-    saveError.value = null; // Limpia el error anterior
+  showConfirmationModal.value = false;
+  saveError.value = null;
 
-    const payload: CreateDiaryEntryPayload = {
-        title: title.value.trim() || "Sin título",
-        content: content.value.trim(),
-        selected_emotions: selectedEmotions.value,
-        emotion_summary: {} as EmotionSummary,
-    };
+  // El payload ahora es más simple
+  const payload: CreateDiaryEntryPayload = {
+      title: title.value.trim() || "Sin título",
+      content: content.value.trim(),
+      selected_emotions: selectedEmotions.value,
+      // ELIMINAMOS emotion_summary
+  };
 
-    try {
-        await createDiaryEntry(payload);
-        showSuccessModal.value = true;
-
-    } catch (err) {
+  try {
+      await diaryStore.createEntry(payload);
+      showSuccessModal.value = true;
+  }catch (err) {
         console.error(err);
         // Ahora damos un mensaje de error más útil
         if (isAxiosError(err) && err.response) {

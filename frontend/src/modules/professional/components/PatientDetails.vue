@@ -1,347 +1,338 @@
 <template>
-    <div class="p-6 dark:bg-gray-900 min-h-screen">
-        <div class="max-w-7xl mx-auto">
+  <div class="p-6 dark:bg-gray-900 min-h-screen">
+    <div class="max-w-7xl mx-auto">
 
-            <div class="flex items-center justify-between mb-8">
-                <button
-                    @click="goBack"
-                    class="p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-800 dark:text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 6l-6 6l6 6"></path></svg>
-                </button>
-                <h1 class="text-3xl font-bold text-gray-800 dark:text-white flex-grow text-center lg:text-left ml-4">
-                    Paciente: {{ patient.name }}
-                </h1>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 lg:table">
-                        <thead class="bg-gray-50 dark:bg-gray-700 hidden lg:table-header-group">
-                            <tr>
-                                <th v-for="header in patientHeaders" :key="header" class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ header }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr class="block lg:table-row p-4 lg:p-0 border-b dark:border-gray-700">
-                                <td class="px-6 py-2 lg:py-4 text-sm font-medium text-gray-900 dark:text-white block lg:table-cell" data-label="No.">1</td>
-                                <td class="px-6 py-2 lg:py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell font-semibold lg:font-normal" data-label="Nombre">{{ patient.name }}</td>
-                                <td class="px-6 py-2 lg:py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Edad">{{ patient.age }}</td>
-                                <td class="px-6 py-2 lg:py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Género">{{ patient.gender }}</td>
-                                <td class="px-6 py-2 lg:py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Correo electrónico">{{ patient.email }}</td>
-                                <td class="px-6 py-2 lg:py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Alias">{{ patient.alias }}</td>
-                                <td class="px-6 py-2 lg:py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Avatar">
-                                    <img :src="patient.avatarUrl" :alt="`Avatar de ${patient.alias}`" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400" />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-8 mb-4">Análisis Semanal</h2>
-
-            <div class="flex border-b border-gray-300 dark:border-gray-700 mb-6">
-                <button
-                    @click="activeTab = 'historial'"
-                    :class="tabClass('historial')"
-                >Historial de escritos</button>
-                <button
-                    @click="activeTab = 'grafica'"
-                    :class="tabClass('grafica')"
-                >Gráfica de pastel</button>
-                <button
-                    @click="activeTab = 'nube'"
-                    :class="tabClass('nube')"
-                >Nube de palabras</button>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 min-h-[500px]">
-
-                <div v-if="activeTab === 'historial'">
-                    <div v-if="!hasData" class="flex justify-center items-center h-[400px]">
-                        <p class="text-xl text-gray-600 dark:text-gray-300">No hay escritos recientes para mostrar.</p>
-                    </div>
-                    <div v-else class="space-y-6">
-                        <div v-for="(escrito, index) in patientData.historial" :key="index" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <div class="md:col-span-1 border-r pr-4 dark:border-gray-600">
-                                <span class="text-4xl font-light text-gray-400 dark:text-gray-500 mr-4">{{ escrito.no }}.</span>
-                                <p class="text-md font-semibold text-gray-800 dark:text-white mb-2">{{ escrito.titulo }}</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-300 italic">{{ escrito.texto }}</p>
-                            </div>
-                            <div class="md:col-span-1 border-r pr-4 dark:border-gray-600">
-                                <p class="text-md font-semibold text-gray-800 dark:text-white mb-2">Emociones básicas de Ekman</p>
-                                <p class="text-sm text-blue-600 dark:text-blue-400">{{ escrito.emocionesBasicas }}</p>
-                            </div>
-                            <div class="md:col-span-1">
-                                <p class="text-md font-semibold text-gray-800 dark:text-white mb-2">Análisis emociones combinadas</p>
-                                <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-                                    <li v-for="(analisis, i) in escrito.analisisCombinado" :key="i">{{ analisis }}</li>
-                                </ul>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 text-right">{{ escrito.fecha }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-else-if="activeTab === 'grafica'">
-                    <div v-if="!hasData" class="flex flex-col justify-center items-center h-[400px] text-center">
-                        <p class="text-xl font-bold text-gray-800 dark:text-white mb-4">No hay suficientes datos para generar esta visualización.</p>
-                        <p class="text-gray-600 dark:text-gray-300">¡Oops! Parece que tu paciente aún no ha escrito nada en su diario, esperemos a que lo haga.</p>
-                    </div>
-                    <div v-else class="grid lg:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Porcentajes de emociones combinadas</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Se muestran las emociones combinadas de la última semana.</p>
-                            <div class="relative w-full h-80">
-                                <img :src="donutChart" alt="Gráfica de Pastel de Emociones Combinadas" class="w-full h-full object-contain mx-auto" />
-                            </div>
-                        </div>
-                        <div class="space-y-3">
-                            <div v-for="(item, index) in patientData.grafica.legend" :key="index" class="flex items-center">
-                                <span :style="{ backgroundColor: item.color }" class="w-4 h-4 rounded-full mr-3"></span>
-                                <span class="text-gray-700 dark:text-gray-300 text-sm">{{ item.label }}</span>
-                                <span class="ml-auto text-sm font-semibold" :style="{ color: item.color }">{{ item.percent }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-else-if="activeTab === 'nube'">
-                    <div v-if="!hasData" class="flex flex-col justify-center items-center h-[400px] text-center">
-                        <p class="text-xl font-bold text-gray-800 dark:text-white mb-4">No hay suficientes datos para generar esta visualización.</p>
-                        <p class="text-gray-600 dark:text-gray-300">¡Oops! Parece que tu paciente aún no ha escrito nada en su diario, esperemos a que lo haga.</p>
-                    </div>
-                    <div v-else class="grid lg:grid-cols-2 gap-8 items-center">
-                        <div class="lg:col-span-2">
-                            <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Nube de palabras</h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Esta Nube de Palabras muestra las palabras más frecuentes. Entre más grande es la palabra, más frecuente es.</p>
-                        </div>
-
-                        <div class="relative w-full h-auto">
-                            <img :src="wordCloud" alt="Nube de Palabras" class="w-full h-full object-contain mx-auto" />
-                        </div>
-
-                        <div class="pl-4">
-                            <ol class="list-none space-y-1 text-gray-700 dark:text-gray-300 text-lg font-medium">
-                                <li v-for="(word, index) in patientData.nube.frecuentes" :key="index">
-                                    {{ index + 1 }}. {{ word }}
-                                </li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mt-8">
-                <div class="flex items-center space-x-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-500 dark:text-gray-400" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 21a9 9 0 0 1 -9 -9a9 9 0 0 1 9 -9a9 9 0 0 1 9 9a9 9 0 0 1 -9 9z"></path><path d="M12 14l0 4"></path><path d="M12 8l0 4"></path></svg>
-                    <p class="text-sm text-gray-600 dark:text-gray-300">
-                        El reporte en PDF de esta semana se generará el: <span class="font-semibold">{{ reportDate }}</span>
-                    </p>
-                </div>
-                <button
-                    @click="downloadPdf"
-                    class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors duration-300"
-                >
-                    Descargar PDF
-                </button>
-            </div>
-
+      <div v-if="loading" class="text-center py-20">
+        <p class="text-xl text-gray-500 dark:text-gray-400">Cargando detalles del paciente...</p>
         </div>
 
-        <div v-if="showReportUnavailableModal" class="fixed inset-0 flex items-center justify-center z-50">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-2xl max-w-sm w-full text-center relative z-10 mx-4">
-                <h3 class="text-xl font-bold mb-4 dark:text-white">Aviso</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                    Aún no se cumple la primera semana para descargar el reporte de análisis emocional. El primer reporte estará disponible a partir de [{{ reportDate }}].
-                </p>
-                <button @click="showReportUnavailableModal = false" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold w-full">Aceptar</button>
-            </div>
+      <div v-else-if="error" class="text-center py-20 bg-red-50 dark:bg-red-900/20 p-8 rounded-lg">
+        <h2 class="text-2xl font-bold text-red-600 dark:text-red-400">Error al Cargar</h2>
+        <p class="text-red-500 dark:text-red-300 mt-2">{{ error }}</p>
+        <button @click="goBack" class="mt-6 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg">
+          Volver
+        </button>
+      </div>
+
+      <div v-else-if="patient">
+        <div class="flex items-center justify-between mb-8">
+          <button @click="goBack" class="p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-800 dark:text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 6l-6 6l6 6"></path></svg>
+          </button>
+          <h1 class="text-3xl font-bold text-gray-800 dark:text-white flex-grow text-center lg:text-left ml-4">
+            Paciente: {{ patient.name }}
+          </h1>
+        </div>
+        <div class="my-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700">
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+
+    <div class="md:col-span-2">
+      <label for="week-selector" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Análisis por Semana</label>
+      <select id="week-selector" v-model="selectedWeek" @change="handleWeekChange" class="mt-1 block w-full rounded-md ...">
+        <option v-for="week in availableWeeks" :key="week.week_number" :value="week.start_date">
+          {{ week.display_text }}
+        </option>
+      </select>
+    </div>
+
+    <p class="text-center text-gray-500 dark:text-gray-400 font-bold md:col-span-1">Ó</p>
+
+    <div class="md:col-span-2 grid grid-cols-2 gap-4">
+      <div>
+        <label for="start-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Desde</label>
+        <input type="date" id="start-date" v-model="customStartDate" class="mt-1 block w-full rounded-md ...">
+      </div>
+      <div>
+        <label for="end-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hasta</label>
+        <input type="date" id="end-date" v-model="customEndDate" class="mt-1 block w-full rounded-md ...">
+      </div>
+    </div>
+  </div>
+  <div class="flex justify-end mb-8">
+      <button @click="applyCustomFilter" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md">
+        Filtrar por Fecha
+      </button>
+  </div>
+</div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8">
+          <table class="min-w-full">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Edad</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Género</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Alias</th>
+                    <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Avatar</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tr class="block lg:table-row p-4 lg:p-0">
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell font-semibold" data-label="Nombre">{{ patient.name }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Edad">{{ patient.age }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Género">{{ patient.gender }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Correo">{{ patient.email }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Alias">{{ patient.alias }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Avatar">
+                  <img :src="patient.avatar_url" :alt="`Avatar de ${patient.alias}`" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div v-if="showDownloadSuccessModal" class="fixed inset-0 flex items-center justify-center z-50">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-2xl max-w-sm w-full text-center relative z-10 mx-4">
-                <div class="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 12l5 5l10 -10"></path></svg>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-8 mb-4">Análisis de Entradas</h2>
+        <div class="flex border-b border-gray-300 dark:border-gray-700 mb-6">
+          <button @click="activeTab = 'historial'" :class="tabClass('historial')">Historial</button>
+          <button @click="activeTab = 'grafica'" :class="tabClass('grafica')">Emociones Combinadas</button>
+          <button @click="activeTab = 'nube'" :class="tabClass('nube')">Nube de Palabras</button>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 min-h-[500px]">
+          <div v-if="activeTab === 'historial'">
+            <div v-if="!hasData" class="flex justify-center items-center h-[400px]">
+              <p class="text-xl text-gray-600 dark:text-gray-300">Este paciente aún no tiene entradas en su diario.</p>
+            </div>
+            <div v-else class="space-y-6">
+              <div v-for="entry in diaryHistory" :key="entry.id" class="border dark:border-gray-700 rounded-lg p-4">
+                <h3 class="font-bold text-lg dark:text-white">{{ entry.title }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">{{ new Date(entry.entry_date).toLocaleString() }}</p>
+                <p class="text-gray-700 dark:text-gray-300 text-sm mb-3">"{{ entry.content.substring(0, 200) }}..."</p>
+                <div class="text-xs space-x-2">
+                  <span v-for="emotion in entry.analyzed_emotions" :key="emotion" class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-1 rounded-full">{{ emotion }}</span>
                 </div>
-                <h3 class="text-xl font-bold mb-4 dark:text-white">¡Descarga Exitosa!</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                    El reporte PDF de esta semana se generó correctamente.
-                </p>
-                <button @click="showDownloadSuccessModal = false" class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold w-full">Entendido</button>
+              </div>
             </div>
+          </div>
+
+          <div v-else-if="activeTab === 'grafica'">
+            <PieChartPatient :combination-data="emotionCombinations" />
+          </div>
+
+          <div v-else-if="activeTab === 'nube'">
+            <WordCloudPatient :words="wordFrequency" />
+          </div>
         </div>
 
+        <div class="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mt-8">
+    <div class="flex items-center space-x-3">
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+
+            <span v-if="reportInfo?.is_available">
+                El reporte semanal está listo para descargar.
+            </span>
+
+            <span v-else>
+                <span v-if="diaryHistory.length === 0">
+                    El primer reporte estará disponible 7 días después de que el paciente escriba por primera vez.
+                </span>
+                <span v-else>
+                    El próximo reporte para este periodo estará disponible el:
+                    <span class="font-semibold">{{ reportInfo?.next_report_date }}</span>
+                </span>
+            </span>
+
+        </p>
+    </div>
+    <button
+        @click="downloadPdf"
+        class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
+        :disabled="isDownloading || !reportInfo?.is_available"
+        :class="{ 'opacity-50 cursor-not-allowed': isDownloading || !reportInfo?.is_available }">
+        {{ isDownloading ? 'Generando...' : 'Descargar PDF' }}
+    </button>
+</div>
+
+      </div>
+    </div>
+  </div>
+
+  <div v-if="showReportUnavailableModal" class="fixed inset-0 flex items-center justify-center z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-2xl max-w-sm w-full text-center mx-4">
+
+        <div class="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-[#7DBFF8] dark:text-blue-400" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 21a9 9 0 0 1 -9 -9a9 9 0 0 1 9 -9a9 9 0 0 1 9 9a9 9 0 0 1 -9 9z"></path><path d="M12 8l0 4"></path><path d="M12 16l.01 0"></path></svg>
+        </div>
+
+        <h3 class="text-xl font-bold mb-4 dark:text-white">Reporte Aún No Disponible</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+            El reporte semanal de este paciente estará disponible a partir del:
+            <span class="font-semibold text-[#7DBFF8] dark:text-blue-400 block mt-2">{{ reportInfo?.next_report_date }}</span>
+        </p>
+
+        <button
+          @click="showReportUnavailableModal = false"
+          class="px-6 py-2 bg-[#7DBFF8] hover:bg-[#2563eb] text-white font-semibold rounded-lg w-full transition-colors"
+        >
+          Entendido
+        </button>
+      </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import router from '@/router';
 import { ref, computed, onMounted } from 'vue';
-// NOTE: Asumiendo que esta es una vista enrutada y que el ID del paciente se pasa por parámetros.
-
-// --- Definición de Tipos ---
-interface PatientInfo {
-    id: number;
-    name: string;
-    age: number;
-    gender: string;
-    email: string;
-    alias: string;
-    avatarUrl: string;
-}
-
-interface Escrito {
-    no: number;
-    titulo: string;
-    texto: string;
-    emocionesBasicas: string;
-    analisisCombinado: string[];
-    fecha: string;
-}
-
-interface PatientAnalysisData {
-    hasData: boolean;
-    reportAvailable: boolean; // Simula si ha pasado una semana
-
-    historial: Escrito[];
-
-    grafica: {
-        data: any; // Aquí iría la estructura de datos del gráfico (por simplicidad, solo usamos la leyenda)
-        legend: { color: string; label: string; percent: number; }[];
-    };
-
-    nube: {
-        frecuentes: string[];
-    };
-}
-
+import { useRoute, useRouter } from 'vue-router';
+import PieChartPatient from '@/modules/patient/components/PieChartPatient.vue';
+import WordCloudPatient from '@/modules/patient/components/WordCloudPatient.vue';
+import * as ProfessionalService from '@/modules/professional/services/professionalServices';
+// --- CORRECCIÓN EN IMPORTS ---
+// Eliminamos ReportWeek y ReportInfo de aquí, ya que no se usan directamente como tipos
+import type { Patient, DiaryEntry } from '@/modules/professional/services/professionalServices';
+const route = useRoute();
+const router = useRouter();
 
 // --- ESTADOS DE PÁGINA ---
+const loading = ref(true);
+const error = ref<string | null>(null);
 const activeTab = ref<'historial' | 'grafica' | 'nube'>('historial');
+const isDownloading = ref(false);
 const showReportUnavailableModal = ref(false);
-const showDownloadSuccessModal = ref(false);
-const showNoDataModal = ref(false); // Modal de "No hay suficientes datos"
 
-// --- DATOS SIMULADOS ---
+// Variables para los datos de la API
+const patient = ref<Patient | null>(null);
+const diaryHistory = ref<DiaryEntry[]>([]);
+const emotionCombinations = ref<[string, number][]>([]);
+const wordFrequency = ref<[string, number][]>([]);
+const reportInfo = ref<ProfessionalService.ReportInfo | null>(null);
+// --- ESTADOS PARA EL FILTRO ---
+const availableWeeks = ref<ProfessionalService.ReportWeek[]>([]);
+const selectedWeek = ref<string | null>(null); // Guardará el start_date de la semana
+const customStartDate = ref('');
+const customEndDate = ref('');
+const activeFilter = ref<{ type: 'week' | 'custom', dates: { startDate: string, endDate: string } | null }>({ type: 'week', dates: null });
 
-// 1. Datos del Paciente (Se cargaría del ID en la URL)
-const patient = ref<PatientInfo>({
-    id: 101,
-    name: 'Maria Castañeda',
-    age: 13,
-    gender: 'Femenino',
-    email: 'maria@correo.com',
-    alias: 'xchmor',
-    avatarUrl: 'https://i.pravatar.cc/150?img=1',
-});
-
-// 2. Fecha del Reporte (Simulación)
-const reportDate = ref('28 de Septiembre 2025');
-
-// 3. Imágenes de las Visualizaciones (Rutas de las imágenes subidas)
-const donutChart = ref('src/assets/images/grafica-de-pastel.png');
-const wordCloud = ref('src/assets/images/Nube-de-palabras.png');
-
-
-// 4. Datos de Análisis del Paciente (Se cargarían del backend)
-const patientData = ref<PatientAnalysisData>({
-    hasData: true,
-    reportAvailable: true,
-
-    historial: [
-        {
-            no: 1,
-            titulo: 'Neque porro quisquam est qui dolorem ipsum quia',
-            texto: '"There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain..There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain...There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain...There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain...."',
-            emocionesBasicas: 'Alegría, Asco',
-            analisisCombinado: ['20% Alegría y tristeza', '15% Enojo y tristeza', '65% Nostalgia y tristeza'],
-            fecha: '3 de Agosto 2022 23:23'
-        },
-         {
-            no: 2,
-            titulo: 'Neque porro quisquam est qui dolorem ipsum quia',
-            texto: '"There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain..There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain...There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain...There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain...."',
-            emocionesBasicas: 'Alegría, Asco',
-            analisisCombinado: ['20% Alegría y tristeza', '15% Enojo y tristeza', '65% Nostalgia y tristeza'],
-            fecha: '3 de Agosto 2022 23:23'
-        },
-    ],
-
-    grafica: {
-        data: [], // null - Para simular que el gráfico está cargado
-        legend: [
-            { color: '#FFD700', label: 'Alegría, miedo', percent: 40 },
-            { color: '#CD5C5C', label: 'Asco, ira', percent: 30 },
-            { color: '#4682B4', label: 'Tristeza, alegría', percent: 10 },
-            { color: '#8FBC8F', label: 'Asco, miedo, ira, sorpresa', percent: 5 },
-            { color: '#6A5ACD', label: 'Sorpresa, miedo, tristeza', percent: 15 },
-        ],
-    },
-
-    nube: {
-        frecuentes: ['Cansada', 'Escuela', 'Navidad', 'Casa', 'Amigos', 'Maria'],
-    },
-});
+const patientId = route.params.id as string;
 
 // --- LÓGICA COMPUTADA ---
-
-const hasData = computed(() => patientData.value.hasData);
+const hasData = computed(() => diaryHistory.value.length > 0);
 
 const tabClass = (tabName: 'historial' | 'grafica' | 'nube') => ({
-    'py-2 px-4 text-lg font-medium transition-colors border-b-2': true,
-    'text-blue-500 border-blue-500 dark:text-blue-400 dark:border-blue-400': activeTab.value === tabName,
-    'text-gray-500 border-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': activeTab.value !== tabName,
+  'py-2 px-4 text-lg font-medium transition-colors border-b-2': true,
+  'text-blue-500 border-blue-500 dark:text-blue-400 dark:border-blue-400': activeTab.value === tabName,
+  'text-gray-500 border-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': activeTab.value !== tabName,
 });
 
-const patientHeaders = ['No.', 'Nombre', 'Edad', 'Género', 'Correo electrónico', 'Alias', 'Avatar'];
-
-
 // --- MÉTODOS DE ACCIÓN ---
-
 function goBack() {
   router.back();
 }
 
-function downloadPdf() {
-    if (!patientData.value.reportAvailable) {
-        // Mostrar modal de aviso si no ha pasado una semana
-        showReportUnavailableModal.value = true;
-        return;
+const fetchPatientData = async () => {
+  if (!patientId) return;
+
+  loading.value = true;
+  error.value = null;
+
+  try {
+    const response = await ProfessionalService.getPatientDetails(patientId, activeFilter.value.dates || undefined);
+    const data = response.data;
+
+    patient.value = data.patient_details;
+    diaryHistory.value = data.diary_history;
+    emotionCombinations.value = data.emotion_combinations;
+    wordFrequency.value = data.word_frequency;
+    reportInfo.value = data.report_info;
+  } catch (err) {
+    console.error("Error al cargar los detalles del paciente:", err);
+    error.value = "No se pudieron cargar los datos del paciente para el periodo seleccionado.";
+  } finally {
+    loading.value = false;
+  }
+};
+
+const applyCustomFilter = () => {
+  if (customStartDate.value && customEndDate.value) {
+    activeFilter.value = {
+      type: 'custom',
+      dates: { startDate: customStartDate.value, endDate: customEndDate.value }
+    };
+    selectedWeek.value = null; // Deseleccionamos la semana para evitar inconsistencias
+    fetchPatientData(); // Recargamos los datos con el nuevo filtro
+  } else {
+    alert("Por favor, selecciona una fecha de inicio y de fin.");
+  }
+};
+
+const handleWeekChange = () => {
+  if (selectedWeek.value) {
+    const weekInfo = availableWeeks.value.find(w => w.start_date === selectedWeek.value);
+    if (weekInfo) {
+      activeFilter.value = {
+        type: 'week',
+        dates: { startDate: weekInfo.start_date, endDate: weekInfo.end_date }
+      };
+      customStartDate.value = ''; // Limpiamos el filtro custom
+      customEndDate.value = '';
+      fetchPatientData(); // Recargamos los datos para la semana seleccionada
     }
+  }
+};
 
-    // Simular la llamada a la API para generar/descargar el PDF
-    console.log("Generando y descargando PDF...");
+onMounted(async () => {
+  if (!patientId) {
+    error.value = "No se especificó un ID de paciente.";
+    loading.value = false;
+    return;
+  }
 
-    // Simular éxito y mostrar modal
-    setTimeout(() => {
-        showDownloadSuccessModal.value = true;
-    }, 500);
-}
+  try {
+    // 1. Cargamos la lista de semanas disponibles para el selector
+    const weeksResponse = await ProfessionalService.getReportWeeks(patientId);
+    availableWeeks.value = weeksResponse.data;
 
-
-// --- CARGA DE DATOS AL INICIO ---
-onMounted(() => {
-
-
-    // Aquí se haría la llamada real al backend para cargar los datos del paciente y su análisis
-    // Por simplicidad, usamos los datos simulados definidos arriba.
+    // 2. Si hay semanas, seleccionamos la más reciente y cargamos sus datos
+    if (weeksResponse.data.length > 0) {
+      selectedWeek.value = weeksResponse.data[0].start_date;
+      handleWeekChange(); // Usamos el handler para establecer el filtro y cargar los datos
+    } else {
+      // Si no hay semanas (paciente sin entradas), igual cargamos la info del paciente
+      await fetchPatientData();
+      loading.value = false;
+    }
+  } catch (err) {
+    console.error("Error al inicializar la vista:", err);
+    error.value = "No se pudieron cargar los datos iniciales del paciente.";
+    loading.value = false;
+  }
 });
 
-// Manejo de clicks en el contenido para mostrar modales de datos insuficientes
-// Esto se haría idealmente en el backend, pero aquí forzamos la lógica del modal de "No hay datos"
-const checkDataAndSetTab = (tabName: 'historial' | 'grafica' | 'nube') => {
-    if (!hasData.value) {
-        // Forzamos el modal de "No hay suficientes datos" si el paciente no tiene data
-        // Esto solo ocurre si patientData.value.hasData es false.
-        showNoDataModal.value = true;
-        return;
-    }
-    activeTab.value = tabName;
-}
+async function downloadPdf() {
+  if (!reportInfo.value?.is_available) {
+    showReportUnavailableModal.value = true;
+    return;
+  }
 
+  isDownloading.value = true;
+  try {
+    const response = await ProfessionalService.downloadPatientReport(
+      patientId,
+      activeFilter.value.dates || undefined
+    );
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+
+    const contentDisposition = response.headers['content-disposition'];
+    let fileName = `reporte_semanal.pdf`;
+    if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (fileNameMatch && fileNameMatch.length === 2) fileName = fileNameMatch[1];
+    }
+
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error("Error al descargar el PDF:", err);
+  } finally {
+    isDownloading.value = false;
+  }
+}
 </script>
 
 <style scoped>

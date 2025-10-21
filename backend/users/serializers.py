@@ -1,6 +1,6 @@
 import re
 import secrets
-from datetime import timedelta
+from datetime import date, timedelta
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
@@ -172,6 +172,7 @@ class PatientProfileSerializer(serializers.ModelSerializer):
     professional_name = serializers.CharField(source="professional.user.name", read_only=True, allow_null=True)
 
     profile_picture = serializers.SerializerMethodField()
+    is_linked = serializers.SerializerMethodField()
 
     class Meta:
         model = Patient
@@ -185,6 +186,8 @@ class PatientProfileSerializer(serializers.ModelSerializer):
             "professional_name",
             "description",
             "profile_picture",
+            "is_linked",
+            "current_streak",
         ]
         read_only_fields = fields
 
@@ -193,6 +196,10 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         if obj.profile_picture and hasattr(obj.profile_picture, "url"):
             return request.build_absolute_uri(obj.profile_picture.url)
         return request.build_absolute_uri(static("images/avatar-icon.png"))
+
+    def get_is_linked(self, obj):
+        """Devuelve true si el paciente está vinculado a un profesional."""
+        return obj.professional is not None
 
 
 class PatientProfileUpdateSerializer(serializers.ModelSerializer):
@@ -485,3 +492,36 @@ class DeleteAccountSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError("La contraseña es incorrecta.")
         return value
+
+
+class PatientListSerializer(serializers.ModelSerializer):
+    """
+    Serializer para mostrar una lista de pacientes a un profesional.
+    """
+
+    # Obtenemos campos del modelo User relacionado
+    name = serializers.CharField(source="user.get_full_name", read_only=True)
+    email = serializers.EmailField(source="user.email", read_only=True)
+
+    # Calculamos la edad dinámicamente
+    age = serializers.SerializerMethodField()
+
+    # Construimos la URL completa del avatar
+    avatar_url = serializers.SerializerMethodField(method_name="get_avatar_full_url")
+    id = serializers.UUIDField(source="user.id", read_only=True)
+
+    class Meta:
+        model = Patient
+        fields = ["id", "name", "age", "gender", "email", "alias", "avatar_url"]
+
+    def get_age(self, obj):
+        today = date.today()
+        born = obj.user.date_of_birth
+        return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+
+    def get_avatar_full_url(self, obj):
+        request = self.context.get("request")
+        if obj.profile_picture and hasattr(obj.profile_picture, "url"):
+            return request.build_absolute_uri(obj.profile_picture.url)
+        # Devuelve una URL por defecto si no hay avatar (puedes cambiarla)
+        return request.build_absolute_uri(static("images/avatar-icon.png"))

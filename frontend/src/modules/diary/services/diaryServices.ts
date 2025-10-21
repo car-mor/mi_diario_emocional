@@ -11,28 +11,28 @@ export interface DiaryEntryFromAPI {
   entry_date: string; // ISO string
   content: string;
   selected_emotions: string[];
-  emotion_summary: EmotionSummary;
   content_length: number;
 }
-
-// El tipo que ya tenías para el resumen de emociones
-export type EmotionSummary = {
-  [key: string]: number;
-};
 
 // Payload para CREAR una nueva entrada
 export interface CreateDiaryEntryPayload {
   title: string;
   content: string;
   selected_emotions: string[];
-  emotion_summary: EmotionSummary;
 }
 
 // Payload para ACTUALIZAR una entrada (todos los campos son opcionales)
 export type UpdateDiaryEntryPayload = Partial<CreateDiaryEntryPayload>;
 
+// Tipo para los datos de la nube de palabras
+export type WordFrequencyData = [string, number][];
 
 // --- FUNCIONES DE SERVICIO (API Calls) ---
+
+// Función para obtener la frecuencia de palabras
+export const getWordFrequency = async (): Promise<AxiosResponse<WordFrequencyData>> => {
+  return api.get('diary-entries/word-frequency/');
+};
 
 // OBTENER todas las entradas del diario del usuario logueado
 export const getDiaryEntries = async (): Promise<AxiosResponse<DiaryEntryFromAPI[]>> => {
@@ -52,4 +52,12 @@ export const deleteDiaryEntry = async (id: string): Promise<AxiosResponse> => {
 // ACTUALIZAR una entrada por su ID (usamos PATCH para actualizaciones parciales)
 export const updateDiaryEntry = async (id: string, data: UpdateDiaryEntryPayload): Promise<AxiosResponse<DiaryEntryFromAPI>> => {
   return api.patch(`diary-entries/${id}/`, data);
+};
+
+// Tipo para los datos de la gráfica
+export type EmotionCombinationData = [string, number][];
+
+// NUEVA FUNCIÓN: Obtener las combinaciones de emociones más frecuentes
+export const getEmotionCombinations = async (): Promise<AxiosResponse<EmotionCombinationData>> => {
+  return api.get('diary-entries/emotion-combinations/');
 };

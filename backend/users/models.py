@@ -61,6 +61,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["role", "date_of_birth", "name", "paternal_last_name", "maternal_last_name"]
 
+    def get_full_name(self):
+        """
+        Devuelve el nombre completo del usuario.
+        """
+        return f"{self.name} {self.paternal_last_name} {self.maternal_last_name}".strip()
+
     def __str__(self):
         return self.email
 
@@ -82,6 +88,9 @@ class Patient(models.Model):
     profile_picture = models.ImageField(upload_to="avatars/", null=True, blank=True)
     linked_at = models.DateTimeField(null=True, blank=True)
     unlinked_at = models.DateTimeField(null=True, blank=True)
+    first_entry_date = models.DateField(null=True, blank=True)
+    current_streak = models.IntegerField(default=0)
+    last_entry_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.alias

@@ -8,13 +8,19 @@ class DiaryEntrySerializer(serializers.ModelSerializer):
         model = DiaryEntry
         fields = [
             "id",
-            "patient",  # <-- Lo mantenemos para lectura
+            "patient",
             "title",
             "entry_date",
             "content",
-            "selected_emotions",
-            "emotion_summary",
-            "content_length",  # <-- AÑADIDO
+            "selected_emotions",  # Las que el usuario selecciona
+            "analyzed_emotions",
+            "content_length",
         ]
-        # Hacemos que 'patient' sea de solo lectura para evitar que se envíe desde el frontend
-        read_only_fields = ["id", "patient", "entry_date", "content_length"]
+        # Hacemos los campos generados por el backend de solo lectura
+        read_only_fields = [
+            "id",
+            "patient",
+            "entry_date",
+            "content_length",
+            "analyzed_emotions",  # <-- AÑADIDO
+        ]

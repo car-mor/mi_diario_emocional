@@ -350,7 +350,7 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     name = serializers.CharField(write_only=True)
     paternal_last_name = serializers.CharField(write_only=True)
-    maternal_last_name = serializers.CharField(write_only=True)
+    maternal_last_name = serializers.CharField(write_only=True, allow_blank=True)
     date_of_birth = serializers.DateField(write_only=True)
     role = serializers.CharField(write_only=True, initial="patient")
 
@@ -401,7 +401,7 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
             "user_data": {
                 "name": validated_data.get("name"),
                 "paternal_last_name": validated_data.get("paternal_last_name"),
-                "maternal_last_name": validated_data.get("maternal_last_name"),
+                "maternal_last_name": validated_data.get("maternal_last_name") or None,
                 "date_of_birth": str(validated_data.get("date_of_birth")),
             },
             "profile_data": {

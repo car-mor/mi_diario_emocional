@@ -75,7 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (role === 'patient') return '/home-patient';
       if (role === 'professional') {
-        return review_status === 'APPROVED' ? '/professional-layout' : '/pending-approval';
+        return review_status === 'APPROVED' ? '/professional-layout' : '/not-approved-professional';
       }
       return '/login';
     } catch (error: unknown) {

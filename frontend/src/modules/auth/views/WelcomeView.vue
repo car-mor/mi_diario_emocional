@@ -15,7 +15,7 @@
           class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-8 text-center shadow-lg border border-gray-200 dark:border-gray-700"
         >
           <h1 class="mb-4 text-4xl text-brand dark:text-[#70BFE9] font-heading font-semibold">
-            ¡Bienvenid@!
+            ¡Bienvenidos!
           </h1>
 
           <p class="mb-8 text-gray-600 dark:text-gray-300 leading-relaxed">

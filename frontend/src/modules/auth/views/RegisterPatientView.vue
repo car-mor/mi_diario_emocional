@@ -38,67 +38,105 @@
       <form v-else-if="step === 2" @submit.prevent="submitPersonalData">
         <div class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="relative">
-              <input
-                v-model="form.name"
-                type="text"
-                placeholder="Ingresa tu nombre(s)"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
-                :style="{ 'padding-left': '3rem' }"
-              />
-              <IconUser
-                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
-              />
+            <div>
+              <div class="relative">
+                  <input
+                    v-model="form.name"
+                    @blur="validateName"
+                    type="text"
+                    placeholder="Ingresa tu(s) nombre(s)"
+                    class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
+                    :class="{
+                      'border-red-500 dark:border-red-500 focus:ring-red-500': nameError,
+                      'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !nameError
+                    }"
+                    required
+                  />
+                  <IconUser
+                    class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                  />
+              </div>
+              <p v-if="nameError" class="text-sm text-red-500 mt-2">{{ nameError }}</p>
             </div>
-            <div class="relative">
-              <input
-                v-model="form.alias"
-                type="text"
-                placeholder="Ingresa tu alias..."
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
-                :style="{ 'padding-left': '3rem' }"
-              />
-              <IconUserPlus
-                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
-              />
-            </div>
+
+            <div>
+              <div class="relative">
+                  <input
+                    v-model="form.alias"
+                    @blur="validateAlias"
+                    type="text"
+                    placeholder="Ingresa tu alias..."
+                    class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
+                    :class="{
+                      'border-red-500 dark:border-red-500 focus:ring-red-500': aliasError,
+                      'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !aliasError
+                    }"
+                    required
+                  />
+                  <IconUserPlus
+                    class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                  />
+              </div>
+              <p v-if="aliasError" class="text-sm text-red-500 mt-2">{{ aliasError }}</p>
           </div>
+
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="relative">
-              <input
-                v-model="form.paternalLastName"
-                type="text"
-                placeholder="Ingresa tu primer apellido"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
-                :style="{ 'padding-left': '3rem' }"
-              />
-              <IconUserCheck
-                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
-              />
+            <div>
+              <div class="relative">
+                <input
+                  v-model="form.paternalLastName"
+                  @blur="validatePaternalLastName"
+                  type="text"
+                  placeholder="Ingresa tu primer apellido"
+                  class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
+                  :class="{
+                    'border-red-500 dark:border-red-500 focus:ring-red-500': paternalLastNameError,
+                    'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !paternalLastNameError
+                  }"
+                  required
+                  :style="{ 'padding-left': '3rem' }"
+                />
+                <IconUserCheck
+                  class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                />
+              </div>
+                <p v-if="paternalLastNameError" class="text-sm text-red-500 mt-2">{{ paternalLastNameError }}</p>
             </div>
-            <div class="relative">
-              <input
-                v-model="form.maternalLastName"
-                type="text"
-                placeholder="Ingresa tu segundo apellido"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
-                :style="{ 'padding-left': '3rem' }"
-              />
-              <IconUserCheck
-                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
-              />
-            </div>
+
+            <div>
+              <div class="relative">
+                  <input
+                    v-model="form.maternalLastName"
+                      @blur="validateMaternalLastName"
+                      type="text"
+                      placeholder="Ingresa tu segundo apellido"
+                      class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
+                      :class="{
+                        'border-red-500 dark:border-red-500 focus:ring-red-500': maternalLastNameError,
+                        'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !maternalLastNameError
+                      }"
+                    :style="{ 'padding-left': '3rem' }"
+                  />
+                  <IconUserCheck
+                    class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                  />
+              </div>
+              <p v-if="maternalLastNameError" class="text-sm text-red-500 mt-2">{{ maternalLastNameError }}</p>
           </div>
+        </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
             <div class="relative">
               <input
                 v-model="form.dateOfBirth"
-                type="date"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
+                @change="validateDateOfBirth" type="date"
+                class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
+                :class="{
+                  'border-red-500 dark:border-red-500 focus:ring-red-500': dateOfBirthError,
+                  'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !dateOfBirthError
+                }"
                 required
                 :style="{ 'padding-left': '3rem' }"
               />
@@ -106,6 +144,11 @@
                 class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
               />
             </div>
+              <p v-if="dateOfBirthError" class="text-sm text-red-500 mt-2">{{ dateOfBirthError }}</p>
+
+            </div>
+
+            <div>
             <div class="relative">
               <select
                 v-model="form.gender"
@@ -123,6 +166,8 @@
                 class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
               />
             </div>
+            </div>
+          </div>
           </div>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">* Campos obligatorios</p>
           <button
@@ -137,38 +182,69 @@
 
       <form v-else-if="step === 3" @submit.prevent="createAccount">
         <div class="space-y-4">
-          <div class="relative">
-            <input
-              v-model="form.email"
-              type="email"
-              placeholder="Ingresa tu correo electrónico"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-              required
-              :style="{ 'padding-left': '3rem' }"
-            />
-            <IconMail
-              class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
-            />
+          <div>
+            <div class="relative">
+              <input
+                v-model="form.email"
+                type="email"
+                placeholder="Ingresa tu correo electrónico"
+                @blur="validateEmail" class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
+                :class="{
+                  'border-red-500 dark:border-red-500 focus:ring-red-500': emailError,
+                  'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !emailError
+                }"
+                required
+                :style="{ 'padding-left': '3rem' }"
+              />
+              <IconMail
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
+            </div>
+            <p v-if="emailError" class="text-sm text-red-500 mt-2">{{ emailError }}</p>
           </div>
+
+          <div>
           <div class="relative">
             <input
               v-model="form.password"
               type="password"
               placeholder="Ingresa tu contraseña"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
+              class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
+              :class="{
+                'border-red-500 dark:border-red-500 focus:ring-red-500': passwordError,
+                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !passwordError
+              }"
               required
               :style="{ 'padding-left': '3rem' }"
             />
             <IconLock
               class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
             />
+
           </div>
+          <div
+            v-if="form.password.length > 0"
+            class="text-sm text-left text-gray-600 dark:text-gray-400 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1"
+          >
+            <p v-for="req in passwordValidation" :key="req.text" class="transition-colors flex items-center"
+              :class="{'text-green-500 dark:text-green-400': req.met, 'text-red-500 dark:text-red-400': !req.met}">
+              <span class="mr-2">{{ req.met ? '✓' : '✗' }}</span>
+              <span>{{ req.text }}</span>
+            </p>
+        </div>
+          </div>
+
+          <div>
           <div class="relative">
             <input
               v-model="form.confirmPassword"
               type="password"
               placeholder="Vuelve a introducir la contraseña"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
+              class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
+               :class="{
+                'border-red-500 dark:border-red-500 focus:ring-red-500': passwordError,
+                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !passwordError
+              }"
               required
               :style="{ 'padding-left': '3rem' }"
             />
@@ -176,7 +252,16 @@
               class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
             />
           </div>
-          <p v-if="passwordError" class="text-sm text-red-500 mt-2">{{ passwordError }}</p>
+            <div
+              v-if="form.password !== form.confirmPassword && form.confirmPassword.length > 0"
+              class="text-sm text-left text-gray-600 dark:text-gray-400 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1"
+            >
+              <p class="flex items-center text-red-500 dark:text-red-400">
+                <span>Las contraseñas no coinciden.</span
+              >
+              </p>
+            </div>
+          </div>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">* Campos obligatorios</p>
           <button
             type="submit"
@@ -214,7 +299,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, type Ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios';
 import BackgroundWrapper from '@/modules/auth/components/BackgroundWrapper.vue'
@@ -239,7 +324,18 @@ const professionalId = ref('')
 const error = ref('')
 const passwordError = ref('')
 const loading = ref(false)
-const linkCodeError = ref('') // Nueva variable para errores del código de enlace
+const linkCodeError = ref('') //Variable para errores del código de enlace
+
+const nameError = ref('');
+const aliasError = ref('');
+const paternalLastNameError = ref('');
+const maternalLastNameError = ref('');
+const dateOfBirthError = ref('');
+const genderError = ref('');
+const emailError = ref('');
+
+const hasAttemptedStep2 = ref(false);
+const hasAttemptedStep3 = ref(false);
 
 const form = reactive({
   name: '',
@@ -277,20 +373,176 @@ async function verifyLinkCode() {
   }
 }
 
+// VALIDACIÓN DE CONTRASEÑA
+const passwordRequirements = [
+  { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
+  { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
+  // { regex: /\d/, text: 'Al menos un número' },
+  { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
+  { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres' }
+];
+const passwordValidation = computed(() => {
+  return passwordRequirements.map(req => ({
+    ...req,
+    met: req.regex.test(form.password)
+  }));
+});
+const isPasswordValid = computed(() => passwordValidation.value.every(req => req.met));
+
+// VALIDACIÓN DE CAMPOS DE TEXTO (Nombre, Apellidos, Alias)
+const validateTextField = (fieldValue: string, errorRef: Ref<string>, fieldName: string) => {
+  const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+
+  // 1. Validar formato (SIEMPRE, si hay texto)
+  if (fieldValue.trim() && !textRegex.test(fieldValue)) {
+    errorRef.value = `El ${fieldName} solo puede contener letras y espacios.`;
+    return false;
+  }
+
+  // 2. Validar "obligatorio" (SOLO SI SE INTENTÓ ENVIAR)
+  if (hasAttemptedStep2.value && !fieldValue.trim()) {
+    errorRef.value = `El ${fieldName} es obligatorio.`;
+    return false;
+  }
+
+  errorRef.value = '';
+  return true;
+};
+
+const validateOptionalTextField = (fieldValue: string, errorRef: Ref<string>, fieldName: string) => {
+  const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+
+  // 1. Validar formato (SOLO SI hay texto)
+  if (fieldValue.trim() && !textRegex.test(fieldValue)) {
+    errorRef.value = `El ${fieldName} solo puede contener letras y espacios.`;
+    return false; // Falla
+  }
+
+  // 2. Si está vacío, está bien (es opcional)
+  errorRef.value = '';
+  return true; // Pasa
+};
+
+// VALIDACIÓN DE FECHA DE NACIMIENTO
+const validateDateOfBirth = () => {
+  // 1. Validar "obligatorio" (SOLO SI SE INTENTÓ ENVIAR)
+  if (hasAttemptedStep2.value && !form.dateOfBirth) {
+    dateOfBirthError.value = 'La fecha de nacimiento es obligatoria.';
+    return false;
+  }
+
+  // Si está vacío pero aún no se intenta enviar, no es un error.
+  if (!form.dateOfBirth) {
+    dateOfBirthError.value = '';
+    return true; // No es un error "activo"
+  }
+  const birthDate = new Date(form.dateOfBirth);
+  const today = new Date();
+
+  if (birthDate > today) {
+    dateOfBirthError.value = 'La fecha de nacimiento no puede ser en el futuro.';
+    return false;
+  }
+
+  const age = today.getFullYear() - birthDate.getFullYear();
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+  const dayDifference = today.getDate() - birthDate.getDate();
+
+  let is18 = false;
+  if (age > 18) {
+    is18 = true;
+  } else if (age === 18) {
+    if (monthDifference > 0) {
+      is18 = true;
+    } else if (monthDifference === 0 && dayDifference >= 0) {
+      is18 = true;
+    }
+  }
+
+  if (!is18) {
+    dateOfBirthError.value = 'Debes ser mayor de 18 años para registrarte.';
+    return false;
+  }
+
+  dateOfBirthError.value = '';
+  return true;
+};
+
+// VALIDACIÓN DE GÉNERO (que no esté vacío)
+const validateGender = () => {
+  // Validar "obligatorio" (SOLO SI SE INTENTÓ ENVIAR)
+  if (hasAttemptedStep2.value && !form.gender) {
+    genderError.value = 'Debes seleccionar un género.';
+    return false;
+  }
+  genderError.value = '';
+  return true;
+};
+
+// VALIDACIÓN DE CORREO
+const validateEmail = () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Validar "obligatorio" (SOLO SI SE INTENTÓ ENVIAR - usa la bandera del paso 3)
+  if (hasAttemptedStep3.value && !form.email) {
+     emailError.value = 'El correo es obligatorio.';
+     return false;
+  }
+
+  // Validar formato (SIEMPRE, si hay texto)
+  if (form.email && !emailRegex.test(form.email)) {
+    emailError.value = 'Formato de correo inválido (ej. nombre@dominio.com)';
+    return false;
+  }
+  emailError.value = '';
+  return true;
+};
+
+// --- WRAPPERS para llamar con @blur ---
+const validateName = () => validateTextField(form.name, nameError, 'nombre');
+const validateAlias = () => validateTextField(form.alias, aliasError, 'alias');
+const validatePaternalLastName = () => validateTextField(form.paternalLastName, paternalLastNameError, 'primer apellido');
+const validateMaternalLastName = () => validateOptionalTextField(form.maternalLastName, maternalLastNameError, 'segundo apellido');
+
+
 function submitPersonalData() {
-  // Lógica de validación básica (como la tenías)
-  if (form.name && form.alias && form.paternalLastName && form.maternalLastName && form.dateOfBirth && form.gender) {
-    step.value = 3 // Avanzar al paso de Credenciales
+  hasAttemptedStep2.value = true; // Marca que se intentó enviar el paso 2
+  const isNameValid = validateName();
+  const isAliasValid = validateAlias();
+  const isPaternalLastNameValid = validatePaternalLastName();
+  const isMaternalLastNameValid = validateMaternalLastName();
+  const isDateOfBirthValid = validateDateOfBirth();
+  const isGenderValid = validateGender();
+
+  if (
+    isNameValid && isAliasValid && isPaternalLastNameValid &&
+    isMaternalLastNameValid && isDateOfBirthValid && isGenderValid
+  ) {
+    // Si todo está bien, avanza al siguiente paso
+    step.value = 3;
+    error.value = ''; // Limpia el error general
   } else {
-    // Manejar error de campos incompletos
-    error.value = 'Por favor, completa todos los campos obligatorios.'
+    // Si algo falla, muestra un error general
+    error.value = 'Por favor, corrige los campos marcados en rojo.';
   }
 }
 
 async function createAccount() {
+  hasAttemptedStep3.value = true; // Marca que se intentó enviar el paso 3
+  // 1. Limpia errores y valida todo
+  passwordError.value = '';
+  const isEmailValid = validateEmail();
+
   if (form.password !== form.confirmPassword) {
-    passwordError.value = 'Las contraseñas no coinciden.'
-    return
+    passwordError.value = 'Las contraseñas no coinciden.';
+  }
+  if (!isPasswordValid.value) {
+    passwordError.value = (passwordError.value + ' La contraseña no cumple los requisitos.').trim();
+  }
+
+  // 2. Detener si hay CUALQUIER error
+  if (!isEmailValid || passwordError.value) {
+    return;
   }
 
   loading.value = true

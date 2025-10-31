@@ -28,7 +28,7 @@ class DiaryEntry(models.Model):
 
     # NUEVO CAMPO - AÑADIR. Almacena el resultado del análisis del modelo.
     analyzed_emotions = ArrayField(models.CharField(max_length=20), default=list, blank=True)
-
+    analyzed_scores = models.JSONField(default=dict, blank=True)
     content_length = models.IntegerField(editable=False)
 
     def save(self, *args, **kwargs):

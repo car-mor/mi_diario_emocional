@@ -1,4 +1,6 @@
 # importacion de secrets
+import base64
+import os
 import secrets
 import uuid
 from collections import Counter
@@ -26,14 +28,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from weasyprint import HTML
 
-from diary.ml_service import lematizar_texto, nlp, preprocesar_texto
+from diary.ml_service import NLP, lematizar_texto_para_lista, preprocesar_texto
 from diary.models import DiaryEntry
 from diary.serializers import DiaryEntrySerializer
 
 from .models import EmailChangeRequest, PasswordReset, Patient, PreRegistration, Professional, User
 from .permissions import IsPatient, IsProfessional
 
-STOP_WORDS = nlp.Defaults.stop_words if nlp else set()
+STOP_WORDS = NLP.Defaults.stop_words if NLP else set()
 # Importa los serializadores y modelos
 from .serializers import (
     ChangePasswordSerializer,
@@ -649,29 +651,52 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         # --- Lógica para la Gráfica de Emociones Combinadas ---
         combination_counts = Counter()
         for entry in diary_entries:
-            if len(entry.analyzed_emotions) > 1:
-                combination = tuple(sorted(entry.analyzed_emotions))
+            emotions = entry.analyzed_emotions
+            # Solo cuenta si la lista no está vacía Y no es ['neutro']
+            if emotions and emotions != ["neutro"]:
+                combination = tuple(sorted(emotions))
                 combination_counts[combination] += 1
         most_common_combinations = [[" - ".join(comb), count] for comb, count in combination_counts.most_common(5)]
-
         # --- Lógica para la Nube de Palabras ---
         full_text = " ".join([entry.content for entry in diary_entries])
         if full_text.strip():
-            lemmas = lematizar_texto(preprocesar_texto(full_text))
+            lemmas = lematizar_texto_para_lista(preprocesar_texto(full_text))
             important_words = [
                 lemma for lemma in lemmas if lemma not in STOP_WORDS and lemma.isalpha() and len(lemma) > 2
             ]
             word_counts = Counter(important_words)
-            most_common_words = word_counts.most_common(50)
+            most_common_words_raw = word_counts.most_common(50)
         else:
-            most_common_words = []
+            most_common_words_raw = []
+
+        max_count = most_common_words_raw[0][1] if most_common_words_raw else 0
+        min_count = most_common_words_raw[-1][1] if most_common_words_raw else 0
+        count_range = float(max_count - min_count)
+
+        most_common_words_with_size = []
+        for word, count in most_common_words_raw:
+            size_class = "size-1"  # default
+            if count_range > 0:
+                size_percent = ((count - min_count) / count_range) * 100
+                if size_percent > 80:
+                    size_class = "size-5"
+                elif size_percent > 60:
+                    size_class = "size-4"
+                elif size_percent > 40:
+                    size_class = "size-3"
+                elif size_percent > 20:
+                    size_class = "size-2"
+            elif max_count > 0:  # Solo hay una palabra
+                size_class = "size-3"
+
+            most_common_words_with_size.append((word, count, size_class))
 
         # --- Construye la respuesta JSON final (CORREGIDO) ---
         data = {
             "patient_details": self.get_serializer(patient).data,
             "diary_history": DiaryEntrySerializer(diary_entries, many=True).data,
             "emotion_combinations": most_common_combinations,
-            "word_frequency": most_common_words,
+            "word_frequency": most_common_words_with_size,
             "report_info": {
                 "is_available": is_report_available,
                 "next_report_date": next_report_date.strftime("%d de %B de %Y"),
@@ -707,29 +732,82 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         # Lógica para Emociones Combinadas
         combination_counts = Counter()
         for entry in diary_entries:
-            if len(entry.analyzed_emotions) > 1:
-                combination = tuple(sorted(entry.analyzed_emotions))
+            emotions = entry.analyzed_emotions
+            if emotions and emotions != ["neutro"]:
+                combination = tuple(sorted(emotions))
                 combination_counts[combination] += 1
         most_common_combinations = [[" - ".join(comb), count] for comb, count in combination_counts.most_common(5)]
-
         # Lógica para Nube de Palabras
         full_text = " ".join([entry.content for entry in diary_entries])
         if full_text.strip():
-            lemmas = lematizar_texto(preprocesar_texto(full_text))
+            lemmas = lematizar_texto_para_lista(preprocesar_texto(full_text))
             important_words = [
                 lemma for lemma in lemmas if lemma not in STOP_WORDS and lemma.isalpha() and len(lemma) > 2
             ]
             word_counts = Counter(important_words)
-            most_common_words = word_counts.most_common(50)
+            most_common_words_raw = word_counts.most_common(50)
         else:
-            most_common_words = []
-        # ---------------------------------------------------
+            most_common_words_raw = []
+
+        max_count = most_common_words_raw[0][1] if most_common_words_raw else 0
+        min_count = most_common_words_raw[-1][1] if most_common_words_raw else 0
+        count_range = float(max_count - min_count)
+
+        most_common_words_with_size = []
+        for word, count in most_common_words_raw:
+            size_class = "size-1"  # default
+            if count_range > 0:
+                size_percent = ((count - min_count) / count_range) * 100
+                if size_percent > 80:
+                    size_class = "size-5"
+                elif size_percent > 60:
+                    size_class = "size-4"
+                elif size_percent > 40:
+                    size_class = "size-3"
+                elif size_percent > 20:
+                    size_class = "size-2"
+            elif max_count > 0:  # Solo hay una palabra
+                size_class = "size-3"
+
+            most_common_words_with_size.append((word, count, size_class))
+
+        avatar_data_uri = None
+        if patient.profile_picture:
+            try:
+                # 1. Abrir el archivo de la imagen en modo binario
+                with open(patient.profile_picture.path, "rb") as image_file:
+                    # 2. Leer los bytes y codificarlos a Base64
+                    image_bytes = image_file.read()
+                    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+
+                    # 3. Crear el Data URI completo para el HTML
+                    # (Tenemos que adivinar el tipo de imagen, usualmente jpeg o png)
+                    content_type = (
+                        "image/png" if patient.profile_picture.name.lower().endswith(".png") else "image/jpeg"
+                    )
+                    avatar_data_uri = f"data:{content_type};base64,{image_b64}"
+
+            except (FileNotFoundError, IOError):
+                # Si el archivo está roto o no se encuentra, simplemente no se mostrará
+                avatar_data_uri = None
+
+        logo_data_uri = None
+        try:
+            # settings.BASE_DIR apunta a la carpeta 'backend'
+            logo_path = os.path.join(settings.BASE_DIR, "media_root", "logo.png")
+            with open(logo_path, "rb") as image_file:
+                image_b64 = base64.b64encode(image_file.read()).decode("utf-8")
+                logo_data_uri = f"data:image/png;base64,{image_b64}"
+        except (FileNotFoundError, IOError):
+            logo_data_uri = None  # El logo es opcional
 
         context = {
             "patient": patient,
             "diary_entries": diary_entries,
+            "avatar_data_uri": avatar_data_uri,
+            "logo_data_uri": logo_data_uri,
             "emotion_combinations": most_common_combinations,
-            "word_frequency": most_common_words,
+            "word_frequency": most_common_words_with_size,
             "week_start": start_date,
             "week_end": end_date,
             "report_title": report_title,

@@ -9,7 +9,7 @@
         <p class="text-xl text-red-500">{{ error }}</p>
       </div>
 
-      <div v-else-if="!chartInternalData || chartInternalData.length === 0" class="flex flex-col items-center justify-center h-96">
+      <div v-else-if="!props.combinationData || props.combinationData.length === 0" class="flex flex-col items-center justify-center h-96">
         <IconBellRingingFilled class="w-12 h-12 text-yellow-400 mb-4" />
         <h2 class="text-2xl mt-3 font-semibold text-gray-800 dark:text-gray-200 text-center">
           ¡Aún no hay suficientes datos!
@@ -38,44 +38,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { Pie } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, type TooltipItem } from 'chart.js';
 import { IconBellRingingFilled } from "@tabler/icons-vue";
-import * as DiaryService from '@/modules/diary/services/diaryServices';
 ChartJS.register(Title, Tooltip, Legend, ArcElement);
 
 // 1. ACEPTA LOS DATOS COMO UNA PROP
 // Estos son los datos que el componente padre (PatientDetails.vue) le pasa.
 const props = defineProps<{
-  combinationData?: [string, number][];
+  combinationData: [string, number][]; // Hazlo requerido
+  loading: boolean; // Acepta el estado de carga del padre
+  error: string | null; // Acepta el error del padre
 }>();
-
-const chartInternalData = ref<[string, number][]>([]);
-const loading = ref(true);
-const error = ref<string | null>(null);
-
-onMounted(async () => {
-  loading.value = true;
-  error.value = null;
-
-  if (props.combinationData) {
-    // Si el padre nos dio los datos, los usamos.
-    chartInternalData.value = props.combinationData;
-    loading.value = false;
-  } else {
-    // Si no, este componente busca sus propios datos (caso del paciente).
-    try {
-      const response = await DiaryService.getEmotionCombinations();
-      chartInternalData.value = response.data;
-    } catch (err) {
-      console.error('Fallo al obtener datos para la gráfica:', err);
-      error.value = "No se pudieron cargar los datos del análisis.";
-    } finally {
-      loading.value = false;
-    }
-  }
-});
 
 // 2. ESTADOS INTERNOS DEL COMPONENTE (siguen usando ref)
 // Estas variables solo afectan a cómo se ve la gráfica, no a los datos en sí.
@@ -102,10 +77,11 @@ const toggleDataDisplay = () => {
 const chartData = computed(() => {
   const currentPalette = colorPalettes[activePaletteIndex.value];
   return {
-    labels: chartInternalData.value.map(item => item[0]),       // <-- Usa el estado interno
+    // labels: chartInternalData.value.map(item => item[0]),
+    labels: props.combinationData.map(item => item[0]),
     datasets: [{
-      data: chartInternalData.value.map(item => item[1]),       // <-- Usa el estado interno
-      backgroundColor: chartInternalData.value.map((_, index) => currentPalette[index % currentPalette.length]),
+      data: props.combinationData.map(item => item[1]),      // <-- Usa el estado interno
+      backgroundColor: props.combinationData.map((_, index) => currentPalette[index % currentPalette.length]),
       borderColor: '#ffffff',
       borderWidth: 2,
     }]

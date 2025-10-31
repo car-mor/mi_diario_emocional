@@ -46,9 +46,11 @@
                 accept="image/*"
                 class="hidden"
             />
-
+          <h2 class="mt-4 text-xl font-bold text-gray-900 dark:text-white">
+            {{ userFullName }}
+          </h2>
             <h2 class="mt-3 text-lg font-semibold text-gray-800 dark:text-gray-200">
-                {{ userAlias }}
+                @{{ userAlias }}
             </h2>
             <p class="text-sm text-gray-500">{{ userEmail }}</p>
 
@@ -204,10 +206,28 @@ const userAlias = computed(() => {
     // podemos mostrar el nombre completo.
     return userProfile.value.name;
 });
+
+
 const userEmail = computed(() => {
     // Si los datos están cargados, muestra el email
     return userProfile.value ? userProfile.value.email : 'Cargando...';
 });
+
+const userFullName = computed(() => {
+    if (!userProfile.value) return 'Cargando...';
+
+    // 1. Crea una lista con las partes del nombre
+    const parts = [
+        userProfile.value.name,
+        userProfile.value.paternal_last_name,
+        userProfile.value.maternal_last_name
+    ];
+
+    // 2. Filtra la lista para quitar valores "falsy" (null, undefined, '')
+    // 3. Une las partes filtradas con un espacio
+    return parts.filter(Boolean).join(' ');
+});
+
 //----------- constantes para el alias y descripción ---------------------
 const userDescription = ref( (userProfile.value as AuthServices.PatientProfile)?.description || '');
 const originalDescription = ref(""); // Para guardar la descripción original antes de editar

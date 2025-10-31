@@ -7,16 +7,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .ml_service import (
-    analizar_emociones_texto,
-    lematizar_texto,  # <-- IMPORTACIÓN AÑADIDA
-    nlp,
-    preprocesar_texto,  # <-- IMPORTACIÓN AÑADIDA
+    NLP,
+    analizar_emociones_con_beto,
+    lematizar_texto_para_lista,
+    preprocesar_texto,
 )
 from .models import DiaryEntry
 from .permissions import IsPatient
 from .serializers import DiaryEntrySerializer
 
-STOP_WORDS = nlp.Defaults.stop_words if nlp else set()
+STOP_WORDS = NLP.Defaults.stop_words if NLP else set()
 
 
 class DiaryEntryViewSet(viewsets.ModelViewSet):
@@ -67,9 +67,15 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
 
         patient_profile.save()
         content = serializer.validated_data.get("content", "")
-        emociones_analizadas = analizar_emociones_texto(content)
+        # 1. Llama al nuevo modelo de BETO
+        emociones_lista, scores_dict = analizar_emociones_con_beto(content)
 
-        serializer.save(patient=patient_profile, analyzed_emotions=emociones_analizadas)
+        # 2. Guarda ambos resultados en el serializer
+        serializer.save(
+            patient=patient_profile,
+            analyzed_emotions=emociones_lista,
+            analyzed_scores=scores_dict,
+        )
 
     @action(detail=False, methods=["get"], url_path="emotion-combinations")
     def emotion_combinations(self, request):
@@ -77,10 +83,25 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
         Calcula las 5 combinaciones de emociones más frecuentes PARA EL PACIENTE LOGUEADO.
         """
         user_entries = self.get_queryset()  # Ya está filtrado para este paciente
+
+        start_date = request.query_params.get("start_date")
+        end_date = request.query_params.get("end_date")
+        if start_date and end_date:
+            try:
+                # Asegurarse de que el rango de fechas sea inclusivo
+                end_date_obj = timezone.datetime.strptime(end_date, "%Y-%m-%d").date()
+                end_date_inclusive = end_date_obj + timezone.timedelta(days=1)
+                user_entries = user_entries.filter(entry_date__gte=start_date, entry_date__lt=end_date_inclusive)
+            except (ValueError, TypeError):
+                pass  # Ignorar fechas mal formadas
         combination_counts = Counter()
         for entry in user_entries:
-            if len(entry.analyzed_emotions) > 1:
-                combination_counts[tuple(sorted(entry.analyzed_emotions))] += 1
+            emotions = entry.analyzed_emotions
+
+            # Solo cuenta si la lista no está vacía Y no es ['neutro']
+            if emotions and emotions != ["neutro"]:
+                combination_counts[tuple(sorted(emotions))] += 1
+
         most_common = [[" - ".join(comb), count] for comb, count in combination_counts.most_common(5)]
         return Response(most_common)
 
@@ -90,11 +111,21 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
         Calcula las 50 palabras más frecuentes PARA EL PACIENTE LOGUEADO.
         """
         user_entries = self.get_queryset()
+        start_date = request.query_params.get("start_date")
+        end_date = request.query_params.get("end_date")
+
+        if start_date and end_date:
+            try:
+                end_date_obj = timezone.datetime.strptime(end_date, "%Y-%m-%d").date()
+                end_date_inclusive = end_date_obj + timezone.timedelta(days=1)
+                user_entries = user_entries.filter(entry_date__gte=start_date, entry_date__lt=end_date_inclusive)
+            except (ValueError, TypeError):
+                pass
         full_text = " ".join([entry.content for entry in user_entries])
         if not full_text.strip():
             return Response([])
 
-        lemmas = lematizar_texto(preprocesar_texto(full_text))
+        lemmas = lematizar_texto_para_lista(preprocesar_texto(full_text))
         important_words = [lem for lem in lemmas if lem not in STOP_WORDS and lem.isalpha() and len(lem) > 2]
         word_counts = Counter(important_words)
         return Response(word_counts.most_common(50))

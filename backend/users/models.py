@@ -44,7 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField(null=False)
     name = models.CharField(max_length=255, null=False)
     paternal_last_name = models.CharField(max_length=255, null=False)
-    maternal_last_name = models.CharField(max_length=255, null=False)
+    maternal_last_name = models.CharField(max_length=255, null=True, blank=True)
 
     # Campos para la verificación de cuenta
     is_active = models.BooleanField(default=False)
@@ -59,7 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["role", "date_of_birth", "name", "paternal_last_name", "maternal_last_name"]
+    REQUIRED_FIELDS = ["role", "date_of_birth", "name", "paternal_last_name"]
 
     def get_full_name(self):
         """

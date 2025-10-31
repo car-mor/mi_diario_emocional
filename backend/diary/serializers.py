@@ -14,6 +14,7 @@ class DiaryEntrySerializer(serializers.ModelSerializer):
             "content",
             "selected_emotions",  # Las que el usuario selecciona
             "analyzed_emotions",
+            "analyzed_scores",
             "content_length",
         ]
         # Hacemos los campos generados por el backend de solo lectura
@@ -22,5 +23,6 @@ class DiaryEntrySerializer(serializers.ModelSerializer):
             "patient",
             "entry_date",
             "content_length",
-            "analyzed_emotions",  # <-- AÑADIDO
+            "analyzed_emotions",
+            "analyzed_scores",
         ]

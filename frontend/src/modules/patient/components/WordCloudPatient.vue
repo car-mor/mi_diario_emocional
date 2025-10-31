@@ -8,7 +8,7 @@
         <p class="text-xl text-red-500">{{ error }}</p>
     </div>
 
-    <div v-else-if="!wordsInternalData || wordsInternalData.length === 0" class="flex flex-col items-center justify-center text-center">
+    <div v-else-if="!props.words || props.words.length === 0" class="flex flex-col items-center justify-center text-center">
       <IconBellRingingFilled class="w-12 h-12 text-yellow-400 mb-4" />
       <h2 class="text-2xl mt-3 font-semibold text-gray-800 dark:text-gray-200">
         ¡Aún hay mucho por escribir!
@@ -21,7 +21,7 @@
     <div v-else class="w-full h-full flex flex-col">
       <div class="flex-grow">
         <vue-word-cloud
-          :words="wordsInternalData"
+          :words="props.words"
           font-family="Quicksand, Arial, sans-serif"
           :color="randomColor"
           :animation-duration="2000"
@@ -40,41 +40,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import VueWordCloud from "vuewordcloud";
 import { IconBellRingingFilled } from "@tabler/icons-vue";
-import * as DiaryService from '@/modules/diary/services/diaryServices';
 // --- ACEPTA LOS DATOS COMO UNA PROP ---
 // El componente padre (PatientDetails.vue) le pasará la lista de palabras.
 const props = defineProps<{
-  words?: [string, number][];
+  words: [string, number][]; // Hazlo requerido
+  loading: boolean;
+  error: string | null;
 }>();
-
-const wordsInternalData = ref<[string, number][]>([]);
-const loading = ref(true);
-const error = ref<string | null>(null);
-
-onMounted(async () => {
-  loading.value = true;
-  error.value = null;
-
-  if (props.words) {
-    // Si nos pasan la prop, la usamos.
-    wordsInternalData.value = props.words;
-    loading.value = false;
-  } else {
-    // Si no, buscamos nuestros propios datos.
-    try {
-      const response = await DiaryService.getWordFrequency();
-      wordsInternalData.value = response.data;
-    } catch (err) {
-      console.error('Fallo al obtener datos para la nube:', err);
-      error.value = "No se pudieron cargar los datos del análisis.";
-    } finally {
-      loading.value = false;
-    }
-  }
-});
 // --- ESTADOS Y LÓGICA INTERNA DEL COMPONENTE ---
 // Estas variables solo afectan a la apariencia de la nube, no a los datos.
 const palettes = [

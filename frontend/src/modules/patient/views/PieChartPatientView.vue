@@ -20,7 +20,11 @@
                     </p>
                 </div>
                 <!-- Contenido principal - component gráfico de pastel -->
-                <PieChart />
+                <PieChartPatient
+                  :combination-data="emotionCombinations"
+                  :loading="loading"
+                  :error="error"
+                />
                 <router-view />
             </div>
         </main>
@@ -32,10 +36,15 @@
 <script setup lang="ts">
     import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
     import UserProfile from "../components/PatientProfile.vue"
-    import PieChart from "../components/PieChartPatient.vue"
-    import { computed } from 'vue';
+    import PieChartPatient from "../components/PieChartPatient.vue"
+    import { computed, ref, onMounted } from 'vue';
   import { useAuthStore } from '@/store/auth';
+  import * as DiaryService from '@/modules/diary/services/diaryServices';
     const authStore = useAuthStore();
+
+const emotionCombinations = ref<[string, number][]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
 
 interface PatientProfile {
     name: string;
@@ -57,5 +66,41 @@ const streakCount = computed(() => {
   }
   // Si no es un paciente, la racha es 0.
   return 0;
+});
+const getWeekDateRange = (): { start_date: string, end_date: string } => {
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0 (Domingo) - 6 (Sábado)
+
+  // Asumimos que la semana empieza en Lunes
+  // Ajuste para que Lunes (1) sea el primer día, o Domingo (0) sea -6
+  const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+  const startOfWeek = new Date(now.setDate(diff));
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // Suma 6 días al inicio
+
+  // Formato YYYY-MM-DD
+  const toISODate = (date: Date) => date.toISOString().split('T')[0];
+
+  return {
+    start_date: toISODate(startOfWeek),
+    end_date: toISODate(endOfWeek),
+  };
+};
+onMounted(async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    // Llamamos al servicio de combinaciones de emociones
+    const dateFilter = getWeekDateRange(); // 1. Obtiene la semana actual
+    // 2. Pasa el filtro a la API
+    const response = await DiaryService.getEmotionCombinations(dateFilter);
+    emotionCombinations.value = response.data;
+  } catch (err) {
+    console.error('Fallo al obtener datos para la gráfica:', err);
+    error.value = "No se pudieron cargar los datos del análisis.";
+  } finally {
+    loading.value = false;
+  }
 });
 </script>

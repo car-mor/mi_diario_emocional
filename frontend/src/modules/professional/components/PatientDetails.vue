@@ -1,11 +1,10 @@
 <template>
-  <div class="p-6 dark:bg-gray-900 min-h-screen">
+  <div class="p-4 sm:p-6 dark:bg-gray-900 min-h-screen overflow-x-hidden">
     <div class="max-w-7xl mx-auto">
 
       <div v-if="loading" class="text-center py-20">
         <p class="text-xl text-gray-500 dark:text-gray-400">Cargando detalles del paciente...</p>
-        </div>
-
+      </div>
       <div v-else-if="error" class="text-center py-20 bg-red-50 dark:bg-red-900/20 p-8 rounded-lg">
         <h2 class="text-2xl font-bold text-red-600 dark:text-red-400">Error al Cargar</h2>
         <p class="text-red-500 dark:text-red-300 mt-2">{{ error }}</p>
@@ -15,67 +14,69 @@
       </div>
 
       <div v-else-if="patient">
+
         <div class="flex items-center justify-between mb-8">
-          <button @click="goBack" class="p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <button @click="goBack" class="p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-800 dark:text-white" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 6l-6 6l6 6"></path></svg>
           </button>
-          <h1 class="text-3xl font-bold text-gray-800 dark:text-white flex-grow text-center lg:text-left ml-4">
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white flex-grow text-center lg:text-left ml-4">
             Paciente: {{ patient.name }}
           </h1>
         </div>
+
         <div class="my-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700">
-  <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
 
-    <div class="md:col-span-2">
-      <label for="week-selector" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Análisis por Semana</label>
-      <select id="week-selector" v-model="selectedWeek" @change="handleWeekChange" class="mt-1 block w-full rounded-md ...">
-        <option v-for="week in availableWeeks" :key="week.week_number" :value="week.start_date">
-          {{ week.display_text }}
-        </option>
-      </select>
-    </div>
+            <div class="md:col-span-2">
+              <label for="week-selector" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Análisis por Semana</label>
+              <select id="week-selector" v-model="selectedWeek" @change="handleWeekChange" class="text-gray-700 dark:text-gray-300 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm dark:bg-gray-700 focus:border-blue-500 focus:ring-blue-500">
+                <option v-for="week in availableWeeks" :key="week.week_number" :value="week.start_date">
+                  {{ week.display_text }}
+                </option>
+              </select>
+            </div>
 
-    <p class="text-center text-gray-500 dark:text-gray-400 font-bold md:col-span-1">Ó</p>
+            <p class="text-center text-gray-500 dark:text-gray-400 font-bold md:col-span-1">Ó</p>
 
-    <div class="md:col-span-2 grid grid-cols-2 gap-4">
-      <div>
-        <label for="start-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Desde</label>
-        <input type="date" id="start-date" v-model="customStartDate" class="mt-1 block w-full rounded-md ...">
-      </div>
-      <div>
-        <label for="end-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hasta</label>
-        <input type="date" id="end-date" v-model="customEndDate" class="mt-1 block w-full rounded-md ...">
-      </div>
-    </div>
-  </div>
-  <div class="flex justify-end mb-8">
-      <button @click="applyCustomFilter" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md">
-        Filtrar por Fecha
-      </button>
-  </div>
-</div>
+            <div class="md:col-span-2 grid grid-cols-2 gap-4">
+              <div>
+                <label for="start-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Desde</label>
+                <input type="date" id="start-date" v-model="customStartDate" class="text-gray-700 dark:text-gray-300 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm dark:bg-gray-700 focus:border-blue-500 focus:ring-blue-500">
+              </div>
+              <div>
+                <label for="end-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hasta</label>
+                <input type="date" id="end-date" v-model="customEndDate" class="text-gray-700 dark:text-gray-300 mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm dark:bg-gray-700 focus:border-blue-500 focus:ring-blue-500">
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-center md:justify-end mt-4">
+            <button @click="applyCustomFilter" class="bg-[#70BFE9] hover:bg-[#5DA6C8] text-white font-semibold py-2 px-4 rounded-md w-full md:w-auto">
+              Filtrar por Fecha
+            </button>
+          </div>
+        </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl mb-8 overflow-x-auto">
           <table class="min-w-full">
             <thead class="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Edad</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Género</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Alias</th>
-                    <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Avatar</th>
-                </tr>
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Edad</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Género</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Correo</th>
+                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Alias</th>
+                <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Avatar</th>
+              </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-              <tr class="block lg:table-row p-4 lg:p-0">
-                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell font-semibold" data-label="Nombre">{{ patient.name }}</td>
-                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Edad">{{ patient.age }}</td>
-                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Género">{{ patient.gender }}</td>
-                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Correo">{{ patient.email }}</td>
-                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Alias">{{ patient.alias }}</td>
-                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Avatar">
-                  <img :src="patient.avatar_url" :alt="`Avatar de ${patient.alias}`" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400" />
+              <tr>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap">{{ patient.name }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.age }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.gender }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.email }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.alias }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 text-center">
+                  <img :src="patient.avatar_url" :alt="`Avatar de ${patient.alias}`" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 mx-auto" />
                 </td>
               </tr>
             </tbody>
@@ -83,92 +84,127 @@
         </div>
 
         <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-8 mb-4">Análisis de Entradas</h2>
-        <div class="flex border-b border-gray-300 dark:border-gray-700 mb-6">
-          <button @click="activeTab = 'historial'" :class="tabClass('historial')">Historial</button>
-          <button @click="activeTab = 'grafica'" :class="tabClass('grafica')">Emociones Combinadas</button>
-          <button @click="activeTab = 'nube'" :class="tabClass('nube')">Nube de Palabras</button>
+        <div class="border-b border-gray-300 dark:border-gray-700 mb-6">
+          <div class="overflow-x-auto">
+            <div class="flex space-x-2 sm:space-x-4">
+              <button @click="activeTab = 'historial'" :class="tabClass('historial')" class="whitespace-nowrap">Historial</button>
+              <button @click="activeTab = 'grafica'" :class="tabClass('grafica')" class="whitespace-nowrap">Emociones Combinadas</button>
+              <button @click="activeTab = 'nube'" :class="tabClass('nube')" class="whitespace-nowrap">Nube de Palabras</button>
+            </div>
+          </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 min-h-[500px]">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 min-h-[500px]">
+
           <div v-if="activeTab === 'historial'">
-            <div v-if="!hasData" class="flex justify-center items-center h-[400px]">
+            <div v-if="!hasData" class="flex justify-center items-center h-[400px] text-center">
               <p class="text-xl text-gray-600 dark:text-gray-300">Este paciente aún no tiene entradas en su diario.</p>
             </div>
             <div v-else class="space-y-6">
-              <div v-for="entry in diaryHistory" :key="entry.id" class="border dark:border-gray-700 rounded-lg p-4">
+              <div
+                v-for="entry in diaryHistory"
+                :key="entry.id"
+                class="border dark:border-gray-700 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-lg dark:hover:bg-gray-700"
+                @click="toggleExpand(entry.id)"
+              >
                 <h3 class="font-bold text-lg dark:text-white">{{ entry.title }}</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">{{ new Date(entry.entry_date).toLocaleString() }}</p>
-                <p class="text-gray-700 dark:text-gray-300 text-sm mb-3">"{{ entry.content.substring(0, 200) }}..."</p>
-                <div class="text-xs space-x-2">
-                  <span v-for="emotion in entry.analyzed_emotions" :key="emotion" class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-1 rounded-full">{{ emotion }}</span>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ new Date(entry.entry_date).toLocaleString() }}</p>
+
+                <p v-if="expandedEntryId === entry.id" class="text-gray-700 dark:text-gray-300 text-sm mb-4 whitespace-pre-wrap">
+                  {{ entry.content }}
+                </p>
+                <p v-else class="text-gray-700 dark:text-gray-300 text-sm mb-4 italic">
+                  "{{ entry.content.substring(0, 200) }}..." (clic para expandir)
+                </p>
+
+                <div class="flex flex-col md:flex-row gap-4 pt-3 border-t dark:border-gray-600">
+                  <div class="flex-1">
+                    <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Sentimiento Reportado</h4>
+                    <div v-if="entry.selected_emotions && entry.selected_emotions.length > 0" class="flex flex-wrap gap-2">
+                      <span v-for="emotion in entry.selected_emotions" :key="emotion" class="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-2.5 py-1 rounded-full font-medium">
+                        {{ emotion }}
+                      </span>
+                    </div>
+                    <p v-else class="text-xs text-gray-400 dark:text-gray-500 italic">Ninguno reportado.</p>
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Análisis de IA</h4>
+                    <div v-if="entry.analyzed_emotions && entry.analyzed_emotions.length > 0 && entry.analyzed_emotions[0] !== 'neutro'" class="flex flex-wrap gap-2">
+                      <span v-for="emotion in entry.analyzed_emotions" :key="emotion" class="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
+                        {{ emotion }}
+                      </span>
+                    </div>
+                    <p v-else class="text-xs text-gray-400 dark:text-gray-500 italic">Análisis neutral.</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           <div v-else-if="activeTab === 'grafica'">
-            <PieChartPatient :combination-data="emotionCombinations" />
+            <PieChartPatient
+              :combination-data="emotionCombinations"
+              :loading="loading"
+              :error="error"
+            />
           </div>
-
           <div v-else-if="activeTab === 'nube'">
-            <WordCloudPatient :words="wordFrequency" />
+            <WordCloudPatient
+              :words="wordFrequency"
+              :loading="loading"
+              :error="error"
+            />
           </div>
         </div>
 
-        <div class="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mt-8">
-    <div class="flex items-center space-x-3">
-        <p class="text-sm text-gray-600 dark:text-gray-300">
-
-            <span v-if="reportInfo?.is_available">
+        <div class="flex flex-col sm:flex-row items-center justify-between bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mt-8 gap-4">
+          <div class="flex items-center space-x-3 text-center sm:text-left">
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              <span v-if="reportInfo?.is_available">
                 El reporte semanal está listo para descargar.
-            </span>
-
-            <span v-else>
+              </span>
+              <span v-else>
                 <span v-if="diaryHistory.length === 0">
-                    El primer reporte estará disponible 7 días después de que el paciente escriba por primera vez.
+                  El primer reporte estará disponible 7 días después de que el paciente escriba por primera vez.
                 </span>
                 <span v-else>
-                    El próximo reporte para este periodo estará disponible el:
-                    <span class="font-semibold">{{ reportInfo?.next_report_date }}</span>
+                  El próximo reporte para este periodo estará disponible el:
+                  <span class="font-semibold">{{ reportInfo?.next_report_date }}</span>
                 </span>
-            </span>
-
-        </p>
-    </div>
-    <button
-        @click="downloadPdf"
-        class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
-        :disabled="isDownloading || !reportInfo?.is_available"
-        :class="{ 'opacity-50 cursor-not-allowed': isDownloading || !reportInfo?.is_available }">
-        {{ isDownloading ? 'Generando...' : 'Descargar PDF' }}
-    </button>
-</div>
+              </span>
+            </p>
+          </div>
+          <button
+            @click="downloadPdf"
+            class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors w-full sm:w-auto flex-shrink-0"
+            :disabled="isDownloading || !reportInfo?.is_available"
+            :class="{ 'opacity-50 cursor-not-allowed': isDownloading || !reportInfo?.is_available }">
+            {{ isDownloading ? 'Generando...' : 'Descargar PDF' }}
+          </button>
+        </div>
 
       </div>
     </div>
   </div>
 
-  <div v-if="showReportUnavailableModal" class="fixed inset-0 flex items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-2xl max-w-sm w-full text-center mx-4">
-
-        <div class="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-[#7DBFF8] dark:text-blue-400" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 21a9 9 0 0 1 -9 -9a9 9 0 0 1 9 -9a9 9 0 0 1 9 9a9 9 0 0 1 -9 9z"></path><path d="M12 8l0 4"></path><path d="M12 16l.01 0"></path></svg>
-        </div>
-
-        <h3 class="text-xl font-bold mb-4 dark:text-white">Reporte Aún No Disponible</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            El reporte semanal de este paciente estará disponible a partir del:
-            <span class="font-semibold text-[#7DBFF8] dark:text-blue-400 block mt-2">{{ reportInfo?.next_report_date }}</span>
-        </p>
-
-        <button
-          @click="showReportUnavailableModal = false"
-          class="px-6 py-2 bg-[#7DBFF8] hover:bg-[#2563eb] text-white font-semibold rounded-lg w-full transition-colors"
-        >
-          Entendido
-        </button>
+  <div v-if="showReportUnavailableModal" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-2xl max-w-sm w-full text-center mx-4">
+      <div class="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-[#7DBFF8] dark:text-blue-400" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 21a9 9 0 0 1 -9 -9a9 9 0 0 1 9 -9a9 9 0 0 1 9 9a9 9 0 0 1 -9 9z"></path><path d="M12 8l0 4"></path><path d="M12 16l.01 0"></path></svg>
       </div>
+      <h3 class="text-xl font-bold mb-4 dark:text-white">Reporte Aún No Disponible</h3>
+      <p class="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+        El reporte semanal de este paciente estará disponible a partir del:
+        <span class="font-semibold text-[#7DBFF8] dark:text-blue-400 block mt-2">{{ reportInfo?.next_report_date }}</span>
+      </p>
+      <button
+        @click="showReportUnavailableModal = false"
+        class="px-6 py-2 bg-[#7DBFF8] hover:bg-[#2563eb] text-white font-semibold rounded-lg w-full transition-colors"
+      >
+        Entendido
+      </button>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -202,7 +238,7 @@ const selectedWeek = ref<string | null>(null); // Guardará el start_date de la 
 const customStartDate = ref('');
 const customEndDate = ref('');
 const activeFilter = ref<{ type: 'week' | 'custom', dates: { startDate: string, endDate: string } | null }>({ type: 'week', dates: null });
-
+const expandedEntryId = ref<string | null>(null);
 const patientId = route.params.id as string;
 
 // --- LÓGICA COMPUTADA ---
@@ -217,6 +253,16 @@ const tabClass = (tabName: 'historial' | 'grafica' | 'nube') => ({
 // --- MÉTODOS DE ACCIÓN ---
 function goBack() {
   router.back();
+}
+
+function toggleExpand(entryId: string) {
+  // Si el ID clicado ya es el que está expandido, lo cerramos (null)
+  if (expandedEntryId.value === entryId) {
+    expandedEntryId.value = null;
+  } else {
+    // Si no, expandimos este
+    expandedEntryId.value = entryId;
+  }
 }
 
 const fetchPatientData = async () => {
@@ -334,51 +380,3 @@ async function downloadPdf() {
   }
 }
 </script>
-
-<style scoped>
-/* Estilos necesarios para hacer que la tabla de info del paciente sea responsiva en móvil */
-@media (max-width: 1023px) {
-    .lg\:table { display: block; }
-    .lg\:table-header-group { display: none; }
-
-    .lg\:table-row {
-        display: block;
-        border: none !important;
-        margin-bottom: 0.5rem;
-        padding: 0;
-        background: none !important;
-        box-shadow: none !important;
-    }
-
-    .lg\:table-cell {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.2rem 0;
-        text-align: left !important;
-        border-top: none !important;
-    }
-
-    .lg\:table-cell::before {
-        content: attr(data-label) ":";
-        font-weight: bold;
-        display: block;
-        color: #6b7280;
-        flex-shrink: 0;
-        margin-right: 1rem;
-        width: 120px; /* Ancho fijo para la etiqueta en móvil */
-    }
-
-    .lg\:table-cell:first-child::before,
-    .lg\:table-cell:last-child::before {
-        display: none;
-    }
-
-    .lg\:table-cell:nth-child(1) { padding-top: 1rem; }
-    .lg\:table-cell:nth-child(7) { padding-bottom: 1rem; }
-    .lg\:table-cell > * {
-        text-align: right;
-        margin-left: auto;
-    }
-}
-</style>

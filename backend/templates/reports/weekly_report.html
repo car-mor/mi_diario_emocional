@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte Semanal - {{ patient.alias }}</title>
+    <style>
+        /* --- Importar Fuente Profesional --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        /* --- Variables de Color --- */
+        :root {
+            --color-primary: #3457B2;
+            --color-primary-light: #7DBFF8;
+            --color-logo: #70BFE9;
+            --color-accent-user: #10B981; /* Verde para el usuario */
+            --color-accent-ai: #3B82F6;   /* Azul para la IA */
+            --color-text-dark: #1F2937;
+            --color-text-medium: #4B5563;
+            --color-text-light: #6B7281;
+            --color-bg-light: #F9FAFB;
+            --color-border: #E5E7EB;
+        }
+
+        /* --- Configuración de Página y Tipografía --- */
+        @page {
+            size: A4;
+            margin: 2cm 2cm;
+            
+            @bottom-left {
+                content: "Reporte Confidencial de Paciente";
+                font-size: 9pt;
+                color: var(--color-text-light);
+            }
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 9pt;
+                color: var(--color-text-light);
+            }
+        }
+        
+        body {
+            font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+            color: var(--color-text-dark);
+            font-size: 11pt;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, p { margin: 0; padding: 0; }
+        h1 { font-size: 24pt; color: var(--color-text-dark); font-weight: 700; margin-bottom: 5px; }
+        h2 { font-size: 16pt; color: var(--color-text-dark); font-weight: 600; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid var(--color-primary-light); }
+        h3 { font-size: 13pt; font-weight: 600; color: var(--color-primary); margin-bottom: 15px; }
+        h4 { font-size: 9pt; font-weight: 600; color: var(--color-text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+
+        /* --- Estructura --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--color-primary-light);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo-container { display: flex; align-items: center; }
+        .logo-img img {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+        }
+        .logo-title {
+            font-size: 18pt; /* text-xl */
+            font-weight: 600;
+            color: var(--color-logo);
+            margin-left: 15px; /* space-x-3 */
+        }
+        .header-report-title { text-align: right; }
+        .header-report-title h1 { margin-bottom: 0; }
+        .header-report-title p { font-size: 14pt; color: var(--color-text-medium); }
+
+
+        /* --- 1. Info del Paciente (Grid) --- */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr; /* Columna 1 más ancha */
+            gap: 15px 20px;
+            background-color: var(--color-bg-light);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .info-grid div { line-height: 1.4; }
+        .info-grid p { font-size: 12pt; font-weight: 600; }
+        
+        .patient-id-block {
+            display: flex;
+            align-items: center;
+        }
+        .patient-avatar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--color-primary-light);
+            margin-right: 15px;
+        }
+
+        /* --- 2. Análisis (Grid de 2 Columnas) --- */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr; /* 55% y 45% */
+            gap: 30px;
+            margin-bottom: 30px;
+            page-break-inside: avoid; /* Intenta no romper esta sección */
+        }
+
+        /* --- 2a. Gráfica de Barras (Emociones) --- */
+        .bar-chart-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 10pt; }
+        .bar-chart-label { width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; color: var(--color-text-medium); font-weight: 600; }
+        .bar-chart-bar-bg { width: 50%; background-color: var(--color-border); border-radius: 4px; }
+        .bar-chart-bar {
+            height: 20px;
+            background-color: var(--color-primary-light);
+            border-radius: 4px;
+            text-align: right;
+            padding-right: 6px;
+            color: var(--color-text-dark);
+            font-size: 10pt;
+            font-weight: 600;
+            line-height: 20px;
+            min-width: 25px; /* Para que se vea el número '1' */
+        }
+        .no-data { font-size: 11pt; color: var(--color-text-light); font-style: italic; }
+
+        /* --- 2b. Nube de Palabras (Etiquetas) --- */
+        .word-cloud-container { line-height: 1.8; text-align: left; }
+        .word-cloud-container span { display: inline-block; padding: 2px 6px; margin: 3px; border-radius: 4px; background-color: var(--color-bg-light); color: var(--color-text-medium); font-weight: 600; }
+        .size-5 { font-size: 2em; color: var(--color-primary); }
+        .size-4 { font-size: 1.6em; }
+        .size-3 { font-size: 1.3em; }
+        .size-2 { font-size: 1.1em; }
+        .size-1 { font-size: 1.0em; color: var(--color-text-light); }
+
+
+        /* --- 3. Registro de Entradas --- */
+        .entry-log { margin-top: 30px; }
+        .entry-card { border: 1px solid var(--color-border); border-radius: 8px; margin-bottom: 15px; padding: 15px; page-break-inside: avoid; }
+        .entry-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+        .entry-header h3 { font-size: 13pt; margin-bottom: 0; color: var(--color-primary); }
+        .entry-header span { font-size: 10pt; color: var(--color-text-light); }
+        .entry-content { font-size: 11pt; color: var(--color-text-medium); white-space: pre-wrap; margin-bottom: 15px; }
+        .entry-emotions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-top: 15px; border-top: 1px dashed var(--color-border); }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { font-size: 9pt; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+        .tag-user { background-color: #DEF7EC; color: #046C4E; }
+        .tag-ai { background-color: #DBEAFE; color: #1E40AF; }
+        .tag-none { font-size: 10pt; color: var(--color-text-light); font-style: italic; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo-container">
+            <div class="logo-img">
+                {% if logo_data_uri %}
+                    <img src="{{ logo_data_uri }}" alt="Logo">
+                {% endif %}
+            </div>
+            <h1 class="logo-title">Mi diario emocional</h1>
+        </div>
+        <div class="header-report-title">
+            <h1>Reporte de Análisis</h1>
+            <p>{{ report_title }}</p>
+        </div>
+    </div>
+
+    <section class="info-grid">
+        <div>
+            <h4>Paciente</h4>
+            <div class="patient-id-block">
+                {% if avatar_data_uri %}
+                    <div class="patient-avatar">
+                        <img src="{{ avatar_data_uri }}" alt="Avatar">
+                    </div>
+                {% endif %}
+                <p>{{ patient.user.get_full_name }} ({{ patient.alias }})</p>
+            </div>
+        </div>
+        <div>
+            <h4>Periodo</h4>
+            <p>{{ week_start|date:"d M, Y" }} - {{ week_end|date:"d M, Y" }}</p>
+        </div>
+        <div>
+            <h4>Total de Entradas</h4>
+            <p>{{ diary_entries|length }}</p>
+        </div>
+    </section>
+
+    
+    <section class="analysis-grid">
+        
+        <div class="analysis-chart">
+            <h2>Emociones Frecuentes</h2>
+            
+            {% if emotion_combinations %}
+                {% with max_count=emotion_combinations.0.1 %}
+                <div class="chart-container">
+                    {% for comb, count in emotion_combinations %}
+                        <div class="bar-chart-item">
+                            <div class="bar-chart-label" title="{{ comb }}">{{ comb }}</div>
+                            <div class="bar-chart-bar-bg">
+                                <div class="bar-chart-bar" style="width: {% widthratio count max_count 100 %}%;">
+                                    {{ count }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endwith %}
+            {% else %}
+                <p class="no-data">No se encontraron combinaciones de emociones en este periodo.</p>
+            {% endif %}
+        </div>
+
+        <div class="analysis-cloud">
+            <h2>Nube de Palabras Clave</h2>
+            
+            {% if word_frequency %}
+            <div class="word-cloud-container">
+                {% for word, count, size_class in word_frequency %}
+                    <span class="{{ size_class }}">{{ word }} ({{ count }})</span>
+                {% endfor %}
+            </div>
+            
+            {% else %}
+                <p class="no-data">No se encontraron palabras clave en este periodo.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="entry-log">
+        <h2>Registro de Entradas del Periodo</h2>
+        
+        {% for entry in diary_entries %}
+            <div class="entry-card">
+                <div class="entry-header">
+                    <h3>{{ entry.title }}</h3>
+                    <span>{{ entry.entry_date|date:"d M, Y - P" }}</span>
+                </div>
+                
+                <div class="entry-content">
+                    {{ entry.content }}
+                </div>
+                
+                <div class="entry-emotions-grid">
+                    <div>
+                        <h4>Sentimiento Reportado</h4>
+                        <div class="tag-list">
+                            {% for emotion in entry.selected_emotions %}
+                                <span class="tag tag-user">{{ emotion|capfirst }}</span>
+                            {% empty %}
+                                <span class="tag-none">Ninguno reportado.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Análisis de IA</h4>
+                        <div class="tag-list">
+                            {% if entry.analyzed_emotions and entry.analyzed_emotions.0 != 'neutro' %}
+                                {% for emotion in entry.analyzed_emotions %}
+                                    <span class="tag tag-ai">{{ emotion|capfirst }}</span>
+                                {% endfor %}
+                            {% else %}
+                                 <span class="tag-none">Análisis neutral.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="no-data">No hay entradas en el diario para este periodo.</p>
+        {% endfor %}
+    </section>
+
+</body>
+</html>

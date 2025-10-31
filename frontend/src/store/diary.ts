@@ -1,57 +1,95 @@
-// src/store/diary.ts
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { isAxiosError } from 'axios'; // Importamos el verificador de tipo de Axios
-import * as DiaryService from '@/modules/diary/services/diaryService';
+import * as DiaryService from '@/modules/diary/services/diaryServices';
+import { useAuthStore } from '@/store/auth';
 
-// Define la interfaz para una entrada del diario que viene del backend
-export interface DiaryEntry extends DiaryService.DiaryEntryPayload {
-  id: string;
-  entry_date: string;
-  // Añade otros campos de lectura si es necesario
-}
+// 1. Usamos la interfaz limpia del servicio
+export type DiaryEntry = DiaryService.DiaryEntryFromAPI;
 
 export const useDiaryStore = defineStore('diary', () => {
   const entries = ref<DiaryEntry[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
+  // 2. Acción para obtener todas las entradas
   const fetchEntries = async () => {
     loading.value = true;
     error.value = null;
     try {
       const response = await DiaryService.getDiaryEntries();
       entries.value = response.data;
-    } catch (err: unknown) { // <-- FIX: Usamos 'unknown'
-      // Verificamos si es un error de Axios para extraer un mensaje legible
+    } catch (err: unknown) {
       if (isAxiosError(err) && err.response) {
-         error.value = 'Error de la API (' + err.response.status + '): ' + (err.response.data.detail || 'Fallo de autenticación');
+         error.value = `Error ${err.response.status}: No se pudieron cargar las entradas.`;
       } else {
-         error.value = 'Error al cargar las entradas. ¿Estás logueado?';
+         error.value = 'Error de conexión al cargar las entradas.';
       }
-      console.error('Failed to fetch diary entries:', err);
+      console.error(err);
     } finally {
       loading.value = false;
     }
   };
 
-  const createEntry = async (entry: DiaryService.DiaryEntryPayload) => {
+  // 3. Acción para añadir una nueva entrada
+  const createEntry = async (entryData: DiaryService.CreateDiaryEntryPayload) => {
+    loading.value = true;
+    error.value = null;
+    const authStore = useAuthStore();
+    try {
+      const response = await DiaryService.createDiaryEntry(entryData);
+      // Añadimos la nueva entrada al principio de la lista para que aparezca primero
+      entries.value.unshift(response.data);
+      await authStore.fetchUserProfile();
+      return response.data;
+    } catch (err: unknown) {
+      if (isAxiosError(err) && err.response) {
+        error.value = 'Error al crear la entrada: ' + (err.response.data.detail || 'Datos inválidos.');
+      } else {
+        error.value = 'Error de conexión al crear la entrada.';
+      }
+      console.error(err);
+      throw err; // Lanza el error para que el componente también lo pueda manejar
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // 4. NUEVA ACCIÓN: Eliminar una entrada
+  const deleteEntry = async (id: string) => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await DiaryService.createDiaryEntry(entry);
-      entries.value.push(response.data);
-      return response.data;
-    } catch (err: unknown) { // <-- FIX: Usamos 'unknown'
-      if (isAxiosError(err) && err.response) {
-         error.value = 'Error al crear la entrada: ' + (err.response.data.detail || 'Datos inválidos.');
-      } else {
-         error.value = 'Error de conexión al crear la entrada.';
-      }
-      console.error('Failed to create diary entry:', err);
-      throw err; // Es buena práctica lanzar el error para manejarlo en el componente
+        await DiaryService.deleteDiaryEntry(id);
+        // Filtramos la lista para eliminar la entrada del estado local
+        entries.value = entries.value.filter(entry => entry.id !== id);
+    } catch(err) {
+        // ... manejo de errores ...
+        error.value = 'No se pudo eliminar la entrada.';
+        throw err;
     } finally {
-      loading.value = false;
+        loading.value = false;
+    }
+  };
+
+  // 5. NUEVA ACCIÓN: Actualizar una entrada
+  const updateEntry = async (id: string, updateData: DiaryService.UpdateDiaryEntryPayload) => {
+    loading.value = true;
+    error.value = null;
+    try {
+        const response = await DiaryService.updateDiaryEntry(id, updateData);
+        const index = entries.value.findIndex(entry => entry.id === id);
+        if (index !== -1) {
+            // Reemplazamos el objeto antiguo con el nuevo del backend
+            entries.value[index] = response.data;
+        }
+        return response.data;
+    } catch(err) {
+        // ... manejo de errores ...
+        error.value = 'No se pudo actualizar la entrada.';
+        throw err;
+    } finally {
+        loading.value = false;
     }
   };
 
@@ -61,5 +99,7 @@ export const useDiaryStore = defineStore('diary', () => {
     error,
     fetchEntries,
     createEntry,
+    deleteEntry,
+    updateEntry,
   };
 });

@@ -8,7 +8,7 @@
                 <p class="text-xl text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
                     "No tienes pacientes vinculados actualmente. Comparte tu código de vinculación para que los pacientes puedan conectarse contigo."
                 </p>
-                <a href="/home-professional" class="mt-6 inline-block px-6 py-3 bg-[#7DBFF8] hover:bg-[#3457B2] text-white font-semibold rounded-lg transition-colors duration-300 shadow-md">
+                <a href="/professional-layout" class="mt-6 inline-block px-6 py-3 bg-[#7DBFF8] hover:bg-[#3457B2] text-white font-semibold rounded-lg transition-colors duration-300 shadow-md">
                     Ver mi Código de Enlace
                 </a>
             </div>
@@ -48,7 +48,7 @@
 
                                 <td class="px-6 py-2 lg:py-4 whitespace-normal text-sm text-gray-700 dark:text-gray-300 flex items-center justify-center" data-label="Avatar">
                                     <img
-                                        :src="patient.avatarUrl"
+                                        :src="patient.avatar_url"
                                         :alt="`Avatar de ${patient.alias}`"
                                         class="w-15 h-15 rounded-full object-cover border-2 border-blue-400"
                                     />
@@ -125,95 +125,79 @@
         </div>
     </div>
 </template>
-
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+// Importamos el nuevo servicio y la interfaz
+import * as ProfessionalService from '@/modules/professional/services/professionalServices'; // Ajusta la ruta si es necesario
+import type { Patient } from '@/modules/professional/services/professionalServices';
 
 const router = useRouter();
 
-// Definición de tipos para un paciente
-interface Patient {
-    id: number;
-    name: string;
-    age: number;
-    gender: 'Femenino' | 'Masculino' | 'Otro';
-    email: string;
-    alias: string;
-    avatarUrl: string;
-}
-
-// ----------------------------------------------------
-// --- ESTADOS REACTIVOS Y DATOS DE PRUEBA
-// ----------------------------------------------------
-
-const patientList = ref<Patient[]>([
-    {
-        id: 101, name: 'María Castañeda', age: 13, gender: 'Femenino', email: 'maria@correo.com', alias: 'xchmor',
-        avatarUrl: 'https://i.pravatar.cc/150?img=1'
-    },
-    {
-        id: 102, name: 'Carlos López', age: 15, gender: 'Masculino', email: 'carlos@correo.com', alias: 'PsychoCat',
-        avatarUrl: 'https://i.pravatar.cc/150?img=2'
-    },
-    {
-        id: 103, name: 'Juana Pérez', age: 16, gender: 'Femenino', email: 'juana@correo.com', alias: 'SweetPea',
-        avatarUrl: 'https://i.pravatar.cc/150?img=3'
-    },
-    {
-        id: 104, name: 'Miguel Torres', age: 14, gender: 'Masculino', email: 'miguel@correo.com', alias: 'MigueT',
-        avatarUrl: 'https://i.pravatar.cc/150?img=4'
-    },
-]);
-
-//const patientList = ref<Patient[]>([]); // Lista vacía para probar el estado sin pacientes
+// Variables reactivas para manejar el estado
+const patientList = ref<Patient[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
 
 const showDisconnectModal = ref(false);
 const showSuccessModal = ref(false);
 const selectedPatient = ref<Patient | null>(null);
 
-// ----------------------------------------------------
-// --- MÉTODOS DE LA TABLA Y MODAL
-// ----------------------------------------------------
+// Función para obtener los datos de la API
+const fetchPatients = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const response = await ProfessionalService.getLinkedPatients();
+    // Renombramos 'avatar_url' a 'avatarUrl' para que coincida con tu template
+    patientList.value = response.data.map(p => ({ ...p, avatarUrl: p.avatar_url }));
+  } catch (err) {
+    console.error("Error al cargar pacientes:", err);
+    error.value = "No se pudo cargar la lista de pacientes.";
+  } finally {
+    loading.value = false;
+  }
+};
 
+// Llamamos a la función cuando el componente se carga
+onMounted(fetchPatients);
+
+// MÉTODOS DE LA TABLA Y MODAL (actualizados)
 function openDisconnectModal(patient: Patient) {
-    selectedPatient.value = patient;
-    showDisconnectModal.value = true;
+  selectedPatient.value = patient;
+  showDisconnectModal.value = true;
 }
 
-function confirmDisconnect() {
-    if (!selectedPatient.value) return;
+async function confirmDisconnect() {
+  if (!selectedPatient.value) return;
 
-    console.log(`[API CALL] Desvinculando paciente ID: ${selectedPatient.value.id}`);
-
-    patientList.value = patientList.value.filter(
-        p => p.id !== selectedPatient.value!.id
-    );
+  try {
+    // LLAMADA REAL A LA API
+    await ProfessionalService.disconnectPatient(selectedPatient.value.id);
 
     showDisconnectModal.value = false;
     showSuccessModal.value = true;
+    // Recargamos la lista para que el paciente eliminado desaparezca
+    await fetchPatients();
 
-    console.log("¡Paciente desvinculado con éxito!");
+  } catch (err) {
+    console.error("Error al desvincular paciente:", err);
+    alert("Hubo un error al intentar desvincular al paciente.");
+    showDisconnectModal.value = false;
+  }
 }
 
-function viewPatientDetails(patientId: number) {
-  // Ya no necesitas la alerta ni el console.log para depurar
+function viewPatientDetails(patientId: string) { // El ID ahora es string (UUID)
   router.push({
-    name: 'patient-details',    // Usa el NOMBRE de la ruta
-    params: { id: patientId }   // Usa 'params' para llenar los segmentos dinámicos como ':id'
+    name: 'patient-details',
+    params: { id: patientId }
   });
 }
 
-
-// function viewPatientDetails(patientId: number) {
-//   router.push(`/patient-details/${patientId}`);
-// }
-
-// Limpia el paciente seleccionado si el modal se cierra por cualquier razón.
 watch(showDisconnectModal, (newVal) => {
-    if (!newVal && selectedPatient.value) {
-        selectedPatient.value = null;
-    }
+  if (!newVal) {
+    selectedPatient.value = null;
+  }
 });
 </script>
 

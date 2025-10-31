@@ -134,8 +134,46 @@ class ProfessionalAdmin(admin.ModelAdmin):
         self.message_user(request, "Las solicitudes seleccionadas han sido rechazadas.")
 
 
+@admin.register(Patient)
+class PatientAdmin(admin.ModelAdmin):
+    """
+    Personaliza la vista del modelo Patient en el panel de administración.
+    """
+
+    list_display = ("get_full_name", "alias", "get_email", "get_professional_name")
+    search_fields = ("alias", "user__name", "user__paternal_last_name", "user__email")
+    list_filter = ("gender", "professional__user__name")
+
+    # Optimiza las consultas para cargar los datos relacionados eficientemente
+    list_select_related = ("user", "professional__user")
+
+    # Para la vista de detalle, hacemos que los campos importantes sean de solo lectura
+    readonly_fields = ("get_full_name", "get_email", "linked_at", "unlinked_at")
+
+    # Define los campos y su orden en la vista de edición/detalle
+    fieldsets = (
+        ("Información del Usuario", {"fields": ("get_full_name", "get_email")}),
+        ("Perfil del Paciente", {"fields": ("professional", "alias", "gender", "description", "profile_picture")}),
+        ("Historial de Vinculación", {"fields": ("linked_at", "unlinked_at")}),
+    )
+
+    @admin.display(description="Nombre Completo", ordering="user__name")
+    def get_full_name(self, obj):
+        return obj.user.get_full_name()
+
+    @admin.display(description="Correo Electrónico", ordering="user__email")
+    def get_email(self, obj):
+        return obj.user.email
+
+    @admin.display(description="Profesional Asignado", ordering="professional__user__name")
+    def get_professional_name(self, obj):
+        if obj.professional:
+            return obj.professional.user.get_full_name()
+        return "No asignado"
+
+
 # 3. Registrar los modelos
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(PasswordReset)
 admin.site.register(EmailChangeRequest)
-admin.site.register(Patient)
+# admin.site.register(Patient)

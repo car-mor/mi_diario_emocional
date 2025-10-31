@@ -72,21 +72,29 @@
         <button @click="closeSuccessModal" class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg w-full">Entendido</button>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { isAxiosError } from "axios";
+import { useRouter } from "vue-router";
+import {
+  type CreateDiaryEntryPayload,
+} from "@/modules/diary/services/diaryServices";
+import { useDiaryStore } from '@/store/diary';
+const router = useRouter();
+const diaryStore = useDiaryStore();
+const saveError = ref<string | null>(null);
 
 const step = ref(1);
 //emociones basicas de ekman
 const emotions = [
-  { value: "alegría", label: "😊" },
-  { value: "tristeza", label: "😢" },
-  { value: "ira", label: "😡" },
-  { value: "miedo", label: "😨" },
-  { value: "asco", label: "🤢" },
+  { value: "alegria",  label: "😊" }, // Coincide con el backend
+  { value: "tristeza", label: "😢" }, // Coincide con el backend
+  { value: "ira",      label: "😡" },
+  { value: "miedo",    label: "😨" },
+  { value: "asco",     label: "🤢" },
   { value: "sorpresa", label: "😯" },
 ];
 const selectedEmotions = ref<string[]>([]);
@@ -126,7 +134,7 @@ function showConfirmation() {
       titleError.value = "El título no puede exceder los 100 caracteres.";
       return;
     }
-    const validCharacters = /^[a-zA-Z0-9\s.,!¡¿?_'-]*$/;
+    const validCharacters = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.,!¡¿?_'-]*$/;
     if (!validCharacters.test(cleanTitle)) {
       titleError.value = "El título contiene caracteres no válidos.";
       return;
@@ -148,67 +156,46 @@ function cancelSave() {
 
 // Nuevo: Función para cerrar el modal de éxito y resetear el formulario
 function closeSuccessModal() {
-  showSuccessModal.value = false;
-  step.value = 1;
-  selectedEmotions.value = [];
-  content.value = "";
-  title.value = "";
+    showSuccessModal.value = false;
+    step.value = 1;
+    selectedEmotions.value = [];
+    content.value = "";
+    title.value = "";
+
+    // Redirige al historial para que el usuario vea su nueva entrada
+    router.push({ name: 'diary-history' });
 }
 
-// SIMULACIOOOOOOOOOOOON DE DATOOOS
-async function saveEntry() {
-  showConfirmationModal.value = false; // Cierra el modal antes de guardar
-  
-  const payload = {
-    emotions: selectedEmotions.value,
-    content: content.value.trim(),
-    title: title.value.trim(),
-    date: new Date().toISOString(),
-  };
-
-  try {
-     // Simulación de respuesta del servidor
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Datos enviados (mock):", payload);
-    showSuccessModal.value = true; // Muestra el modal de éxito
-  } catch (err) {
-    console.error(err);
-    alert("Hubo un problema al guardar la entrada");
-  }
-}
-
-
-//conectarse al backend
-/*
 async function saveEntry() {
   showConfirmationModal.value = false;
+  saveError.value = null;
 
-  const payload = {
-    emotions: selectedEmotions.value,
-    content: content.value.trim(),
-    title: title.value.trim(),
-    date: new Date().toISOString(),
+  // El payload ahora es más simple
+  const payload: CreateDiaryEntryPayload = {
+      title: title.value.trim() || "Sin título",
+      content: content.value.trim(),
+      selected_emotions: selectedEmotions.value,
+      // ELIMINAMOS emotion_summary
   };
 
   try {
-    const response = await fetch("/api/diary-entries/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error("Error al guardar entrada");
+      await diaryStore.createEntry(payload);
+      showSuccessModal.value = true;
+  }catch (err) {
+        console.error(err);
+        // Ahora damos un mensaje de error más útil
+        if (isAxiosError(err) && err.response) {
+            if (err.response.status === 403) {
+                saveError.value = "Acción no permitida. Solo los pacientes pueden crear entradas.";
+            } else {
+                saveError.value = "Hubo un problema al guardar. Inténtalo de nuevo.";
+            }
+        } else {
+            saveError.value = "Error de conexión. Revisa tu internet.";
+        }
+        // Opcional: podrías mostrar el error en un modal en lugar de en el formulario
+        alert(saveError.value);
     }
-
-    // Muestra el modal de éxito si todo salió bien
-    showSuccessModal.value = true;
-  } catch (err) {
-    console.error(err);
-    alert("Hubo un problema al guardar la entrada");
-    // Opcional: mostrar un modal de error personalizado
-  }
 }
-}*/
 
 </script>

@@ -1,8 +1,10 @@
 <template>
   <div class="flex h-screen">
     <main class="flex-1 flex flex-col overflow-hidden">
-      <StreakAndTitle title="Inicio: Recursos de Autoayuda" :streakCount="2" />
-
+      <StreakAndTitle
+      title="Inicio: Recursos de Autoayuda"
+      :streak-count="streakCount"
+    />
       <div class="dark:bg-gray-800 transition-colors flex-1 p-6 overflow-y-auto">
 
         <div class="mb-8 relative bg-gradient-to-r overflow-hidden h-96 flex items-center justify-center">
@@ -188,7 +190,7 @@
 
 <script setup lang="ts">
 import { IconPhoneCall, IconMoodHeart } from "@tabler/icons-vue"
-import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
+import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
 import UserProfile from "../components/PatientProfile.vue"
 import Carrusel from "../components/CarruselPatient.vue"
 import { ref, onMounted, computed } from 'vue';
@@ -208,6 +210,8 @@ interface PatientProfile {
     alias: string;
     gender: string;
     professional_name?: string; // Es opcional y puede ser nulo
+    is_linked: boolean;
+    current_streak: number;
 }
 
 // ----------------------------------------------------
@@ -217,6 +221,17 @@ const patientData = ref<PatientProfile | null>(null);
 const loadingProfile = ref(true);
 const authStore = useAuthStore();
 const router = useRouter();
+
+const streakCount = computed(() => {
+  // Primero, verificamos si el usuario es un paciente y si su perfil ha cargado
+  if (authStore.userType === 'patient' && authStore.userProfile) {
+    // Si es así, le decimos a TypeScript que trate el perfil como un PatientProfile
+    // y accedemos a 'current_streak' de forma segura.
+    return (authStore.userProfile as PatientProfile).current_streak || 0;
+  }
+  // Si no es un paciente, la racha es 0.
+  return 0;
+});
 
 // Variables de UI y modales
 const showEmergencyNumbers = ref(false);

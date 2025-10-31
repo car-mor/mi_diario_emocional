@@ -2,12 +2,15 @@
   <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6">
     <div class="flex items-center justify-between">
       <!-- Logo y título -->
+      <a href="/">
       <div class="flex items-center space-x-3">
+
         <div class="flex items-center justify-center">
           <img src="@/assets/images/logo.png" alt="Logo <3" class="w-14 h-14 object-contain" />
         </div>
         <h1 class="text-xl font-semibold text-[#70BFE9]">Mi diario emocional</h1>
       </div>
+      </a>
 
       <!-- Navegación central -->
       <nav class="hidden md:flex items-center space-x-8">

@@ -4,9 +4,6 @@ from .models import DiaryEntry
 
 
 class DiaryEntrySerializer(serializers.ModelSerializer):
-    # `read_only=True` asegura que el ID del paciente no se pueda modificar desde el frontend
-    patient = serializers.UUIDField(read_only=True)
-
     class Meta:
         model = DiaryEntry
         fields = [
@@ -15,7 +12,17 @@ class DiaryEntrySerializer(serializers.ModelSerializer):
             "title",
             "entry_date",
             "content",
-            "selected_emotions",
-            "emotion_summary",
+            "selected_emotions",  # Las que el usuario selecciona
+            "analyzed_emotions",
+            "analyzed_scores",
+            "content_length",
         ]
-        read_only_fields = ["id", "entry_date", "content_length"]
+        # Hacemos los campos generados por el backend de solo lectura
+        read_only_fields = [
+            "id",
+            "patient",
+            "entry_date",
+            "content_length",
+            "analyzed_emotions",
+            "analyzed_scores",
+        ]

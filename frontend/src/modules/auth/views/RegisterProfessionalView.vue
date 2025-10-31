@@ -19,10 +19,15 @@
                 v-model="form.email"
                 type="email"
                 placeholder="Ingresa tu correo electrónico"
-                class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
+                @blur="validateEmail" class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2"
+                :class="{
+                  'border-red-500 dark:border-red-500 focus:ring-red-500': emailError,
+                  'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !emailError
+                }"
                 required
               />
             </div>
+            <p v-if="emailError" class="text-sm text-red-500 mt-2">{{ emailError }}</p>
           </div>
           <div class="relative">
             <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2"
@@ -37,6 +42,16 @@
                 class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
                 required
               />
+            </div>
+            <div
+              v-if="form.password.length > 0"
+              class="text-sm text-left text-gray-600 dark:text-gray-400 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1"
+            >
+              <p v-for="req in passwordValidation" :key="req.text" class="transition-colors flex items-center"
+                :class="{'text-green-500 dark:text-green-400': req.met, 'text-red-500 dark:text-red-400': !req.met}">
+                <span class="mr-2">{{ req.met ? '✓' : '✗' }}</span>
+                <span>{{ req.text }}</span>
+              </p>
             </div>
           </div>
           <div class="relative">
@@ -53,6 +68,15 @@
                 required
               />
             </div>
+            <div
+              v-if="form.password !== form.confirmPassword && form.confirmPassword.length > 0"
+              class="text-sm text-left text-gray-600 dark:text-gray-400 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1"
+            >
+              <p class="flex items-center text-red-500 dark:text-red-400">
+                <span>Las contraseñas no coinciden.</span
+              >
+              </p>
+            </div>
           </div>
            <p v-if="passwordError" class="text-sm text-red-500 mt-2">{{ passwordError }}</p>
 
@@ -65,9 +89,14 @@
                 v-model="form.name"
                 type="text"
                 placeholder="Ingresa tu nombre(s)"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
+                @blur="validateName" class="w-full px-4 py-3 rounded-lg border bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2"
+              :class="{
+                'border-red-500 dark:border-red-500 focus:ring-red-500': nameError,
+                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !nameError
+              }"
+              required
               />
+              <p v-if="nameError" class="text-sm text-red-500 mt-2">{{ nameError }}</p>
             </div>
             <div class="relative">
               <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2"
@@ -77,9 +106,14 @@
                 v-model="form.paternalLastName"
                 type="text"
                 placeholder="Ingresa tu primer apellido"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
+                @blur="validatePaternalLastName" class="w-full px-4 py-3 rounded-lg border bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2"
+              :class="{
+                'border-red-500 dark:border-red-500 focus:ring-red-500': paternalLastNameError,
+                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !paternalLastNameError
+              }"
+              required
               />
+              <p v-if="paternalLastNameError" class="text-sm text-red-500 mt-2">{{ paternalLastNameError }}</p>
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -91,9 +125,14 @@
                 v-model="form.maternalLastName"
                 type="text"
                 placeholder="Ingresa tu segundo apellido"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
+                @blur="validateMaternalLastName" class="w-full px-4 py-3 rounded-lg border bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2"
+              :class="{
+                'border-red-500 dark:border-red-500 focus:ring-red-500': maternalLastNameError,
+                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !maternalLastNameError
+              }"
+
               />
+              <p v-if="maternalLastNameError" class="text-sm text-red-500 mt-2">{{ maternalLastNameError }}</p>
             </div>
             <div class="relative">
               <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2"
@@ -102,9 +141,14 @@
               <input
                 v-model="form.dateOfBirth"
                 type="date"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
+                @change="validateDateOfBirth" class="w-full px-4 py-3 rounded-lg border bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2"
+              :class="{
+                'border-red-500 dark:border-red-500 focus:ring-red-500': dateOfBirthError,
+                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !dateOfBirthError
+              }"
+              required
               />
+              <p v-if="dateOfBirthError" class="text-sm text-red-500 mt-2">{{ dateOfBirthError }}</p>
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -130,9 +174,14 @@
                 v-model="form.professionalLicense"
                 type="text"
                 placeholder="Ingresa tu No. de Cédula Profesional"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
+                @blur="validateLicense" class="w-full px-4 py-3 rounded-lg border bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2"
+              :class="{
+                'border-red-500 dark:border-red-500 focus:ring-red-500': licenseError,
+                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !licenseError
+              }"
+              required
               />
+              <p v-if="licenseError" class="text-sm text-red-500 mt-2">{{ licenseError }}</p>
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -144,9 +193,14 @@
                 v-model="form.curp"
                 type="text"
                 placeholder="Ingresa tu CURP"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
-                required
+                @blur="validateCurp" class="w-full px-4 py-3 rounded-lg border bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2"
+              :class="{
+                'border-red-500 dark:border-red-500 focus:ring-red-500': curpError,
+                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !curpError
+              }"
+              required
               />
+              <p v-if="curpError" class="text-sm text-red-500 mt-2">{{ curpError }}</p>
             </div>
             <div class="relative">
               <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2"
@@ -231,7 +285,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, type Ref } from 'vue'
+
 import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios';
 import * as AuthServices from '@/modules/auth/services/authServices';
@@ -244,7 +299,14 @@ const step = ref(1) // 1 para el formulario, 4 para el mensaje de éxito
 const loading = ref(false)
 const errorPopup = ref(false)
 const errorMessage = ref('')
-const passwordError = ref(''); // Para el error de contraseñas que no coinciden
+const passwordError = ref('');
+const emailError = ref('');
+const curpError = ref('');
+const licenseError = ref('');
+const nameError = ref('');
+const paternalLastNameError = ref('');
+const maternalLastNameError = ref('');
+const dateOfBirthError = ref('');
 
 const form = reactive({
   email: '',
@@ -261,14 +323,146 @@ const form = reactive({
   career: '',
 })
 
+// Función genérica para validar campos de texto (nombres, apellidos)
+const validateTextField = (fieldValue: string, errorRef: Ref<string>, fieldName: string) => {
+  // Solo letras, espacios y acentos
+  const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+  if (fieldValue && !textRegex.test(fieldValue)) {
+    errorRef.value = `El ${fieldName} solo puede contener letras y espacios.`;
+  } else if (!fieldValue.trim()) {
+    // Esto lo cubre 'required', pero es una buena doble verificación
+    errorRef.value = `El ${fieldName} es obligatorio.`;
+  } else {
+    errorRef.value = '';
+  }
+};
+
+const validateName = () => {
+  validateTextField(form.name, nameError, 'nombre');
+};
+const validatePaternalLastName = () => {
+  validateTextField(form.paternalLastName, paternalLastNameError, 'primer apellido');
+};
+const validateMaternalLastName = () => {
+  validateTextField(form.maternalLastName, maternalLastNameError, 'segundo apellido');
+};
+
+// Función para validar la fecha de nacimiento
+const validateDateOfBirth = () => {
+  if (!form.dateOfBirth) {
+    dateOfBirthError.value = 'La fecha de nacimiento es obligatoria.';
+    return;
+  }
+
+  const birthDate = new Date(form.dateOfBirth);
+  const today = new Date();
+
+  // 1. Verificar si la fecha es futura
+  if (birthDate > today) {
+    dateOfBirthError.value = 'La fecha de nacimiento no puede ser en el futuro.';
+    return;
+  }
+
+  // 2. Verificar si es mayor de 18 años
+  const age = today.getFullYear() - birthDate.getFullYear();
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+  const dayDifference = today.getDate() - birthDate.getDate();
+
+  // Ajuste si aún no ha cumplido años este año
+  let is18 = false;
+  if (age > 18) {
+    is18 = true;
+  } else if (age === 18) {
+    if (monthDifference > 0) {
+      is18 = true;
+    } else if (monthDifference === 0 && dayDifference >= 0) {
+      is18 = true;
+    }
+  }
+
+  if (!is18) {
+    dateOfBirthError.value = 'Debes ser mayor de 18 años para registrarte.';
+  } else {
+    dateOfBirthError.value = '';
+  }
+};
+
+const passwordRequirements = [
+  { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
+  { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
+  { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
+  { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres' }
+];
+
+const passwordValidation = computed(() => {
+  return passwordRequirements.map(req => ({
+    ...req,
+    // 👇 CAMBIO CLAVE: Usa 'form.password' en lugar de 'newPassword.value'
+    met: req.regex.test(form.password)
+  }));
+});
+
+const isPasswordValid = computed(() => passwordValidation.value.every(req => req.met));
+
+// Función para validar el Correo
+const validateEmail = () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (form.email && !emailRegex.test(form.email)) {
+    emailError.value = 'Formato de correo inválido (ej. nombre@dominio.com)';
+  } else {
+    emailError.value = '';
+  }
+};
+
+// Función para validar la Cédula (asume 7-8 dígitos)
+const validateLicense = () => {
+  const licenseRegex = /^[0-9]{7,8}$/;
+  if (form.professionalLicense && !licenseRegex.test(form.professionalLicense)) {
+    licenseError.value = 'La cédula debe contener solo 7 u 8 números.';
+  } else {
+    licenseError.value = '';
+  }
+};
+
+// Función para validar la CURP (formato estándar de 18 caracteres)
+const validateCurp = () => {
+  const curpRegex = /^[A-Z]{4}[0-9]{6}[H|M][A-Z]{5}[A-Z0-9]{2}$/;
+  // Usamos toUpperCase() para que el usuario pueda escribir en minúsculas
+  if (form.curp && !curpRegex.test(form.curp.toUpperCase())) {
+    curpError.value = 'Formato de CURP inválido (deben ser 18 caracteres).';
+  } else {
+    curpError.value = '';
+  }
+};
+
 // Función única para enviar todo el formulario
 const submitRegistration = async () => {
+  passwordError.value = '';
+  validateEmail();
+  validateLicense();
+  validateCurp();
+  validateTextField(form.name, nameError, 'nombre');
+  validateTextField(form.paternalLastName, paternalLastNameError, 'primer apellido');
+  validateTextField(form.maternalLastName, maternalLastNameError, 'segundo apellido');
+  validateDateOfBirth();
   // 1. Validación de contraseña en el frontend
   if (form.password !== form.confirmPassword) {
     passwordError.value = 'Las contraseñas no coinciden.';
     return;
   }
-  passwordError.value = '';
+
+  if (!isPasswordValid.value) {
+    passwordError.value = 'La contraseña no cumple con todos los requisitos de seguridad.';
+    return;
+  }
+
+  if (
+    emailError.value || licenseError.value || curpError.value || passwordError.value ||
+    nameError.value || paternalLastNameError.value || maternalLastNameError.value || dateOfBirthError.value
+  ) {
+    return; // Detiene el envío
+  }
+
   loading.value = true;
 
   // 2. Construir el payload EXACTAMENTE como lo espera tu ProfessionalSerializer

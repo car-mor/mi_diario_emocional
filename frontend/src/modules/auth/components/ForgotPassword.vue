@@ -359,7 +359,7 @@ const verifyCode = async () => {
 const passwordRequirements = [
     { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
     { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
-    { regex: /\d/, text: 'Al menos un número' },
+    // { regex: /\d/, text: 'Al menos un número' },
     { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
     { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres' }
 ];
@@ -408,7 +408,7 @@ const confirmNewPassword = async () => {
 }
 
 const resendRecoveryCode = async () => {
-    if (isResendDisabled.value) { /* ... */ return }
+    if (isResendDisabled.value) { return }
     loading.value = true;
     try {
         // La lógica es la misma que el envío inicial

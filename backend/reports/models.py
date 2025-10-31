@@ -7,9 +7,7 @@ from users.models import Patient, Professional
 
 class WeeklyReport(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    professional = models.ForeignKey(
-        Professional, on_delete=models.CASCADE, related_name="weekly_reports"
-    )
+    professional = models.ForeignKey(Professional, on_delete=models.CASCADE, related_name="weekly_reports")
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="weekly_reports")
     week_start = models.DateField()
     report_url = models.URLField()

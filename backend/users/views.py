@@ -1,14 +1,20 @@
 # importacion de secrets
+import base64
+import os
 import secrets
 import uuid
-from datetime import timedelta
+from collections import Counter
+from datetime import date, timedelta
 
 from django.conf import settings  # Para acceder a variables de configuración
 from django.contrib.auth.hashers import check_password
 from django.db import transaction
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
+from django.template.loader import render_to_string
 from django.utils import timezone
-from rest_framework import exceptions, generics, status
+from rest_framework import exceptions, generics, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 
@@ -20,15 +26,23 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
+from weasyprint import HTML
+
+from diary.ml_service import NLP, lematizar_texto_para_lista, preprocesar_texto
+from diary.models import DiaryEntry
+from diary.serializers import DiaryEntrySerializer
 
 from .models import EmailChangeRequest, PasswordReset, Patient, PreRegistration, Professional, User
+from .permissions import IsPatient, IsProfessional
 
+STOP_WORDS = NLP.Defaults.stop_words if NLP else set()
 # Importa los serializadores y modelos
 from .serializers import (
     ChangePasswordSerializer,
     ConfirmEmailChangeSerializer,
     CustomTokenObtainPairSerializer,
     DeleteAccountSerializer,
+    PatientListSerializer,
     PatientProfileSerializer,
     PatientProfileUpdateSerializer,
     PatientSerializer,
@@ -398,7 +412,7 @@ class UserProfileView(RetrieveUpdateAPIView):
         if user.role == "professional":
             return ProfessionalProfileSerializer
         elif user.role == "patient":
-            return PatientSerializer
+            return PatientProfileSerializer
 
         raise exceptions.PermissionDenied("Rol de usuario no soportado.")
 
@@ -604,3 +618,318 @@ class DeleteAccountView(generics.GenericAPIView):
         user.delete()
 
         return Response({"detail": "Tu cuenta ha sido eliminada permanentemente."}, status=status.HTTP_204_NO_CONTENT)
+
+
+class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated, IsProfessional]
+    serializer_class = PatientListSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if hasattr(user, "professional_profile"):
+            return user.professional_profile.patients.all().select_related("user")
+        return Patient.objects.none()
+
+    def retrieve(self, request, *args, **kwargs):
+        patient = self.get_object()
+        start_date_param = request.query_params.get("start_date")
+        end_date_param = request.query_params.get("end_date")
+
+        if start_date_param and end_date_param:
+            # MODO PERSONALIZADO: Si se provee un rango, lo usamos.
+            start_date = date.fromisoformat(start_date_param)
+            end_date = date.fromisoformat(end_date_param)
+            # Para el reporte, asumimos que un rango personalizado siempre está "disponible"
+            is_report_available = True
+            next_report_date = end_date
+        else:
+            # MODO SEMANAL (por defecto): Usamos la lógica de la semana más reciente.
+            start_date, end_date, is_report_available, next_report_date = self._get_most_recent_week_info(patient)
+        # ------------------------------------
+
+        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__date__range=[start_date, end_date])
+        # --- Lógica para la Gráfica de Emociones Combinadas ---
+        combination_counts = Counter()
+        for entry in diary_entries:
+            emotions = entry.analyzed_emotions
+            # Solo cuenta si la lista no está vacía Y no es ['neutro']
+            if emotions and emotions != ["neutro"]:
+                combination = tuple(sorted(emotions))
+                combination_counts[combination] += 1
+        most_common_combinations = [[" - ".join(comb), count] for comb, count in combination_counts.most_common(5)]
+        # --- Lógica para la Nube de Palabras ---
+        full_text = " ".join([entry.content for entry in diary_entries])
+        if full_text.strip():
+            lemmas = lematizar_texto_para_lista(preprocesar_texto(full_text))
+            important_words = [
+                lemma for lemma in lemmas if lemma not in STOP_WORDS and lemma.isalpha() and len(lemma) > 2
+            ]
+            word_counts = Counter(important_words)
+            most_common_words_raw = word_counts.most_common(50)
+        else:
+            most_common_words_raw = []
+
+        max_count = most_common_words_raw[0][1] if most_common_words_raw else 0
+        min_count = most_common_words_raw[-1][1] if most_common_words_raw else 0
+        count_range = float(max_count - min_count)
+
+        most_common_words_with_size = []
+        for word, count in most_common_words_raw:
+            size_class = "size-1"  # default
+            if count_range > 0:
+                size_percent = ((count - min_count) / count_range) * 100
+                if size_percent > 80:
+                    size_class = "size-5"
+                elif size_percent > 60:
+                    size_class = "size-4"
+                elif size_percent > 40:
+                    size_class = "size-3"
+                elif size_percent > 20:
+                    size_class = "size-2"
+            elif max_count > 0:  # Solo hay una palabra
+                size_class = "size-3"
+
+            most_common_words_with_size.append((word, count, size_class))
+
+        # --- Construye la respuesta JSON final (CORREGIDO) ---
+        data = {
+            "patient_details": self.get_serializer(patient).data,
+            "diary_history": DiaryEntrySerializer(diary_entries, many=True).data,
+            "emotion_combinations": most_common_combinations,
+            "word_frequency": most_common_words_with_size,
+            "report_info": {
+                "is_available": is_report_available,
+                "next_report_date": next_report_date.strftime("%d de %B de %Y"),
+                "is_custom_range": bool(start_date_param),  # Un flag para el frontend
+            },
+        }
+        return Response(data)
+
+    @action(detail=True, methods=["get"], url_path="download-report")
+    def download_report(self, request, pk=None):
+        patient = self.get_object()
+        start_date_param = request.query_params.get("start_date")
+        end_date_param = request.query_params.get("end_date")
+
+        if start_date_param and end_date_param:
+            start_date = date.fromisoformat(start_date_param)
+            end_date = date.fromisoformat(end_date_param)
+            if start_date == end_date:
+                report_title = f"Resumen del Día ({start_date.strftime('%d %b, %Y')})"
+            else:
+                report_title = "Resumen de Periodo Personalizado"
+        else:
+            start_date, end_date, is_available, _ = self._get_most_recent_week_info(patient)
+            if not is_available:
+                return Response(
+                    {"detail": "El reporte semanal aún no está disponible."}, status=status.HTTP_403_FORBIDDEN
+                )
+            report_title = "Resumen Semanal"
+
+        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__date__range=[start_date, end_date])
+
+        # --- AÑADIMOS LA LÓGICA DE CÁLCULO QUE FALTABA ---
+        # Lógica para Emociones Combinadas
+        combination_counts = Counter()
+        for entry in diary_entries:
+            emotions = entry.analyzed_emotions
+            if emotions and emotions != ["neutro"]:
+                combination = tuple(sorted(emotions))
+                combination_counts[combination] += 1
+        most_common_combinations = [[" - ".join(comb), count] for comb, count in combination_counts.most_common(5)]
+        # Lógica para Nube de Palabras
+        full_text = " ".join([entry.content for entry in diary_entries])
+        if full_text.strip():
+            lemmas = lematizar_texto_para_lista(preprocesar_texto(full_text))
+            important_words = [
+                lemma for lemma in lemmas if lemma not in STOP_WORDS and lemma.isalpha() and len(lemma) > 2
+            ]
+            word_counts = Counter(important_words)
+            most_common_words_raw = word_counts.most_common(50)
+        else:
+            most_common_words_raw = []
+
+        max_count = most_common_words_raw[0][1] if most_common_words_raw else 0
+        min_count = most_common_words_raw[-1][1] if most_common_words_raw else 0
+        count_range = float(max_count - min_count)
+
+        most_common_words_with_size = []
+        for word, count in most_common_words_raw:
+            size_class = "size-1"  # default
+            if count_range > 0:
+                size_percent = ((count - min_count) / count_range) * 100
+                if size_percent > 80:
+                    size_class = "size-5"
+                elif size_percent > 60:
+                    size_class = "size-4"
+                elif size_percent > 40:
+                    size_class = "size-3"
+                elif size_percent > 20:
+                    size_class = "size-2"
+            elif max_count > 0:  # Solo hay una palabra
+                size_class = "size-3"
+
+            most_common_words_with_size.append((word, count, size_class))
+
+        avatar_data_uri = None
+        if patient.profile_picture:
+            try:
+                # 1. Abrir el archivo de la imagen en modo binario
+                with open(patient.profile_picture.path, "rb") as image_file:
+                    # 2. Leer los bytes y codificarlos a Base64
+                    image_bytes = image_file.read()
+                    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+
+                    # 3. Crear el Data URI completo para el HTML
+                    # (Tenemos que adivinar el tipo de imagen, usualmente jpeg o png)
+                    content_type = (
+                        "image/png" if patient.profile_picture.name.lower().endswith(".png") else "image/jpeg"
+                    )
+                    avatar_data_uri = f"data:{content_type};base64,{image_b64}"
+
+            except (FileNotFoundError, IOError):
+                # Si el archivo está roto o no se encuentra, simplemente no se mostrará
+                avatar_data_uri = None
+
+        logo_data_uri = None
+        try:
+            # settings.BASE_DIR apunta a la carpeta 'backend'
+            logo_path = os.path.join(settings.BASE_DIR, "media_root", "logo.png")
+            with open(logo_path, "rb") as image_file:
+                image_b64 = base64.b64encode(image_file.read()).decode("utf-8")
+                logo_data_uri = f"data:image/png;base64,{image_b64}"
+        except (FileNotFoundError, IOError):
+            logo_data_uri = None  # El logo es opcional
+
+        context = {
+            "patient": patient,
+            "diary_entries": diary_entries,
+            "avatar_data_uri": avatar_data_uri,
+            "logo_data_uri": logo_data_uri,
+            "emotion_combinations": most_common_combinations,
+            "word_frequency": most_common_words_with_size,
+            "week_start": start_date,
+            "week_end": end_date,
+            "report_title": report_title,
+        }
+
+        html_string = render_to_string("reports/weekly_report.html", context)
+        pdf = HTML(string=html_string).write_pdf()
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="reporte_{patient.alias}_{start_date}.pdf"'
+        return response
+
+    @action(detail=True, methods=["get"], url_path="report-weeks")
+    def report_weeks(self, request, pk=None):
+        """
+        Devuelve una lista de las semanas de reporte disponibles para un paciente.
+        """
+        patient = self.get_object()
+        if not patient.first_entry_date:
+            return Response([])
+
+        first_date = patient.first_entry_date
+        today = timezone.now().date()
+
+        total_days = (today - first_date).days
+        if total_days < 0:
+            return Response([])
+
+        total_weeks = (total_days // 7) + 1
+
+        weeks_data = []
+        for week_num in range(total_weeks):
+            start_date = first_date + timedelta(days=week_num * 7)
+            end_date = start_date + timedelta(days=6)
+            weeks_data.append(
+                {
+                    "week_number": week_num + 1,
+                    "start_date": start_date.isoformat(),
+                    "end_date": end_date.isoformat(),
+                    "display_text": f"Semana {week_num + 1} ({start_date.strftime('%d/%m')} - {end_date.strftime('%d/%m')})",
+                }
+            )
+
+        # Devolvemos las semanas en orden descendente (la más reciente primero)
+        return Response(sorted(weeks_data, key=lambda w: w["week_number"], reverse=True))
+
+    def _get_most_recent_week_info(self, patient):
+        """Calcula la información de la semana de reporte más reciente."""
+
+        first_date = patient.first_entry_date
+
+        # Lógica mejorada: si la fecha no está establecida, la buscamos.
+        if not first_date:
+            first_entry = patient.diary_entries.order_by("entry_date").first()
+            if first_entry:
+                first_date = first_entry.entry_date.date()
+                # Guardamos la fecha para que la próxima vez sea más rápido
+                patient.first_entry_date = first_date
+                patient.save()
+            else:
+                # Si realmente no hay entradas, devolvemos el estado "sin datos".
+                today = timezone.now().date()
+                return today, today, False, today + timedelta(days=7)
+
+        today = timezone.now().date()
+        days_since_first = (today - first_date).days
+
+        if days_since_first < 0:
+            return today, today, False, first_date + timedelta(days=7)
+
+        current_week_number = days_since_first // 7
+        start_date = first_date + timedelta(days=current_week_number * 7)
+        end_date = start_date + timedelta(days=6)
+
+        is_report_available = (today - start_date).days >= 7
+        next_report_date = start_date + timedelta(days=7)
+
+        return start_date, end_date, is_report_available, next_report_date
+
+    @action(detail=True, methods=["post"], url_path="disconnect")
+    def disconnect(self, request, pk=None):
+        """
+        Desvincula un paciente del profesional.
+        URL: POST /api/professional/patients/{patient_id}/disconnect/
+        """
+        # get_object() usa el queryset para asegurar que el profesional
+        # solo puede desvincular a un paciente que le pertenece.
+        patient_to_disconnect = self.get_object()
+
+        # "Desvincular" en tu modelo significa poner el campo 'professional' a None.
+        patient_to_disconnect.professional = None
+        patient_to_disconnect.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LinkToProfessionalView(APIView):
+    """
+    Permite a un paciente autenticado y no vinculado
+    enviar un código para vincularse a un profesional.
+    """
+
+    permission_classes = [IsAuthenticated, IsPatient]
+
+    def post(self, request, *args, **kwargs):
+        link_code = request.data.get("link_code")
+        if not link_code:
+            return Response({"error": "El código de enlace es requerido."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            professional_to_link = Professional.objects.get(link_code=link_code)
+        except Professional.DoesNotExist:
+            return Response({"error": "El código de enlace es inválido."}, status=status.HTTP_404_NOT_FOUND)
+
+        patient_profile = request.user.patient_profile
+
+        # Verificamos si ya está vinculado para evitar re-vinculaciones innecesarias
+        if patient_profile.professional:
+            return Response({"error": "Ya estás vinculado a un profesional."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ¡Éxito! Hacemos la vinculación
+        patient_profile.professional = professional_to_link
+        patient_profile.linked_at = timezone.now()
+        patient_profile.save()
+
+        return Response({"message": "Vinculación exitosa."}, status=status.HTTP_200_OK)

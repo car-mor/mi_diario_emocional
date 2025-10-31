@@ -196,6 +196,8 @@ export interface PatientProfile {
     // CRÍTICO: Incluir el campo que viene de Django
     profile_picture: string | null; // <-- URL de la foto o null/default
     professional_name?: string;
+    is_linked: boolean;
+    current_streak: number;
 }
 
 export type UserProfileData = ProfessionalProfile | PatientProfile
@@ -241,7 +243,7 @@ export const uploadAvatar = async (file: File): Promise<AxiosResponse> => {
 
 const API_URL = 'http://localhost:8000/api/';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_URL,
 });
 

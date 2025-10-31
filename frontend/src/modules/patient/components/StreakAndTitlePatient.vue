@@ -6,27 +6,56 @@
           {{ title }}
         </h1>
       </div>
-      <div class="flex items-center space-x-1 text-orange-500 font-semibold flex-shrink-0">
-        <span class="text-4xl">🔥</span>
-        <span>{{ streakCount }} días de racha</span>
+      <div class="flex items-center space-x-1 font-semibold flex-shrink-0">
+        <span class="text-4xl" :class="flameClass">🔥</span>
+        <span :class="textColorClass">{{ streakCount }} {{ streakText }}</span>
       </div>
     </div>
-     <!-- Mobile -->
+
     <div class="lg:hidden flex flex-col items-center space-y-2">
       <h1 class="text-2xl font-bold text-[#7DBFF8] text-center">
         {{ title }}
       </h1>
-      <div class="flex items-center space-x-1 text-orange-500 font-semibold">
-        <span class="text-3xl">🔥</span>
-        <span>{{ streakCount }} días de racha</span>
+      <div class="flex items-center space-x-1 font-semibold">
+        <span class="text-3xl" :class="flameClass">🔥</span>
+        <span :class="textColorClass">{{ streakCount }} {{ streakText }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-    defineProps<{ 
-        title: string
-        streakCount: number 
-    }>()
+import { computed } from 'vue';
+
+const props = defineProps<{
+  title: string
+  streakCount: number
+}>();
+
+const streakText = computed(() => {
+  return props.streakCount === 1 ? 'día de racha' : 'días de racha';
+});
+
+const flameClass = computed(() => {
+  if (props.streakCount >= 30) {
+    return 'text-red-500 animate-bounce';
+  }
+  if (props.streakCount >= 15) {
+    return 'text-orange-500 animate-pulse';
+  }
+  if (props.streakCount >= 7) {
+    return 'text-yellow-500';
+  }
+  if (props.streakCount > 0) {
+    return 'text-yellow-400';
+  }
+  return 'text-gray-400 grayscale';
+});
+
+const textColorClass = computed(() => {
+    if (props.streakCount >= 15) return 'text-red-500';
+    if (props.streakCount >= 7) return 'text-orange-500';
+    if (props.streakCount > 0) return 'text-yellow-500';
+    return 'text-gray-500';
+});
 </script>

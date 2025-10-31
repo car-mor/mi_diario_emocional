@@ -16,10 +16,12 @@ from users.views import (
     ChangePasswordView,
     ConfirmEmailChangeView,
     DeleteAccountView,
+    LinkToProfessionalView,
     MyTokenObtainPairView,
     PasswordResetConfirmView,
     PasswordResetVerifyCodeView,
     PatientRegistrationView,
+    ProfessionalActionsViewSet,
     ProfessionalRegistrationView,
     RegenerateLinkCodeView,
     RequestEmailChangeView,
@@ -40,7 +42,7 @@ router = DefaultRouter()
 # Paso 2: Registrar todos los ViewSets en el Router
 router.register("diary-entries", DiaryEntryViewSet, basename="diary-entry")
 router.register("weekly-reports", WeeklyReportViewSet, basename="weekly-report")
-
+router.register("professional/patients", ProfessionalActionsViewSet, basename="professional-patient")
 
 # Paso 3: Definir urlpatterns
 urlpatterns = [
@@ -62,5 +64,6 @@ urlpatterns = [
     path("profile/request-email-change/", RequestEmailChangeView.as_view(), name="request-email-change"),
     path("profile/confirm-email-change/", ConfirmEmailChangeView.as_view(), name="confirm-email-change"),
     path("profile/delete-account/", DeleteAccountView.as_view(), name="delete-account"),
+    path("patient/link-professional/", LinkToProfessionalView.as_view(), name="patient-link-professional"),
     path("", include(router.urls)),
 ]

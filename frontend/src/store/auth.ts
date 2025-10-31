@@ -18,6 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false);
   const isAuthReady = ref(false);
   const userProfile = ref<UserProfileData | null>(null);
+  const isLinked = ref(localStorage.getItem('isLinked') === 'true');
 
   const setTokens = (access: string, refresh: string) => {
     authToken.value = access;
@@ -42,7 +43,13 @@ export const useAuthStore = defineStore('auth', () => {
     if (!authToken.value) return;
     try {
       const response = await apiFetchProfile();
+      // console.log('Paso 1: Respuesta cruda de la API /profile/me/:', response.data);
       userProfile.value = response.data;
+      // console.log('Paso 2: userProfile en el store actualizado a:', userProfile.value);
+      if (userProfile.value && 'is_linked' in userProfile.value) {
+        isLinked.value = userProfile.value.is_linked;
+        localStorage.setItem('isLinked', String(isLinked.value));
+      }
     } catch (error) {
       console.error("Error al obtener el perfil del usuario:", error);
     }
@@ -68,7 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (role === 'patient') return '/home-patient';
       if (role === 'professional') {
-        return review_status === 'APPROVED' ? '/professional-layout' : '/pending-approval';
+        return review_status === 'APPROVED' ? '/professional-layout' : '/not-approved-professional';
       }
       return '/login';
     } catch (error: unknown) {
@@ -78,6 +85,20 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  const checkInitialAuth = async () => {
+    if (isAuthReady.value) return;
+    if (authToken.value) {
+      try {
+        await fetchUserProfile();
+      } catch (error) {
+        console.error("Fallo en la carga inicial del perfil:", error);
+        // Si el token es inválido (ej. expiró), forzamos el logout.
+        await logout();
+      }
+    }
+    isAuthReady.value = true;
+  };
+
   const logout = async () => {
     const currentRefreshToken = refreshToken.value;
     userProfile.value = null;
@@ -85,6 +106,7 @@ export const useAuthStore = defineStore('auth', () => {
     authToken.value = null;
     refreshToken.value = null;
     reviewStatus.value = null;
+    isLinked.value = false;
     localStorage.clear();
 
     if (currentRefreshToken) {
@@ -97,12 +119,6 @@ export const useAuthStore = defineStore('auth', () => {
     window.location.href = '/login';
   };
 
-  const checkInitialAuth = async () => {
-    if (authToken.value) {
-      await fetchUserProfile();
-    }
-    isAuthReady.value = true;
-  }
 
   return {
     userType,
@@ -118,7 +134,8 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUserProfile,
     checkInitialAuth,
     reviewStatus,
-    updateUserProfile
+    updateUserProfile,
+    isLinked
   };
 });
 

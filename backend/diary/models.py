@@ -1,4 +1,3 @@
-# Create your models here.
 import uuid
 
 from django.contrib.postgres.fields import ArrayField
@@ -10,12 +9,12 @@ from users.models import Patient
 
 class DiaryEntry(models.Model):
     EMOTION_CHOICES = (
-        ("joy", "Joy"),
-        ("sadness", "Sadness"),
-        ("fear", "Fear"),
-        ("anger", "Anger"),
-        ("disgust", "Disgust"),
-        ("surprise", "Surprise"),
+        ("alegria", "Alegría"),
+        ("tristeza", "Tristeza"),
+        ("ira", "Ira"),
+        ("miedo", "Miedo"),
+        ("asco", "Asco"),
+        ("sorpresa", "Sorpresa"),
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -23,10 +22,14 @@ class DiaryEntry(models.Model):
     title = models.CharField(max_length=100, default="Sin título")
     entry_date = models.DateTimeField(default=timezone.now)
     content = models.TextField()
-    selected_emotions = ArrayField(models.CharField(max_length=20, choices=EMOTION_CHOICES))
-    emotion_summary = models.JSONField()
 
-    content_length = models.IntegerField(editable=False)  # Para evitar el error en `makemigrations`
+    # PERFECTO - NO CAMBIAR. Almacena la selección manual del usuario.
+    selected_emotions = ArrayField(models.CharField(max_length=20, choices=EMOTION_CHOICES), default=list, blank=True)
+
+    # NUEVO CAMPO - AÑADIR. Almacena el resultado del análisis del modelo.
+    analyzed_emotions = ArrayField(models.CharField(max_length=20), default=list, blank=True)
+    analyzed_scores = models.JSONField(default=dict, blank=True)
+    content_length = models.IntegerField(editable=False)
 
     def save(self, *args, **kwargs):
         self.content_length = len(self.content)

@@ -62,7 +62,7 @@
         </div>
       </div>
 
-      <div v-if="showErrorModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div v-if="showErrorModal" class="fixed inset-0 flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl max-w-sm w-full text-center">
           <h3 class="text-xl font-bold text-red-500 mb-4">¡Error!</h3>
           <p class="text-gray-600 dark:text-gray-400 mb-6">{{ errorMessage }}</p>

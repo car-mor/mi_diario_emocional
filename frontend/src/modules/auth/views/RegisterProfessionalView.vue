@@ -119,7 +119,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="relative">
               <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2"
-                >Segundo apellido *</label
+                >Segundo apellido</label
               >
               <input
                 v-model="form.maternalLastName"

@@ -34,6 +34,7 @@ class CustomUserManager(BaseUserManager):
 # Modelo de usuario base
 class User(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = (
+        ("admin", "Admin"),
         ("patient", "Patient"),
         ("professional", "Professional"),
     )

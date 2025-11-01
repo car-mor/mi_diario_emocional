@@ -16,7 +16,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 EMOTION_LABELS = ["alegria", "tristeza", "ira", "miedo", "sorpresa", "asco"]
 
 # Umbrales que definiste en tu notebook (Celda 12)
-UMBRALES = {"alegria": 0.50, "tristeza": 0.50, "ira": 0.50, "miedo": 0.30, "sorpresa": 0.30, "asco": 0.35}
+UMBRALES = {"alegria": 0.48, "tristeza": 0.50, "ira": 0.50, "miedo": 0.30, "sorpresa": 0.30, "asco": 0.35}
 
 # --- 1. Cargar modelos (solo una vez) ---
 try:
@@ -109,7 +109,11 @@ def analizar_emociones_con_beto(texto: str) -> Tuple[List[str], Dict[str, float]
         if prob >= umbral:
             emociones_detectadas.append(emocion)
 
-    if not emociones_detectadas:
-        emociones_detectadas = ["neutro"]  # Etiqueta por defecto
+    if not emociones_detectadas and probabilidades_dict:
+        # Ordena el diccionario por probabilidad (valor) de mayor a menor
+        sorted_emociones = sorted(probabilidades_dict.items(), key=lambda item: item[1], reverse=True)
+        # Extrae los nombres de las dos emociones más altas
+        emociones_detectadas = [emocion for emocion, prob in sorted_emociones[:2]]
+        
 
     return emociones_detectadas, probabilidades_dict

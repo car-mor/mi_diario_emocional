@@ -147,11 +147,11 @@ const CODE_EXPIRY_MINUTES = 5;
 
 // --- Propiedades Computadas ---
 const passwordRequirements = [
-    { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
-    { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
-    { regex: /\d/, text: 'Al menos un número' },
-    { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial' },
-    { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres' }
+  { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
+  { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
+  { regex: /\d/, text: 'Al menos un número' },
+  { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
+  { regex: /^.{8,32}$/, text: 'Entre 8 y 32 caracteres' }
 ];
 const passwordValidation = computed(() => passwordRequirements.map(req => ({...req, met: req.regex.test(newPassword.value)})));
 const isPasswordValid = computed(() => passwordValidation.value.every(req => req.met));

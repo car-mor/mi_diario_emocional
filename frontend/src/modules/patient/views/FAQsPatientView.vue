@@ -43,11 +43,11 @@
                         ¿Necesitas más información? ¡Contáctanos!
                     </h2>
                     <a
-                    href="mailto:midiarioemocional@gmail.com"
+                    href="mailto:midiarioemocional_help@outlook.com"
                     class="text-lg md:text-4xl text-[#70BFE9] font-bold"
                     >
                         <IconMailHeart class="inline w-11 h-11 md:w-11 md:h-11 mr-2 mb-1" />
-                        midiarioemocional@gmail.com
+                        midiarioemocional_help@outlook.com
                     </a>
 
                 </div>

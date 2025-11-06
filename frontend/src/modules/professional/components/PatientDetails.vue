@@ -72,7 +72,7 @@
               <tr>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap">{{ patient.name }}</td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.age }}</td>
-                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.gender }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ genderMap[patient.gender] || patient.gender }}</td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.email }}</td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.alias }}</td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 text-center">
@@ -104,7 +104,7 @@
               <div
                 v-for="entry in diaryHistory"
                 :key="entry.id"
-                class="border dark:border-gray-700 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-lg dark:hover:bg-gray-700"
+                class="border dark:border-gray-700 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-lg dark:hover:bg-gray-700 whitespace-pre-wrap break-words"
                 @click="toggleExpand(entry.id)"
               >
                 <h3 class="font-bold text-lg dark:text-white">{{ entry.title }}</h3>
@@ -119,22 +119,22 @@
 
                 <div class="flex flex-col md:flex-row gap-4 pt-3 border-t dark:border-gray-600">
                   <div class="flex-1">
-                    <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Sentimiento Reportado</h4>
+                    <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Sentimiento seleccionado:</h4>
                     <div v-if="entry.selected_emotions && entry.selected_emotions.length > 0" class="flex flex-wrap gap-2">
                       <span v-for="emotion in entry.selected_emotions" :key="emotion" class="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-2.5 py-1 rounded-full font-medium">
                         {{ emotion }}
                       </span>
                     </div>
-                    <p v-else class="text-xs text-gray-400 dark:text-gray-500 italic">Ninguno reportado.</p>
+                    <p v-else class="text-sm text-gray-400 dark:text-gray-500 italic">Ninguno reportado.</p>
                   </div>
                   <div class="flex-1">
-                    <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Análisis de IA</h4>
+                    <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Análisis de IA:</h4>
                     <div v-if="entry.analyzed_emotions && entry.analyzed_emotions.length > 0 && entry.analyzed_emotions[0] !== 'neutro'" class="flex flex-wrap gap-2">
                       <span v-for="emotion in entry.analyzed_emotions" :key="emotion" class="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
                         {{ emotion }}
                       </span>
                     </div>
-                    <p v-else class="text-xs text-gray-400 dark:text-gray-500 italic">Análisis neutral.</p>
+                    <p v-else class="text-sm text-gray-400 dark:text-gray-500 italic">Análisis neutral.</p>
                   </div>
                 </div>
               </div>
@@ -264,6 +264,13 @@ function toggleExpand(entryId: string) {
     expandedEntryId.value = entryId;
   }
 }
+
+const genderMap: Record<string, string> = {
+  male: 'Masculino',
+  female: 'Femenino',
+  non_binary: 'No binario',
+  other: 'Otro'
+};
 
 const fetchPatientData = async () => {
   if (!patientId) return;

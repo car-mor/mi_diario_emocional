@@ -296,6 +296,28 @@
       </div>
     </div>
   </BackgroundWrapper>
+  <div
+    v-if="errorPopup"
+    class="fixed inset-0 flex items-center justify-center z-50"
+    @click="closeErrorPopup"
+  >
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-xl max-w-sm w-full text-center m-4"
+      @click.stop
+    >
+      <div class="flex flex-col items-center justify-center">
+        <IconCircleXFilled class="text-red-500 w-16 h-16 mb-4" />
+        <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">Error</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">{{ errorMessage }}</p>
+        <button
+          @click="closeErrorPopup"
+          class="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition-colors"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -314,6 +336,7 @@ import {
   IconMail,
   IconLock,
   IconCircleCheckFilled,
+  IconCircleXFilled,
 } from '@tabler/icons-vue'
 
 const router = useRouter()
@@ -324,7 +347,9 @@ const professionalId = ref('')
 const error = ref('')
 const passwordError = ref('')
 const loading = ref(false)
-const linkCodeError = ref('') //Variable para errores del código de enlace
+const linkCodeError = ref('')
+const errorMessage = ref('')   // <-- AÑADE ESTA LÍNEA
+const errorPopup = ref(false)
 
 const nameError = ref('');
 const aliasError = ref('');
@@ -377,9 +402,9 @@ async function verifyLinkCode() {
 const passwordRequirements = [
   { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
   { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
-  // { regex: /\d/, text: 'Al menos un número' },
+  { regex: /\d/, text: 'Al menos un número' },
   { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
-  { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres' }
+  { regex: /^.{8,32}$/, text: 'Entre 8 y 32 caracteres' }
 ];
 const passwordValidation = computed(() => {
   return passwordRequirements.map(req => ({
@@ -448,6 +473,11 @@ const validateDateOfBirth = () => {
   const monthDifference = today.getMonth() - birthDate.getMonth();
   const dayDifference = today.getDate() - birthDate.getDate();
 
+  if (age > 120) {
+    dateOfBirthError.value = 'La fecha de nacimiento no es válida (supera los 120 años).';
+    return false;
+  }
+
   let is18 = false;
   if (age > 18) {
     is18 = true;
@@ -500,7 +530,29 @@ const validateEmail = () => {
 
 // --- WRAPPERS para llamar con @blur ---
 const validateName = () => validateTextField(form.name, nameError, 'nombre');
-const validateAlias = () => validateTextField(form.alias, aliasError, 'alias');
+const validateAlias = () => {
+  const alias = form.alias; // Usamos el valor real para contar emojis
+  const aliasTrimmed = alias.trim();
+
+  // 1. Validar "obligatorio" (SOLO SI SE INTENTÓ ENVIAR)
+  if (hasAttemptedStep2.value && !aliasTrimmed) {
+    aliasError.value = 'El alias es obligatorio.';
+    return false;
+  }
+
+  // 2. NUEVA VALIDACIÓN: Longitud (1-28 caracteres)
+  //    Usamos [...alias].length para contar emojis como 1 solo caracter
+  const charLength = [...alias].length;
+
+  if (alias && (charLength < 1 || charLength > 28)) {
+    aliasError.value = `El alias debe tener entre 1 y 28 caracteres. (Actual: ${charLength})`;
+    return false;
+  }
+
+  // Si pasa, limpiamos el error
+  aliasError.value = '';
+  return true;
+};
 const validatePaternalLastName = () => validateTextField(form.paternalLastName, paternalLastNameError, 'primer apellido');
 const validateMaternalLastName = () => validateOptionalTextField(form.maternalLastName, maternalLastNameError, 'segundo apellido');
 
@@ -531,6 +583,7 @@ async function createAccount() {
   hasAttemptedStep3.value = true; // Marca que se intentó enviar el paso 3
   // 1. Limpia errores y valida todo
   passwordError.value = '';
+  errorMessage.value = '';
   const isEmailValid = validateEmail();
 
   if (form.password !== form.confirmPassword) {
@@ -546,7 +599,6 @@ async function createAccount() {
   }
 
   loading.value = true
-  passwordError.value = ''
 
   try {
     // 1. Prepara el payload con la estructura anidada y la vinculación
@@ -574,36 +626,45 @@ async function createAccount() {
 
   } catch (err: unknown) {
     if (isAxiosError(err) && err.response && err.response.data) {
+      const data = err.response.data;
+      let msg = 'Error de registro. Verifique su información.'; // Mensaje por defecto
 
-        let msg = 'Error de registro. Verifique su información.';
-        const data = err.response.data;
+      // 1. Revisa el error de email (el más común)
+      if (data.email && Array.isArray(data.email) && data.email.length > 0) {
+        msg = data.email[0]; // Ej: "Este correo electrónico ya está en uso."
 
-        // Intentamos extraer el error del campo 'user' (que es el serializador anidado)
-        if (data.user) {
-            const userErrors = data.user;
-            if (userErrors.email) msg = `Correo: ${userErrors.email[0]}`;
-            else if (userErrors.date_of_birth) msg = `Fecha de Nacimiento: ${userErrors.date_of_birth[0]}`;
-            else if (userErrors.password) msg = `Contraseña: ${userErrors.password[0]}`;
-            else msg = 'Campos de usuario incompletos.';
-        }
-        // Si el error es del serializer Patient (ej. alias o gender)
-        else if (data.alias) {
-            msg = `Alias: ${data.alias[0]}`;
-        }
-        else if (data.professional_id) {
-            msg = `Terapeuta: ${data.professional_id[0]}`;
-        }
-        else if (data.detail) {
-             msg = data.detail; // Error genérico de DRF
-        }
+      // 2. Revisa errores de fecha de nacimiento
+      } else if (data.date_of_birth && Array.isArray(data.date_of_birth)) {
+        msg = `Fecha de Nacimiento: ${data.date_of_birth[0]}`;
 
-        passwordError.value = msg;
+      // 3. Revisa errores de contraseña
+      } else if (data.password && Array.isArray(data.password)) {
+        msg = `Contraseña: ${data.password.join(' ')}`; // Une todos los errores de contraseña
+
+      // 4. Revisa errores de alias (del perfil)
+      } else if (data.alias && Array.isArray(data.alias)) {
+        msg = `Alias: ${data.alias[0]}`;
+
+      // 5. Revisa errores genéricos
+      } else if (data.detail) {
+        msg = data.detail;
+      }
+
+      // Asigna al popup en lugar de al texto
+      errorMessage.value = msg;
+      errorPopup.value = true;
+
+      // Opcional: si aún quieres mostrar algo en el campo de contraseña
+      // passwordError.value = "Error. Revisa el popup para más detalles.";
 
     } else {
-        passwordError.value = 'Ocurrió un error en el servidor. Inténtalo de nuevo.'
+      // Error genérico
+      errorMessage.value = 'Ocurrió un error en el servidor. Inténtalo de nuevo.';
+      errorPopup.value = true;
     }
+
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
@@ -613,5 +674,9 @@ function goToLogin() {
     params: { type: 'patient' }, // 1. Le pasamos el parámetro 'type'
     query: { email: form.email }    // 2. Le pasamos el email para que el formulario se auto-rellene
   });
+}
+function closeErrorPopup() {
+  errorPopup.value = false;
+  errorMessage.value = '';
 }
 </script>

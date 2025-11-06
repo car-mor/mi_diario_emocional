@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import {
   type BaseCredentials,
@@ -18,7 +18,12 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false);
   const isAuthReady = ref(false);
   const userProfile = ref<UserProfileData | null>(null);
-  const isLinked = ref(localStorage.getItem('isLinked') === 'true');
+  // const isLinked = ref(localStorage.getItem('isLinked') === 'true');
+  const isLinked = computed(() => {
+  // Comprueba si el perfil existe, si tiene la propiedad 'is_linked', y si es 'true'
+  // El '!!' asegura que siempre devuelva un booleano (true/false)
+  return !!(userProfile.value && 'is_linked' in userProfile.value && userProfile.value.is_linked);
+});
 
   const setTokens = (access: string, refresh: string) => {
     authToken.value = access;
@@ -46,10 +51,10 @@ export const useAuthStore = defineStore('auth', () => {
       // console.log('Paso 1: Respuesta cruda de la API /profile/me/:', response.data);
       userProfile.value = response.data;
       // console.log('Paso 2: userProfile en el store actualizado a:', userProfile.value);
-      if (userProfile.value && 'is_linked' in userProfile.value) {
-        isLinked.value = userProfile.value.is_linked;
-        localStorage.setItem('isLinked', String(isLinked.value));
-      }
+      // if (userProfile.value && 'is_linked' in userProfile.value) {
+      //   isLinked.value = userProfile.value.is_linked;
+      //   localStorage.setItem('isLinked', String(isLinked.value));
+      // }
     } catch (error) {
       console.error("Error al obtener el perfil del usuario:", error);
     }
@@ -74,9 +79,23 @@ export const useAuthStore = defineStore('auth', () => {
       await fetchUserProfile();
 
       if (role === 'patient') return '/home-patient';
+      // if (role === 'professional') {
+      //   // return review_status === 'APPROVED' ? '/professional-layout' : '/not-approved-professional';
+      // }
       if (role === 'professional') {
-        return review_status === 'APPROVED' ? '/professional-layout' : '/not-approved-professional';
+      switch (review_status) {
+        case 'APPROVED':
+          return '/professional-layout';
+        case 'PENDING':
+          return '/pending-approval-professional';
+        case 'REJECTED':
+          // Puedes crear una ruta específica para "Rechazado"
+          return '/not-approved-professional';
+        default:
+          // Un failsafe por si el estado es nulo o inesperado
+          return '/login';
       }
+    }
       return '/login';
     } catch (error: unknown) {
       throw error;
@@ -106,7 +125,7 @@ export const useAuthStore = defineStore('auth', () => {
     authToken.value = null;
     refreshToken.value = null;
     reviewStatus.value = null;
-    isLinked.value = false;
+    // isLinked.value = false;
     localStorage.clear();
 
     if (currentRefreshToken) {

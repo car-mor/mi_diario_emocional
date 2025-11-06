@@ -20,7 +20,7 @@ class DiaryEntry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="diary_entries")
     title = models.CharField(max_length=100, default="Sin título")
-    entry_date = models.DateTimeField(default=timezone.now)
+    entry_date = models.DateTimeField(default=timezone.localtime)
     content = models.TextField()
 
     # PERFECTO - NO CAMBIAR. Almacena la selección manual del usuario.

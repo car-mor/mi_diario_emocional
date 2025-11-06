@@ -134,11 +134,6 @@ function showConfirmation() {
       titleError.value = "El título no puede exceder los 100 caracteres.";
       return;
     }
-    const validCharacters = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.,!¡¿?_'-]*$/;
-    if (!validCharacters.test(cleanTitle)) {
-      titleError.value = "El título contiene caracteres no válidos.";
-      return;
-    }
   } else {
     titleError.value = "Tu diario debe tener un título.";
     return;

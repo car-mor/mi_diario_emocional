@@ -360,6 +360,5 @@ async function loadPatientData() {
 // Ciclo de vida para cargar los datos al inicio
 onMounted(() => {
     loadPatientData();
-    showMotivationalQuote();
 });
 </script>

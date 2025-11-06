@@ -48,7 +48,7 @@
           <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ entry.title }}</h3>
           <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(entry.entry_date) }} hrs</span>
         </div>
-        <p class="mt-4 text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+        <p class="mt-4 text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">
           {{ entry.content }}
         </p>
         <div class="mt-2">

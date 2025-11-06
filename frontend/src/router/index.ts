@@ -17,12 +17,18 @@ const routes = [
       component: () => import('@/modules/auth/views/LinkProfessionalView.vue'),
       meta: { requiresAuth: true, role: 'patient' }
     },
-  {
-    path: '/not-approved-professional',
-    name: 'not-approved-professional',
-    component: () => import('@/modules/auth/views/NotApprovedProfessionalView.vue'),
-    meta: { requiresAuth: true, role: 'professional' }, // Ruta protegida
-  },
+    {
+      path: '/not-approved-professional',
+      name: 'not-approved-professional',
+      component: () => import('@/modules/auth/views/NotApprovedProfessionalView.vue'),
+      meta: { requiresAuth: true, role: 'professional' }, // Ruta protegida
+    },
+    {
+      path: '/pending-approval-professional',
+      name: 'pending-approval-professional',
+      component: () => import('@/modules/auth/views/PendingApprovalProfessionalView.vue'),
+      meta: { requiresAuth: true, role: 'professional' }, // Ruta protegida
+    },
     {
       path: '/faq',
       name: 'faq',

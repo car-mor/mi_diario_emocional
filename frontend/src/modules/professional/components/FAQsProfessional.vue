@@ -38,22 +38,22 @@
                     <h2 class="text-2xl md:text-2xl font-bold mb-4 text-gray-600 dark:text-gray-300 mb-6">
                         ¿Necesitas más información? ¡Contáctanos!
                     </h2>
-                    <a 
-                    href="mailto:midiarioemocional@gmail.com" 
+                    <a
+                    href="mailto:midiarioemocional_help@outlook.com"
                     class="text-lg md:text-4xl text-[#70BFE9] font-bold"
                     >
                         <IconMailHeart class="inline w-11 h-11 md:w-11 md:h-11 mr-2 mb-1" />
-                        midiarioemocional@gmail.com
+                        midiarioemocional_help@outlook.com
                     </a>
                 </div>
-                <router-view /> 
+                <router-view />
             </div>
         </main>
     </div>
 </template>
 
 <script setup lang="ts">
-import { IconMailHeart, IconBackspaceFilled } from "@tabler/icons-vue"
+import { IconMailHeart} from "@tabler/icons-vue"
 import { ref } from 'vue';
 
 const openIndex = ref<number | null>(null)

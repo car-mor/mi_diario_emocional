@@ -98,7 +98,7 @@
               class="w-full inline-block text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-lg transition-colors"
               :disabled="loading"
             >
-              Volver a enviar código
+              Volver a enviar código {{ remainingTimeFormatted }}
             </button>
           </form>
         </div>
@@ -205,13 +205,33 @@ const currentTime = ref(Date.now());
 const fiveMinutesInMs = 5 * 60 * 1000;
 let timeInterval: number | null = null;
 
+// 1. COMPUTED ORIGINAL (Devuelve un NÚMERO)
+//    Este lo usa 'isResendDisabled'
 const remainingTime = computed(() => {
   if (lastResendTimestamp.value === 0) return 0;
   const elapsed = currentTime.value - lastResendTimestamp.value;
+  // Devuelve los milisegundos restantes
   return Math.max(0, fiveMinutesInMs - elapsed);
 });
 
+// 2. COMPUTED PARA FORMATEAR (Devuelve un STRING)
+//    Este lo usa el botón en el template
+const remainingTimeFormatted = computed(() => {
+  if (remainingTime.value <= 0) return ''; // Lee del computed original
+
+  const totalSeconds = Math.ceil(remainingTime.value / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const paddedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+
+  return ` (${minutes}:${paddedSeconds})`;
+});
+
+// 3. COMPUTED DE DESHABILITADO (Ahora funciona)
+//    Lee el 'remainingTime' numérico
 const isResendDisabled = computed(() => remainingTime.value > 0);
+
+
 
 onMounted(() => {
   const emailFromUrl = route.query.email;
@@ -273,7 +293,26 @@ const firstTimeLogin = async () => {
 
 const resendCode = async () => {
   if (isResendDisabled.value) {
-    errorMessage.value = `Debes esperar ${Math.ceil(remainingTime.value / 1000)} segundos.`;
+    // 1. Calcula el total de segundos restantes (redondeando hacia arriba)
+    const totalSeconds = Math.ceil(remainingTime.value / 1000);
+
+    // 2. Obtiene los minutos y segundos
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    // 3. Crea el mensaje de espera
+    let waitMessage = "Debes esperar ";
+    if (minutes > 0) {
+      waitMessage += `${minutes} minuto${minutes !== 1 ? 's' : ''}`;
+      if (seconds > 0) {
+        waitMessage += ` y ${seconds} segundo${seconds !== 1 ? 's' : ''}`;
+      }
+    } else {
+      // Si no hay minutos, solo muestra los segundos
+      waitMessage += `${seconds} segundo${seconds !== 1 ? 's' : ''}`;
+    }
+
+    errorMessage.value = `${waitMessage}.`;
     errorPopup.value = true;
     return;
   }
@@ -325,11 +364,31 @@ const closeErrorPopup = () => {
   errorMessage.value = '';
 };
 
-const closeSuccessPopup = () => {
+const closeSuccessPopup = async () => { // 1. Haz la función async
   successPopup.value = false;
+
   if (userType.value === 'patient') {
-    router.push({ name: 'home-patient' });
+    try {
+      // 2. Carga el perfil completo del usuario ANTES de redirigir
+      await authStore.fetchUserProfile();
+
+      // 3. Comprueba el estado de vinculación desde el store
+      //    (Asumiendo que tu store tiene un getter 'isLinked'
+      //     o puedes checar 'authStore.userProfile.is_linked')
+      if (authStore.isLinked) {
+        router.push({ name: 'home-patient' });
+      } else {
+        // 4. Si no está vinculado, envíalo a la página de vinculación
+        router.push({ name: 'link-professional' });
+      }
+    } catch (error) {
+      console.error('Error al cargar el perfil del paciente:', error);
+      // Si falla la carga del perfil, envíalo al login
+      router.push({ name: 'login' });
+    }
+
   } else {
+    // Si es profesional, simplemente va al login para que inicie sesión
     router.push({ name: 'login' });
   }
 };

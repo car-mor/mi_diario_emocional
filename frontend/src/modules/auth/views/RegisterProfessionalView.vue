@@ -247,7 +247,8 @@
           </h3>
           <p class="text-gray-600 dark:text-gray-400 leading-relaxed text-center">
             Te notificaremos por correo cuando hayamos validado tus datos y cédula profesional para que puedas
-            comenzar a usar la aplicación. Este proceso puede tardar de 1 a 3 días hábiles.
+            comenzar a usar la aplicación. Este proceso puede tardar de 1 a 3 días hábiles. Mientras tanto, puedes
+            regresar al inicio de sesión y activar tu cuenta con el código que te enviamos por correo (Expira en 15 minutos).
           </p>
         </div>
         <button
@@ -307,6 +308,7 @@ const nameError = ref('');
 const paternalLastNameError = ref('');
 const maternalLastNameError = ref('');
 const dateOfBirthError = ref('');
+const hasAttemptedSubmit = ref(false);
 
 const form = reactive({
   email: '',
@@ -325,16 +327,49 @@ const form = reactive({
 
 // Función genérica para validar campos de texto (nombres, apellidos)
 const validateTextField = (fieldValue: string, errorRef: Ref<string>, fieldName: string) => {
-  // Solo letras, espacios y acentos
   const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
-  if (fieldValue && !textRegex.test(fieldValue)) {
-    errorRef.value = `El ${fieldName} solo puede contener letras y espacios.`;
-  } else if (!fieldValue.trim()) {
-    // Esto lo cubre 'required', pero es una buena doble verificación
+  const trimmedValue = fieldValue.trim(); // Usamos .trim() para la validación
+
+  // 1. Validar "obligatorio" (SOLO SI SE INTENTÓ ENVIAR)
+  if (hasAttemptedSubmit.value && !trimmedValue) {
     errorRef.value = `El ${fieldName} es obligatorio.`;
-  } else {
-    errorRef.value = '';
+    return false;
   }
+
+  // 2. Validar formato (SIEMPRE, si hay texto)
+  if (trimmedValue && !textRegex.test(trimmedValue)) {
+    errorRef.value = `El ${fieldName} solo puede contener letras y espacios.`;
+    return false;
+  }
+
+  // 3. Longitud (SIEMPRE, si hay texto)
+  if (trimmedValue && (trimmedValue.length < 2 || trimmedValue.length > 40)) {
+    errorRef.value = `El ${fieldName} debe tener entre 2 y 40 caracteres.`;
+    return false;
+  }
+
+  errorRef.value = '';
+  return true;
+};
+
+const validateOptionalTextField = (fieldValue: string, errorRef: Ref<string>, fieldName: string) => {
+  const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+
+  // 1. Validar formato (SOLO SI hay texto)
+  if (fieldValue.trim() && !textRegex.test(fieldValue)) {
+    errorRef.value = `El ${fieldName} solo puede contener letras y espacios.`;
+    return false; // Falla
+  }
+
+  // 3. Longitud (SIEMPRE, si hay texto)
+  if (fieldValue.trim() && (fieldValue.trim().length < 2 || fieldValue.trim().length > 40)) {
+    errorRef.value = `El ${fieldName} debe tener entre 2 y 40 caracteres.`;
+    return false; // Falla
+  }
+
+  // 2. Si está vacío, está bien (es opcional)
+  errorRef.value = '';
+  return true; // Pasa
 };
 
 const validateName = () => {
@@ -344,16 +379,21 @@ const validatePaternalLastName = () => {
   validateTextField(form.paternalLastName, paternalLastNameError, 'primer apellido');
 };
 const validateMaternalLastName = () => {
-  validateTextField(form.maternalLastName, maternalLastNameError, 'segundo apellido');
+  validateOptionalTextField(form.maternalLastName, maternalLastNameError, 'segundo apellido');
 };
 
 // Función para validar la fecha de nacimiento
 const validateDateOfBirth = () => {
-  if (!form.dateOfBirth) {
+  if (hasAttemptedSubmit.value && !form.dateOfBirth) {
     dateOfBirthError.value = 'La fecha de nacimiento es obligatoria.';
-    return;
+    return false;
   }
 
+  // Si está vacío pero aún no se intenta enviar, no es un error.
+  if (!form.dateOfBirth) {
+    dateOfBirthError.value = '';
+    return true; // No es un error "activo"
+  }
   const birthDate = new Date(form.dateOfBirth);
   const today = new Date();
 
@@ -367,6 +407,11 @@ const validateDateOfBirth = () => {
   const age = today.getFullYear() - birthDate.getFullYear();
   const monthDifference = today.getMonth() - birthDate.getMonth();
   const dayDifference = today.getDate() - birthDate.getDate();
+
+  if (age > 120) {
+    dateOfBirthError.value = 'La fecha de nacimiento no es válida (supera los 120 años).';
+    return false;
+  }
 
   // Ajuste si aún no ha cumplido años este año
   let is18 = false;
@@ -390,8 +435,9 @@ const validateDateOfBirth = () => {
 const passwordRequirements = [
   { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
   { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
+  { regex: /\d/, text: 'Al menos un número' },
   { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
-  { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres' }
+  { regex: /^.{8,32}$/, text: 'Entre 8 y 32 caracteres' }
 ];
 
 const passwordValidation = computed(() => {
@@ -407,43 +453,77 @@ const isPasswordValid = computed(() => passwordValidation.value.every(req => req
 // Función para validar el Correo
 const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // 1. Validar "obligatorio"
+  if (hasAttemptedSubmit.value && !form.email) {
+    emailError.value = 'El correo es obligatorio.';
+    return false;
+  }
+
+  // 2. Validar formato (si hay texto)
   if (form.email && !emailRegex.test(form.email)) {
     emailError.value = 'Formato de correo inválido (ej. nombre@dominio.com)';
-  } else {
-    emailError.value = '';
+    return false;
   }
+
+  emailError.value = '';
+  return true;
 };
 
 // Función para validar la Cédula (asume 7-8 dígitos)
 const validateLicense = () => {
   const licenseRegex = /^[0-9]{7,8}$/;
+  // 1. Validar "obligatorio"
+  if (hasAttemptedSubmit.value && !form.professionalLicense) {
+    licenseError.value = 'La cédula es obligatoria.';
+    return false;
+  }
+
+  // 2. Validar formato (si hay texto)
   if (form.professionalLicense && !licenseRegex.test(form.professionalLicense)) {
     licenseError.value = 'La cédula debe contener solo 7 u 8 números.';
-  } else {
-    licenseError.value = '';
+    return false;
   }
+
+  licenseError.value = '';
+  return true;
 };
 
 // Función para validar la CURP (formato estándar de 18 caracteres)
 const validateCurp = () => {
   const curpRegex = /^[A-Z]{4}[0-9]{6}[H|M][A-Z]{5}[A-Z0-9]{2}$/;
-  // Usamos toUpperCase() para que el usuario pueda escribir en minúsculas
+  // 1. Validar "obligatorio"
+  if (hasAttemptedSubmit.value && !form.curp) {
+    curpError.value = 'La CURP es obligatoria.';
+    return false;
+  }
+
+  if (/[a-z]/.test(form.curp)) {
+    curpError.value = 'La CURP debe estar en mayúsculas.';
+    return false;
+  }
+
+
+  // 2. Validar formato (si hay texto)
   if (form.curp && !curpRegex.test(form.curp.toUpperCase())) {
     curpError.value = 'Formato de CURP inválido (deben ser 18 caracteres).';
-  } else {
-    curpError.value = '';
+    return false;
   }
+
+  curpError.value = '';
+  return true;
 };
 
 // Función única para enviar todo el formulario
 const submitRegistration = async () => {
+  hasAttemptedSubmit.value = true;
   passwordError.value = '';
   validateEmail();
   validateLicense();
   validateCurp();
   validateTextField(form.name, nameError, 'nombre');
   validateTextField(form.paternalLastName, paternalLastNameError, 'primer apellido');
-  validateTextField(form.maternalLastName, maternalLastNameError, 'segundo apellido');
+  validateOptionalTextField(form.maternalLastName, maternalLastNameError, 'segundo apellido');
   validateDateOfBirth();
   // 1. Validación de contraseña en el frontend
   if (form.password !== form.confirmPassword) {
@@ -496,9 +576,9 @@ const submitRegistration = async () => {
       let msg = 'Error de registro. Verifique sus datos.';
 
       // Manejo de errores anidados
-      if (data.user && data.user.email) msg = `Email: ${data.user.email[0]}`;
-      else if (data.professional_license) msg = `Cédula: ${data.professional_license[0]}`;
-      else if (data.curp) msg = `CURP: ${data.curp[0]}`;
+      if (data.user && data.user.email) msg = `${data.user.email[0]}`;
+      else if (data.professional_license) msg = `${data.professional_license[0]}`;
+      else if (data.curp) msg = `${data.curp[0]}`;
       else if (data.detail) msg = data.detail;
 
       errorMessage.value = msg;

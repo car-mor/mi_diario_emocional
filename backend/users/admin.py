@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
+from django.utils import timezone
 
 from .models import EmailChangeRequest, PasswordReset, Patient, Professional, User
 from .services import send_approval_email, send_rejection_email
@@ -11,17 +12,56 @@ class PatientInline(admin.StackedInline):
     model = Patient
     can_delete = False
     verbose_name_plural = "Perfil de Paciente"
+    
+    fields = ('professional', 'alias', 'gender', 'description', 'profile_picture', 'linked_at', 'unlinked_at', 'first_entry_date', 'current_streak', 'last_entry_date')
+    readonly_fields = ('linked_at', 'unlinked_at', 'first_entry_date', 'last_entry_date', 'current_streak')
+    
+    raw_id_fields = ('professional',)
 
 
 class ProfessionalInline(admin.StackedInline):
     model = Professional
     can_delete = False
     verbose_name_plural = "Perfil de Profesional"
+    fields = (
+        'professional_license', 
+        'curp', 
+        'sex', 
+        'career', 
+        'institution', 
+        'review_status',  # Dejamos este editable
+        'link_code', 
+        'link_code_changes_today', 
+        'link_code_last_updated'
+    )
+    
+    readonly_fields = (
+        'professional_license', 
+        'curp', 
+        'sex', 
+        'career', 
+        'institution', 
+        'link_code', 
+        'link_code_changes_today', 
+        'link_code_last_updated'
+    )
 
 
 # 2. Configurar el Admin del Usuario Base (User)
 class CustomUserAdmin(BaseUserAdmin):
-    inlines = (PatientInline, ProfessionalInline)
+    # inlines = (PatientInline, ProfessionalInline)
+    def get_inlines(self, request, obj=None):
+        """
+        Muestra el inline correcto basado en el rol del usuario.
+        """
+        if not obj: # Si es un usuario nuevo
+            return []
+        if obj.role == 'patient':
+            return (PatientInline,)
+        if obj.role == 'professional':
+            return (ProfessionalInline,)
+        return [] # Los Admins/Superusers no tienen inline
+    
     readonly_fields = ("created_at", "verification_code")
 
     list_display = ("email", "role", "is_active", "is_staff", "created_at")
@@ -83,9 +123,30 @@ class ProfessionalAdmin(admin.ModelAdmin):
     search_fields = ("user__name", "user__paternal_last_name", "user__email", "professional_license")
 
     # Define los campos que se mostrarán en la vista de detalle
-    readonly_fields = ("get_full_name", "get_email", "validate_license_link", "get_registration_date")
-    fields = ("get_full_name", "get_email", "validate_license_link", "review_status", "get_registration_date")
-
+    readonly_fields = (
+        "get_full_name",
+        "get_email",
+        "get_date_of_birth",
+        "sex",               
+        "curp",             
+        "validate_license_link",
+        "career",            
+        "institution",      
+        "get_registration_date",
+    )
+    fields = (
+        "get_full_name",
+        "get_email",
+        "get_date_of_birth",
+        "sex",
+        "curp",
+        "validate_license_link",
+        "career",
+        "institution",
+        "get_registration_date",
+        "review_status",
+    )
+    
     # Agrega las acciones personalizadas
     actions = ["approve_applications", "reject_applications"]
 
@@ -103,7 +164,9 @@ class ProfessionalAdmin(admin.ModelAdmin):
 
     @admin.display(description="Fecha de Registro")
     def get_registration_date(self, obj):
-        return obj.user.created_at
+        if obj.user.created_at:
+            return timezone.template_localtime(obj.user.created_at)
+        return None
 
     @admin.display(description="Validar Cédula")
     def validate_license_link(self, obj):
@@ -114,6 +177,10 @@ class ProfessionalAdmin(admin.ModelAdmin):
                 '<a href="{}" target="_blank">Validar Cédula {} en el portal oficial</a>', url, obj.professional_license
             )
         return "No proporcionada"
+    
+    @admin.display(description="Fecha de Nacimiento")
+    def get_date_of_birth(self, obj):
+        return obj.user.date_of_birth
 
     @admin.action(description="Aprobar seleccionados y activar cuentas")
     def approve_applications(self, request, queryset):

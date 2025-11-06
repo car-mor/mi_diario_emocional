@@ -184,8 +184,9 @@ class VerifyEmailView(APIView):
 
                     Patient.objects.create(
                         user=user,
-                        professional=professional_instance,  # Asignamos la instancia
-                        **profile_data,  # Pasamos el resto de los datos (alias, gender)
+                        professional=professional_instance,
+                        linked_at=timezone.localtime(),      
+                        **profile_data,
                     )
                 # (Aquí podrías añadir la lógica para crear un 'professional' si es necesario)
 
@@ -224,12 +225,29 @@ class VerifyProfessionalEmailView(APIView):
         try:
             user = User.objects.get(email=email, role="professional", is_active=False)
 
+            # if (
+            #     not user.check_password(password)
+            #     or user.verification_code != verification_code
+            #     or user.verification_code_expires_at < timezone.now()
+            # ):
+            #     raise User.DoesNotExist
+            
+            # 1. Comprobar la expiración PRIMERO
+            if user.verification_code_expires_at < timezone.now():
+                return Response(
+                    {"error": "El código de verificación ha expirado."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # 2. Comprobar credenciales y código
             if (
                 not user.check_password(password)
                 or user.verification_code != verification_code
-                or user.verification_code_expires_at < timezone.now()
             ):
-                raise User.DoesNotExist
+                return Response(
+                    {"error": "Credenciales o código de verificación incorrectos."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             user.is_active = True
             user.verification_code = None
@@ -242,9 +260,10 @@ class VerifyProfessionalEmailView(APIView):
             )
 
         except User.DoesNotExist:
+        # Esta excepción ahora solo se activa si el email NO existe
             return Response(
-                {"error": "Credenciales o código incorrectos para una cuenta pendiente de activación."},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": "No se encontró una cuenta profesional pendiente para este correo."},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
 
@@ -800,9 +819,14 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
                 logo_data_uri = f"data:image/png;base64,{image_b64}"
         except (FileNotFoundError, IOError):
             logo_data_uri = None  # El logo es opcional
+            
+        therapist_name = "No Asignado"
+        if patient.professional:
+            therapist_name = patient.professional.user.get_full_name()
 
         context = {
             "patient": patient,
+            "therapist_name": therapist_name,
             "diary_entries": diary_entries,
             "avatar_data_uri": avatar_data_uri,
             "logo_data_uri": logo_data_uri,
@@ -825,11 +849,16 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         Devuelve una lista de las semanas de reporte disponibles para un paciente.
         """
         patient = self.get_object()
+        
+        if not patient.first_entry_date:
+            self._get_most_recent_week_info(patient)
+            patient.refresh_from_db()
+        
         if not patient.first_entry_date:
             return Response([])
 
         first_date = patient.first_entry_date
-        today = timezone.now().date()
+        today = timezone.localdate()
 
         total_days = (today - first_date).days
         if total_days < 0:
@@ -858,22 +887,21 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
 
         first_date = patient.first_entry_date
 
+        today = timezone.localdate()
         # Lógica mejorada: si la fecha no está establecida, la buscamos.
         if not first_date:
             first_entry = patient.diary_entries.order_by("entry_date").first()
             if first_entry:
-                first_date = first_entry.entry_date.date()
+                first_date = timezone.localtime(first_entry.entry_date).date()
                 # Guardamos la fecha para que la próxima vez sea más rápido
                 patient.first_entry_date = first_date
                 patient.save()
             else:
                 # Si realmente no hay entradas, devolvemos el estado "sin datos".
-                today = timezone.now().date()
                 return today, today, False, today + timedelta(days=7)
 
-        today = timezone.now().date()
         days_since_first = (today - first_date).days
-
+        
         if days_since_first < 0:
             return today, today, False, first_date + timedelta(days=7)
 
@@ -881,6 +909,14 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         start_date = first_date + timedelta(days=current_week_number * 7)
         end_date = start_date + timedelta(days=6)
 
+        is_report_available = (today >= start_date + timedelta(days=7))
+        # O si hoy es el último día de la semana
+        if today == end_date:
+             is_report_available = True
+             
+        if current_week_number == 0 and days_since_first >= 7:
+            is_report_available = True
+            
         is_report_available = (today - start_date).days >= 7
         next_report_date = start_date + timedelta(days=7)
 

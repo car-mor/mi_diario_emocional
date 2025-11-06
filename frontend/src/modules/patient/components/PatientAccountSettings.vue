@@ -400,12 +400,12 @@ function closeDeleteSuccessModal() {
   localStorage.removeItem('userProfile');
   authStore.logout();
 }
-  const passwordRequirements = [
-    { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
-    { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
-    // { regex: /\d/, text: 'Al menos un número' },
-    { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
-    { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres de longitud' }
+ const passwordRequirements = [
+  { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
+  { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
+  { regex: /\d/, text: 'Al menos un número' },
+  { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
+  { regex: /^.{8,32}$/, text: 'Entre 8 y 32 caracteres' }
 ];
 
 const passwordValidation = computed(() => {

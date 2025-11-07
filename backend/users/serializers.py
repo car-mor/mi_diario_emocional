@@ -1,12 +1,13 @@
 import re
 import secrets
 from datetime import date, timedelta
-from rest_framework.validators import UniqueValidator
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.templatetags.static import static
 from django.utils import timezone
 from rest_framework import exceptions, serializers
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Patient, PreRegistration, Professional, User
@@ -14,15 +15,16 @@ from .services import generate_verification_code
 
 
 class UserSerializer(serializers.ModelSerializer):
+    terms_accepted = serializers.BooleanField(write_only=True)
+
     email = serializers.EmailField(
         validators=[
             UniqueValidator(  # <-- QUITA 'serializers.' de aquí
-                queryset=User.objects.all(),
-                message="Este correo electrónico ya está en uso."
+                queryset=User.objects.all(), message="Este correo electrónico ya está en uso."
             )
         ]
     )
-    
+
     class Meta:
         model = User
         # Excluimos la contraseña y el id en la lectura
@@ -35,13 +37,14 @@ class UserSerializer(serializers.ModelSerializer):
             "date_of_birth",
             "role",
             "password",
+            "terms_accepted",
         ]
         extra_kwargs = {
             "password": {"write_only": True},
             "id": {"read_only": True},
             "role": {"read_only": True},  # El rol se define al crear el perfil de paciente o profesional
         }
-    
+
     def validate_name(self, value):
         if not (2 <= len(value) <= 40):
             raise serializers.ValidationError("El nombre debe tener entre 2 y 40 caracteres.")
@@ -57,46 +60,52 @@ class UserSerializer(serializers.ModelSerializer):
         if value and not (2 <= len(value) <= 40):
             raise serializers.ValidationError("El apellido materno debe tener entre 2 y 40 caracteres.")
         return value
-    
+
     def validate_email(self, value):
         """
         Comprueba que el email no esté en uso en la tabla User
         ni en la tabla PreRegistration.
         """
         normalized_email = value.lower()
-        
+
         # 1. Comprueba contra usuarios ya creados (is_active=True o False)
         #    (El 'unique=True' del modelo ya hace esto, pero ser explícito es bueno)
         if User.objects.filter(email__iexact=normalized_email).exists():
             raise serializers.ValidationError("Este correo electrónico ya está en uso.")
-        
+
         # 2. Comprueba contra pacientes pendientes de verificación
         if PreRegistration.objects.filter(email__iexact=normalized_email).exists():
-            raise serializers.ValidationError("Este correo electrónico ya está en uso por una cuenta pendiente de verificación.")
-        
+            raise serializers.ValidationError(
+                "Este correo electrónico ya está en uso por una cuenta pendiente de verificación."
+            )
+
         return value
-    
+
     def validate_password(self, value):
         errors = []
         if not (8 <= len(value) <= 32):
             errors.append("Debe tener entre 8 y 32 caracteres.")
-        if not re.search(r'[A-Z]', value):
+        if not re.search(r"[A-Z]", value):
             errors.append("Debe contener al menos una letra mayúscula.")
-        if not re.search(r'[a-z]', value):
+        if not re.search(r"[a-z]", value):
             errors.append("Debe contener al menos una letra minúscula.")
-        if not re.search(r'\d', value): # <-- REGLA AÑADIDA
+        if not re.search(r"\d", value):  # <-- REGLA AÑADIDA
             errors.append("Debe contener al menos un número.")
-        if not re.search(r'[@$!%*?&]', value): # Asegúrate que coincida con tu frontend
+        if not re.search(r"[@$!%*?&]", value):  # Asegúrate que coincida con tu frontend
             errors.append("Debe contener al menos un carácter especial (@$!%*?&).")
-        
+
         if errors:
             # Devuelve todos los errores encontrados
             raise serializers.ValidationError(errors)
-        
-        return value # Devuelve la contraseña si es válida
+
+        return value  # Devuelve la contraseña si es válida
 
     # Sobreescribimos el método create para hashear la contraseña
     def create(self, validated_data):
+        terms = validated_data.pop("terms_accepted", False)
+        if not terms:
+            raise serializers.ValidationError("Debes aceptar los términos y condiciones para registrarte.")
+
         password = validated_data.pop("password")
 
         # Generar un código aleatorio y seguro de 6 caracteres
@@ -106,6 +115,8 @@ class UserSerializer(serializers.ModelSerializer):
         # Crear el objeto User con el código y la expiración
         user = User(**validated_data)
         user.set_password(password)
+
+        user.terms_accepted_at = timezone.now()
 
         # Asignar el código de verificación y su expiración
         user.verification_code = new_code
@@ -124,25 +135,17 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfessionalSerializer(serializers.ModelSerializer):
     # Anidamos el serializador de User para manejar la creación de ambos modelos
     user = UserSerializer()
-    
+
     professional_license = serializers.CharField(
-        max_length=64, # Es bueno poner el max_length aquí
+        max_length=64,  # Es bueno poner el max_length aquí
         validators=[
-            UniqueValidator(
-                queryset=Professional.objects.all(),
-                message="Esta cédula profesional ya está registrada."
-            )
-        ]
+            UniqueValidator(queryset=Professional.objects.all(), message="Esta cédula profesional ya está registrada.")
+        ],
     )
-    
+
     curp = serializers.CharField(
-        max_length=18, # Es bueno poner el max_length aquí
-        validators=[
-            UniqueValidator(
-                queryset=Professional.objects.all(),
-                message="Este CURP ya está registrado."
-            )
-        ]
+        max_length=18,  # Es bueno poner el max_length aquí
+        validators=[UniqueValidator(queryset=Professional.objects.all(), message="Este CURP ya está registrado.")],
     )
 
     class Meta:
@@ -223,9 +226,10 @@ class PatientSerializer(serializers.ModelSerializer):
         # 4. Crear el Perfil del Paciente (Patient)
         # Aquí DRF llama a Patient.objects.create(user=user_instance, professional=professional_instance, **validated_data)
         patient = Patient.objects.create(
-            user=user_instance,  # Le pasamos la INSTANCIA de User (corregido)
-            professional=professional_instance,  # Le pasamos la INSTANCIA de Professional (corregido)
-            **validated_data,  # El resto de campos (alias, gender, description, etc.)
+            user=user_instance,
+            professional=professional_instance,
+            linked_at=timezone.now(),  # ← AGREGAR ESTA LÍNEA
+            **validated_data,
         )
 
         return patient
@@ -430,6 +434,7 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
     maternal_last_name = serializers.CharField(write_only=True, allow_blank=True)
     date_of_birth = serializers.DateField(write_only=True)
     role = serializers.CharField(write_only=True, initial="patient")
+    terms_accepted = serializers.BooleanField(write_only=True)
 
     # Campos del modelo Patient
     alias = serializers.CharField(write_only=True)
@@ -455,6 +460,7 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
             "verification_code",
             "verification_code_expires_at",
             "professional_id",
+            "terms_accepted",
         ]
         # Estos campos son de solo lectura porque los calculamos nosotros.
         read_only_fields = [
@@ -464,7 +470,7 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
             "verification_code",
             "verification_code_expires_at",
         ]
-    
+
     def validate_alias(self, value):
         """
         Valida el alias:
@@ -473,13 +479,13 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
         """
         if not value.strip():
             raise serializers.ValidationError("El alias es obligatorio y no puede consistir solo en espacios.")
-        
+
         if not (1 <= len(value) <= 28):
             raise serializers.ValidationError("El alias debe tener entre 1 y 28 caracteres.")
-        
+
         # Como no hay más reglas, se permiten emojis, números y letras.
         return value
-    
+
     def validate_name(self, value):
         if not (2 <= len(value) <= 40):
             raise serializers.ValidationError("El nombre debe tener entre 2 y 40 caracteres.")
@@ -495,48 +501,50 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
         if value and not (2 <= len(value) <= 40):
             raise serializers.ValidationError("El apellido materno debe tener entre 2 y 40 caracteres.")
         return value
-    
+
     def validate_email(self, value):
         """
         Comprueba que el email no esté en uso en la tabla User
         ni en la tabla PreRegistration.
         """
         normalized_email = value.lower()
-        
+
         # 1. Comprueba contra usuarios ya creados (Terapeutas)
         if User.objects.filter(email__iexact=normalized_email).exists():
             raise serializers.ValidationError("Este correo electrónico ya está en uso.")
-        
+
         # 2. Comprueba contra otros pacientes pendientes
         #    (Usamos 'self.instance' para excluir el registro actual si se está actualizando)
         query = PreRegistration.objects.filter(email__iexact=normalized_email)
         if self.instance:
             query = query.exclude(pk=self.instance.pk)
-            
+
         if query.exists():
-            raise serializers.ValidationError("Este correo electrónico ya está en uso por una cuenta pendiente de verificación.")
-        
+            raise serializers.ValidationError(
+                "Este correo electrónico ya está en uso por una cuenta pendiente de verificación."
+            )
+
         return value
-    
+
     def validate_password(self, value):
         errors = []
         if not (8 <= len(value) <= 32):
             errors.append("Debe tener entre 8 y 32 caracteres.")
-        if not re.search(r'[A-Z]', value):
+        if not re.search(r"[A-Z]", value):
             errors.append("Debe contener al menos una letra mayúscula.")
-        if not re.search(r'[a-z]', value):
+        if not re.search(r"[a-z]", value):
             errors.append("Debe contener al menos una letra minúscula.")
-        if not re.search(r'\d', value): # <-- REGLA AÑADIDA
+        if not re.search(r"\d", value):  # <-- REGLA AÑADIDA
             errors.append("Debe contener al menos un número.")
-        if not re.search(r'[@$!%*?&]', value): # Asegúrate que coincida con tu frontend
+        if not re.search(r"[@$!%*?&]", value):  # Asegúrate que coincida con tu frontend
             errors.append("Debe contener al menos un carácter especial (@$!%*?&).")
-        
+
         if errors:
             # Devuelve todos los errores encontrados
             raise serializers.ValidationError(errors)
-        
-        return value # Devuelve la contraseña si es válida
-    
+
+        return value  # Devuelve la contraseña si es válida
+
     def validate_date_of_birth(self, value):
         """
         Valida la fecha de nacimiento.
@@ -547,18 +555,18 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
         today = date.today()
         if value > today:
             raise serializers.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
-        
+
         # Calcular edad
         age = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
-        
+
         # 1. Límite de 120 años (NUEVA VALIDACIÓN)
         if age > 120:
             raise serializers.ValidationError("La fecha de nacimiento no es válida (supera los 120 años).")
-        
+
         # 2. Mínimo 18 años
         if age < 18:
             raise serializers.ValidationError("Debes ser mayor de 18 años para registrarte.")
-        
+
         return value
 
     def create(self, validated_data):
@@ -566,6 +574,12 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
         Sobrescribimos el método `create` para que actualice un pre-registro
         existente o cree uno nuevo si no existe.
         """
+
+        terms = validated_data.pop("terms_accepted", False)
+        if not terms:
+            # Esta validación se activa si el frontend no envía 'terms_accepted: true'
+            raise serializers.ValidationError("Debes aceptar los términos y condiciones para registrarte.")
+
         email = validated_data.get("email")
 
         # Datos que se usarán para crear o actualizar el registro
@@ -582,6 +596,7 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
                 "gender": validated_data.get("gender"),
                 "professional_id": str(validated_data.get("professional_id")),
             },
+            "terms_accepted": True,
             "role": "patient",
             "verification_code": generate_verification_code(),  # Genera un nuevo código siempre
             "verification_code_expires_at": timezone.now() + timedelta(minutes=15),
@@ -593,8 +608,6 @@ class PreRegistrationSerializer(serializers.ModelSerializer):
         pre_registration, created = PreRegistration.objects.update_or_create(email=email, defaults=defaults)
 
         return pre_registration
-    
-    
 
 
 class ChangePasswordSerializer(serializers.Serializer):

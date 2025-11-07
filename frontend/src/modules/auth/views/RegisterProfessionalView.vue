@@ -286,15 +286,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, type Ref } from 'vue'
+import { ref, reactive, computed, type Ref, onMounted  } from 'vue'
 
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { isAxiosError } from 'axios';
 import * as AuthServices from '@/modules/auth/services/authServices';
 import BackgroundWrapper from '@/modules/auth/components/BackgroundWrapper.vue'
 import { IconMail, IconLock, IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const step = ref(1) // 1 para el formulario, 4 para el mensaje de éxito
 const loading = ref(false)
@@ -309,6 +310,7 @@ const paternalLastNameError = ref('');
 const maternalLastNameError = ref('');
 const dateOfBirthError = ref('');
 const hasAttemptedSubmit = ref(false);
+const termsAccepted = ref(false);
 
 const form = reactive({
   email: '',
@@ -324,6 +326,16 @@ const form = reactive({
   institution: '',
   career: '',
 })
+
+onMounted(() => {
+  if (route.query.terms === 'true') {
+    termsAccepted.value = true;
+  } else {
+    // Si intentan acceder a la URL de registro directamente,
+    // los echamos a la página de bienvenida.
+    router.push({ name: 'welcome' });
+  }
+});
 
 // Función genérica para validar campos de texto (nombres, apellidos)
 const validateTextField = (fieldValue: string, errorRef: Ref<string>, fieldName: string) => {
@@ -432,6 +444,7 @@ const validateDateOfBirth = () => {
   }
 };
 
+
 const passwordRequirements = [
   { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
   { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
@@ -525,6 +538,12 @@ const submitRegistration = async () => {
   validateTextField(form.paternalLastName, paternalLastNameError, 'primer apellido');
   validateOptionalTextField(form.maternalLastName, maternalLastNameError, 'segundo apellido');
   validateDateOfBirth();
+  if (!termsAccepted.value) {
+    errorMessage.value = "Debe aceptar los términos antes de registrarse.";
+    errorPopup.value = true;
+    return;
+  }
+
   // 1. Validación de contraseña en el frontend
   if (form.password !== form.confirmPassword) {
     passwordError.value = 'Las contraseñas no coinciden.';
@@ -554,7 +573,8 @@ const submitRegistration = async () => {
           paternal_last_name: form.paternalLastName,
           maternal_last_name: form.maternalLastName,
           date_of_birth: form.dateOfBirth,
-          role: "professional"
+          role: "professional",
+          terms_accepted: termsAccepted.value
       },
       sex: form.gender,
       professional_license: form.professionalLicense,

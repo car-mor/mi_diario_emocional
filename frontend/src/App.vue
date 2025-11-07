@@ -2,6 +2,7 @@
 import { onMounted, computed } from 'vue';
 import { RouterView } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
+import WelcomeFooter from '@/modules/auth/components/WelcomeFooter.vue';
 
 import AnonymusHeader from '@/modules/auth/components/WelcomeHeader.vue';
 
@@ -30,6 +31,8 @@ onMounted(() => {
     </header>
 
     <RouterView :class="{ 'flex-1': !isAuthenticatedUser }" />
-
+<footer>
+        <WelcomeFooter />
+    </footer>
   </div>
 </template>

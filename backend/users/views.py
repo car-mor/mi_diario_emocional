@@ -164,8 +164,13 @@ class VerifyEmailView(APIView):
                     password=password,
                     is_active=True,
                     role=prereg.role,
-                    **prereg.user_data,  # <-- CORRECCIÓN: Sin coma al final
+                    **prereg.user_data,
                 )
+
+                # Transferimos la aceptación de los términos
+                if prereg.terms_accepted:
+                    user.terms_accepted_at = prereg.created_at  # Usamos la fecha del pre-registro
+                    user.save()
 
                 # Creamos el perfil de paciente asociado
                 if prereg.role == "patient":
@@ -185,7 +190,7 @@ class VerifyEmailView(APIView):
                     Patient.objects.create(
                         user=user,
                         professional=professional_instance,
-                        linked_at=timezone.localtime(),      
+                        linked_at=timezone.localtime(),
                         **profile_data,
                     )
                 # (Aquí podrías añadir la lógica para crear un 'professional' si es necesario)
@@ -231,7 +236,7 @@ class VerifyProfessionalEmailView(APIView):
             #     or user.verification_code_expires_at < timezone.now()
             # ):
             #     raise User.DoesNotExist
-            
+
             # 1. Comprobar la expiración PRIMERO
             if user.verification_code_expires_at < timezone.now():
                 return Response(
@@ -240,10 +245,7 @@ class VerifyProfessionalEmailView(APIView):
                 )
 
             # 2. Comprobar credenciales y código
-            if (
-                not user.check_password(password)
-                or user.verification_code != verification_code
-            ):
+            if not user.check_password(password) or user.verification_code != verification_code:
                 return Response(
                     {"error": "Credenciales o código de verificación incorrectos."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -260,7 +262,7 @@ class VerifyProfessionalEmailView(APIView):
             )
 
         except User.DoesNotExist:
-        # Esta excepción ahora solo se activa si el email NO existe
+            # Esta excepción ahora solo se activa si el email NO existe
             return Response(
                 {"error": "No se encontró una cuenta profesional pendiente para este correo."},
                 status=status.HTTP_404_NOT_FOUND,
@@ -819,7 +821,7 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
                 logo_data_uri = f"data:image/png;base64,{image_b64}"
         except (FileNotFoundError, IOError):
             logo_data_uri = None  # El logo es opcional
-            
+
         therapist_name = "No Asignado"
         if patient.professional:
             therapist_name = patient.professional.user.get_full_name()
@@ -849,11 +851,11 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         Devuelve una lista de las semanas de reporte disponibles para un paciente.
         """
         patient = self.get_object()
-        
+
         if not patient.first_entry_date:
             self._get_most_recent_week_info(patient)
             patient.refresh_from_db()
-        
+
         if not patient.first_entry_date:
             return Response([])
 
@@ -901,7 +903,7 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
                 return today, today, False, today + timedelta(days=7)
 
         days_since_first = (today - first_date).days
-        
+
         if days_since_first < 0:
             return today, today, False, first_date + timedelta(days=7)
 
@@ -909,14 +911,14 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         start_date = first_date + timedelta(days=current_week_number * 7)
         end_date = start_date + timedelta(days=6)
 
-        is_report_available = (today >= start_date + timedelta(days=7))
+        is_report_available = today >= start_date + timedelta(days=7)
         # O si hoy es el último día de la semana
         if today == end_date:
-             is_report_available = True
-             
+            is_report_available = True
+
         if current_week_number == 0 and days_since_first >= 7:
             is_report_available = True
-            
+
         is_report_available = (today - start_date).days >= 7
         next_report_date = start_date + timedelta(days=7)
 

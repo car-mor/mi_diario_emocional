@@ -46,6 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=255, null=False)
     paternal_last_name = models.CharField(max_length=255, null=False)
     maternal_last_name = models.CharField(max_length=255, null=True, blank=True)
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
 
     # Campos para la verificación de cuenta
     is_active = models.BooleanField(default=False)
@@ -163,6 +164,7 @@ class PreRegistration(models.Model):
     hashed_password = models.CharField(max_length=255)
     verification_code = models.CharField(max_length=10)
     verification_code_expires_at = models.DateTimeField()
+    terms_accepted = models.BooleanField(default=False)
 
     # Guardamos el resto de los datos como JSON
     user_data = models.JSONField()  # Datos del usuario (name, apellidos, etc.)

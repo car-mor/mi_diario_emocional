@@ -242,45 +242,82 @@ let lastQuoteIndex = -1;
 // Base de datos de frases (Tu lógica de frases permanece igual)
         const quotes = {
             motivacional: [
-                { text: "El único modo de hacer un gran trabajo es amar lo que haces.", author: "Steve Jobs" },
-                { text: "No esperes el momento perfecto, toma el momento y hazlo perfecto.", author: "Anónimo" },
-                { text: "Tu único límite eres tú mismo.", author: "Anónimo" },
-                { text: "Los sueños no tienen fecha de caducidad.", author: "Anónimo" },
-                { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
-                { text: "No se trata de ser perfecto, se trata de ser mejor que ayer.", author: "Anónimo" },
-                { text: "La motivación es lo que te pone en marcha, el hábito es lo que hace que sigas.", author: "Jim Ryun" },
-                { text: "Cada día es una nueva oportunidad para cambiar tu vida.", author: "Anónimo" }
+                { text: "La felicidad es una dirección, no un lugar.", author: "Sydney J. Harris" },
+                { text: "Si supiera que el mundo se acaba mañana, yo, hoy todavía, plantaría un árbol.", author: "Martin Luther King Jr." },
+                { text: "Si escuchas una voz dentro de ti que dice 'no puedes pintar', entonces pinta y esa voz será silenciada.", author: "Vincent Van Gogh" },
+                { text: "Sigues poniendo un pie delante del otro y un día miras hacia atrás y has escalado una montaña.", author: "Tom Hiddleston" },
+                { text: "El éxito es caminar de fracaso en fracaso sin perder el entusiasmo.", author: "Winston Churchill" },
+                { text: "La diferencia entre ganar y perder suele ser no darse por vencido.", author: "Walt Disney" },
+                { text: "El camino hacia el éxito y el camino hacia el fracaso son prácticamente el mismo.", author: "Colin R. Davis" },
+                { text: "No nos quedamos sentados esperando a otras personas. Simplemente, nos ponemos en marcha y lo hacemos.", author: "Arlan Hamilton" },
+                { text: "La educación es el arma más poderosa para cambiar el mundo.", author: "Nelson Mandela" },
+                { text: "Mantén tus ojos en las estrellas y tus pies en el suelo.", author: "Theodore Roosevelt" },
+                { text: "Sólo un pequeño pensamiento positivo por la mañana puede cambiar todo tu día.", author: "Dalai Lama" },
+                { text: "Si puedes imaginarlo, puedes hacerlo.", author: "Tom Fitzgerald" },
+                { text: "El gran descubrimiento de mi generación es que los seres humanos pueden cambiar sus vidas cambiando su actitud.", author: "William James" },
+                { text: "Los lunes ofrecen un nuevo comienzo 52 veces al año.", author: "David Dweck" },
+                { text: "Cuando todo parezca ir en tu contra, recuerda que un avión despega contra el viento, no a favor de él.", author: "Henry Ford" }
             ],
+
             amor: [
-                { text: "Ámate a ti mismo primero y todo lo demás encajará.", author: "Lucille Ball" },
-                { text: "Eres suficiente tal como eres.", author: "Anónimo" },
-                { text: "Tu relación contigo mismo es la más importante.", author: "Anónimo" },
-                { text: "No eres lo que te pasó, eres lo que decides ser.", author: "Anónimo" },
-                { text: "Mereces amor, especialmente el tuyo propio.", author: "Anónimo" },
-                { text: "La autocompasión es la clave del crecimiento personal.", author: "Anónimo" },
-                { text: "Tratarte con bondad no es opcional, es esencial.", author: "Anónimo" },
-                { text: "Eres tu propio hogar, haz que sea un lugar hermoso.", author: "Anónimo" }
+                { text: "El amor propio tiene muy poco que ver con cómo te sientes con tu apariencia. Se trata de aceptar todo de ti mismo.", author: "Tyra Banks" },
+                { text: "Amarse a uno mismo es el comienzo de un romance de por vida.", author: "Oscar Wilde" },
+                { text: "Prefiero ser sincero conmigo mismo, incluso ante el riesgo de hacer el ridículo ante los demás, en lugar de ser falso, e incurrir en mi propio aborrecimiento.", author: "Frederick Douglass" },
+                { text: "Nunca es demasiado tarde para ser lo que podrías haber sido.", author: "George Eliot" },
+                { text: "Tú mismo, tanto como cualquier otro ser en el universo entero, mereces tu propio amor y afecto.", author: "Buda" },
+                { text: "El amor propio es la fuente de todos los amores.", author: "Pierre Corneille" },
+                { text: "Si tienes la capacidad de amar, ámate a ti mismo primero.", author: "Charles Bukowski" },
+                { text: "No podemos estar tan desesperados por recibir amor como para olvidamos de dónde lo encontramos siempre; adentro.", author: "Alexandra Elle" },
+                { text: "A medida que empecé a quererme, dejé de ansiar tener una vida diferente, y pude ver que todo lo que me rodeaba me estaba invitando a crecer. Hoy en día lo llamo 'madurez'.", author: "Charlie Chaplin" },
+                { text: "La única persona que puede deprimirme soy yo mismo, y no voy a dejar que me deprima más.", author: "C. JoyBell C" },
+                { text: "¿Por qué, en general, se rehuye la soledad? Porque son muy pocos los que encuentran compañía consigo mismos.", author: "Carlo Dossi" },
+                { text: "Nadie te puede hacer sentir inferior sin tu consentimiento.", author: "Eleanor Roosevelt" },
+                { text: "Conservar algo que me ayude a recordarte sería admitir que te puedo olvidar.", author: "William Shakespeare" },
+                { text: "Ser dueño de nuestras historias y amarnos a nosotros mismos a través de ese proceso, es lo más valiente que jamás haremos.", author: "Brené Brown" },
+                { text: "La mejor manera de ganar confianza en ti mismo es hacer lo que tienes miedo de hacer.", author: "Swati Sharma" }
             ],
+
             bienestar: [
-                { text: "Tu salud mental es una prioridad, no un lujo.", author: "Anónimo" },
-                { text: "Está bien no estar bien, no está bien no pedir ayuda.", author: "Anónimo" },
-                { text: "La paz mental comienza el momento que decides no permitir que otros controlen tus emociones.", author: "Anónimo" },
-                { text: "Respira, suelta y recuerda que este momento pasará.", author: "Anónimo" },
-                { text: "Tu bienestar mental importa tanto como tu salud física.", author: "Anónimo" },
-                { text: "No tienes que ser perfecto, solo tienes que ser real.", author: "Anónimo" },
-                { text: "Cuidar de ti mismo no es egoísmo, es supervivencia.", author: "Anónimo" },
-                { text: "La terapia es una forma de amor propio.", author: "Anónimo" }
+                { text: "Cuando quieres cambiar tus circunstancias, primero debes cambiar tus pensamientos.", author: "Rhonda Byrne" },
+                { text: "El tiempo que disfrutas perdiéndolo no es tiempo perdido.", author: "Marthe Troly-Curtin" },
+                { text: "El éxito no se logra solo con cualidades especiales. Es, sobre todo, un trabajo de constancia, de método y de organización.", author: "Victor Hugo" },
+                { text: "Si no puedes volar, corre; si no puedes correr, camina; si no puedes caminar, gatea, pero sigue avanzando hacia tu meta.", author: "Martin Luther King Jr." },
+                { text: "Busca la libertad y conviértete en cautivo de tus deseos. Busca la disciplina y encuentra la libertad.", author: "Frank Herbert" },
+                { text: "Odié cada minuto de entrenamiento, pero dije, no te rindas. Sufre ahora y vive el resto de tu vida como un campeón.", author: "Muhammad Ali" },
+                { text: "Sé brutalmente honesto con lo de corto plazo, y optimista y confiado con lo planteado a largo plazo.", author: "Reed Hastings" },
+                { text: "Acepta la responsabilidad en tu vida. Sé consciente de que serás tú quien te llevará a donde quieres ir, nadie más.", author: "Les Brown" },
+                { text: "Únicamente aquellos que se atreven a tener grandes fracasos, terminan consiguiendo grandes éxitos.", author: "Robert F. Kennedy" },
+                { text: "No podemos estar en modo de supervivencia. Tenemos que estar en modo de crecimiento.", author: "Jeff Bezos" },
+                { text: "El que pasa el tiempo arrepintiéndose del pasado, pierde el presente y arriesga el futuro.", author: "Francisco de Quevedo" },
+                { text: "El que tiene fe en sí mismo no necesita que los demás crean en él.", author: "Miguel de Unamuno" },
+                { text: "Aléjate de la gente que trata de empequeñecer tus ambiciones. La gente pequeña siempre hace eso, pero la gente realmente grande, te hace sentir que tú también puedes ser grande.", author: "Mark Twain" },
+                { text: "Un día sin una sonrisa es un día perdido.", author: "Charles Chaplin" },
+                { text: "Si escuchas una voz dentro de ti que dice 'no puedes pintar', entonces pinta, y la voz será silenciada.", author: "Vincent Van Gogh" },
+
+
             ],
+
             sabiduria: [
-                { text: "La sabiduría consiste en saber lo que hacer después.", author: "Herbert Hoover" },
-                { text: "No podemos dirigir el viento, pero sí ajustar las velas.", author: "Proverbio" },
-                { text: "La única constante en la vida es el cambio.", author: "Heráclito" },
-                { text: "Lo que resistimos, persiste. Lo que aceptamos, se transforma.", author: "Carl Jung" },
-                { text: "El mayor revolucionario es aquel que se revoluciona a sí mismo.", author: "Anónimo" },
+                { text: "El misterio de la vida no es un problema a resolver, sino una realidad a experimentar.", author: "Frank Herbert" },
+                { text: "La vida es 10% lo que me ocurre y 90% cómo reacciono a ello.", author: "Charles R. Swindoll" },
+                { text: "No podemos cambiar las cartas que nos han repartido, pero sí cómo jugamos la mano.", author: "Randy Pausch" },
+                { text: "El que tiene un porqué para vivir puede soportar casi cualquier cómo.", author: "Friedrich Nietzsche" },
                 { text: "No juzgues cada día por la cosecha que recoges, sino por las semillas que plantas.", author: "Robert Louis Stevenson" },
-                { text: "La paciencia es amarga, pero su fruto es dulce.", author: "Aristóteles" },
-                { text: "El conocimiento te da poder, pero el carácter te da respeto.", author: "Bruce Lee" }
-            ]
+                { text: "Nuestro destino vive en los momentos más pequeños. Y esos momentos a veces son tan fugaces como un susurro.", author: "Glenn Cooper"},
+                { text: "Es el tiempo que has perdido en tu rosa lo que hace que tu rosa sea importante.", author: "Antoine de Saint-Exupéry" },
+                { text: "Todo lo que una persona puede imaginar, otra puede hacerlo realidad.", author: "Julio Verne" },
+                { text: "El mundo está lleno de magia para quien sabe mirar.", author: "Cassandra Clare" },
+                { text: "No es bueno detenerse en los sueños y olvidarse de vivir.", author: "J.K. Rowling" },
+                { text: "El hombre llega mucho más lejos para evitar lo que teme que para alcanzar lo que desea.", author: "Dan Brown" },
+                { text: "Si esperamos hasta que estemos listos, estaremos esperando por el resto de nuestras vidas.", author: "Lemony Snicket" },
+                { text: "Vivir es experimentar. Y no quedarse pensando en el sentido de la vida.", author: "Paulo Coelho" },
+                { text: "La vida es eso que pasa mientras esperamos un futuro mejor.", author: "Javier Iriondo" },
+                { text: "No llores porque ya se terminó, sonríe porque sucedió.", author: "Gabriel García Márquez" },
+
+
+
+
+              ]
         };
 const getAllQuotes = () => {  let allQuotes: { text: string; author: string }[] = [];
   Object.values(quotes).forEach(categoryQuotes => {

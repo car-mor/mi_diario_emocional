@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.html import format_html
 from django.utils import timezone
+from django.utils.html import format_html
 
 from .models import EmailChangeRequest, PasswordReset, Patient, Professional, User
 from .services import send_approval_email, send_rejection_email
@@ -12,11 +12,22 @@ class PatientInline(admin.StackedInline):
     model = Patient
     can_delete = False
     verbose_name_plural = "Perfil de Paciente"
-    
-    fields = ('professional', 'alias', 'gender', 'description', 'profile_picture', 'linked_at', 'unlinked_at', 'first_entry_date', 'current_streak', 'last_entry_date')
-    readonly_fields = ('linked_at', 'unlinked_at', 'first_entry_date', 'last_entry_date', 'current_streak')
-    
-    raw_id_fields = ('professional',)
+
+    fields = (
+        "professional",
+        "alias",
+        "gender",
+        "description",
+        "profile_picture",
+        "linked_at",
+        "unlinked_at",
+        "first_entry_date",
+        "current_streak",
+        "last_entry_date",
+    )
+    readonly_fields = ("linked_at", "unlinked_at", "first_entry_date", "last_entry_date", "current_streak")
+
+    raw_id_fields = ("professional",)
 
 
 class ProfessionalInline(admin.StackedInline):
@@ -24,26 +35,26 @@ class ProfessionalInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = "Perfil de Profesional"
     fields = (
-        'professional_license', 
-        'curp', 
-        'sex', 
-        'career', 
-        'institution', 
-        'review_status',  # Dejamos este editable
-        'link_code', 
-        'link_code_changes_today', 
-        'link_code_last_updated'
+        "professional_license",
+        "curp",
+        "sex",
+        "career",
+        "institution",
+        "review_status",  # Dejamos este editable
+        "link_code",
+        "link_code_changes_today",
+        "link_code_last_updated",
     )
-    
+
     readonly_fields = (
-        'professional_license', 
-        'curp', 
-        'sex', 
-        'career', 
-        'institution', 
-        'link_code', 
-        'link_code_changes_today', 
-        'link_code_last_updated'
+        "professional_license",
+        "curp",
+        "sex",
+        "career",
+        "institution",
+        "link_code",
+        "link_code_changes_today",
+        "link_code_last_updated",
     )
 
 
@@ -54,17 +65,17 @@ class CustomUserAdmin(BaseUserAdmin):
         """
         Muestra el inline correcto basado en el rol del usuario.
         """
-        if not obj: # Si es un usuario nuevo
+        if not obj:  # Si es un usuario nuevo
             return []
-        if obj.role == 'patient':
+        if obj.role == "patient":
             return (PatientInline,)
-        if obj.role == 'professional':
+        if obj.role == "professional":
             return (ProfessionalInline,)
-        return [] # Los Admins/Superusers no tienen inline
-    
-    readonly_fields = ("created_at", "verification_code")
+        return []  # Los Admins/Superusers no tienen inline
 
-    list_display = ("email", "role", "is_active", "is_staff", "created_at")
+    readonly_fields = ("created_at", "verification_code", "terms_accepted_at")
+
+    list_display = ("email", "role", "is_active", "is_staff", "created_at", "terms_accepted_at")
 
     list_filter = ("role", "is_active", "is_staff")
 
@@ -95,7 +106,7 @@ class CustomUserAdmin(BaseUserAdmin):
             },
         ),  # Añadimos campos de verificación
         # CORRECCIÓN AQUÍ: Cambiamos 'date_joined' por 'created_at'
-        ("Fechas Importantes", {"fields": ("last_login", "created_at")}),
+        ("Fechas Importantes", {"fields": ("last_login", "created_at", "terms_accepted_at")}),
     )
 
     # También debes corregir el método add_fieldsets para la página de creación de usuario admin
@@ -127,11 +138,11 @@ class ProfessionalAdmin(admin.ModelAdmin):
         "get_full_name",
         "get_email",
         "get_date_of_birth",
-        "sex",               
-        "curp",             
+        "sex",
+        "curp",
         "validate_license_link",
-        "career",            
-        "institution",      
+        "career",
+        "institution",
         "get_registration_date",
     )
     fields = (
@@ -146,7 +157,7 @@ class ProfessionalAdmin(admin.ModelAdmin):
         "get_registration_date",
         "review_status",
     )
-    
+
     # Agrega las acciones personalizadas
     actions = ["approve_applications", "reject_applications"]
 
@@ -177,7 +188,7 @@ class ProfessionalAdmin(admin.ModelAdmin):
                 '<a href="{}" target="_blank">Validar Cédula {} en el portal oficial</a>', url, obj.professional_license
             )
         return "No proporcionada"
-    
+
     @admin.display(description="Fecha de Nacimiento")
     def get_date_of_birth(self, obj):
         return obj.user.date_of_birth

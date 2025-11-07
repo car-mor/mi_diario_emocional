@@ -1,5 +1,5 @@
 <template>
-      <div class="dark:bg-gray-900 flex flex-col min-h-screen grid grid-rows-[auto_1fr_auto] min-h-screen">
+<div class="dark:bg-gray-900 grid grid-rows-[auto_1fr_auto] min-h-screen">
 
 
     <main class="flex-1 flex flex-col overflow-hidden">
@@ -12,9 +12,6 @@
         <router-view />
       </div>
     </main>
-    <footer>
-        <WelcomeFooter />
-    </footer>
   </div>
   <div v-if="showWarningModal" class="fixed inset-0 z-[100] flex items-center justify-center" aria-modal="true">
     <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl max-w-md w-full text-center mx-4">
@@ -24,8 +21,17 @@
       </svg>
 
       <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">¿Sigues ahí?</h2>
-      <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
-        Tu sesión se cerrará por inactividad en <b>1 minuto</b>.
+        <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
+        Tu sesión se cerrará por inactividad en
+        <b>
+          <template v-if="countdown >= 60">
+            {{ Math.floor(countdown / 60) }} minuto{{ Math.floor(countdown / 60) > 1 ? 's' : '' }}
+            y {{ countdown % 60 }} segundo{{ (countdown % 60) !== 1 ? 's' : '' }}
+          </template>
+          <template v-else>
+            {{ countdown }} segundo{{ countdown !== 1 ? 's' : '' }}
+          </template>
+        </b>.
       </p>
 
       <div class="flex justify-center gap-4">
@@ -46,10 +52,10 @@
 
 <script setup lang="ts">
 // 4. Imports necesarios para todos los componentes
-import WelcomeFooter from '@/modules/auth/components/WelcomeFooter.vue';
 import ProfessionalHeader from '../components/ProfessionalHeader.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '@/store/auth';
+const countdown = ref(120); // 2 minutos en segundos
 
 const authStore = useAuthStore(); // Ya deberías tener esto
 
@@ -58,33 +64,48 @@ const showWarningModal = ref(false);
 
 // Tiempos (en milisegundos)
 const WARNING_TIME_MS = 10 * 60 * 1000; // 10 minutos
-const LOGOUT_TIME_MS = 2 * 60 * 1000; // 2 minutos
+const COUNTDOWN_SECONDS = 120; // 2 minutos
 
 // IDs de los temporizadores (para poder limpiarlos)
 let warningTimerId: number | null = null;
-let logoutTimerId: number | null = null;
+let logoutTimerId: number | null = null; // ← Cambiar de const a let
+let countdownInterval: number | null = null;
 
 /**
  * Inicia los dos temporizadores: uno para la advertencia (9 min)
  * y otro para el cierre de sesión automático (10 min).
  */
 const startInactivityTimers = () => {
-  // 1. Limpia cualquier timer anterior para evitar duplicados
   if (warningTimerId) clearTimeout(warningTimerId);
   if (logoutTimerId) clearTimeout(logoutTimerId);
+  if (countdownInterval) clearInterval(countdownInterval);
 
-  // 2. Inicia el timer para la advertencia
+  // Timer para mostrar advertencia
   warningTimerId = setTimeout(() => {
     showWarningModal.value = true;
+    startCountdown();
   }, WARNING_TIME_MS);
 
-  // 3. Inicia el timer para el logout automático
+  // Timer para logout automático (advertencia + countdown)
   logoutTimerId = setTimeout(() => {
-    // Solo cerramos sesión si el modal está activo (por si acaso)
-    if (showWarningModal.value) {
-      authStore.logout();
+    authStore.logout();
+  }, WARNING_TIME_MS + (COUNTDOWN_SECONDS * 1000));
+};
+
+const startCountdown = () => {
+  countdown.value = COUNTDOWN_SECONDS;
+
+  // Limpia intervalos anteriores
+  if (countdownInterval) clearInterval(countdownInterval);
+
+  countdownInterval = setInterval(() => {
+    if (countdown.value > 0) {
+      countdown.value--;
+    } else {
+      clearInterval(countdownInterval!);
+      authStore.logout(); // Cierra sesión al llegar a 0
     }
-  }, LOGOUT_TIME_MS);
+  }, 1000);
 };
 
 /**
@@ -92,8 +113,10 @@ const startInactivityTimers = () => {
  * o cuando hace clic en "Permanecer Conectado".
  */
 const resetInactivityTimer = () => {
-  showWarningModal.value = false; // Oculta el modal
-  startInactivityTimers(); // Reinicia el conteo de 10 minutos
+  showWarningModal.value = false;
+  if (countdownInterval) clearInterval(countdownInterval);
+  if (logoutTimerId) clearTimeout(logoutTimerId);
+  startInactivityTimers();
 };
 
 /**
@@ -101,6 +124,8 @@ const resetInactivityTimer = () => {
  */
 const manualLogout = () => {
   showWarningModal.value = false;
+  if (countdownInterval) clearInterval(countdownInterval);
+  if (logoutTimerId) clearTimeout(logoutTimerId); // ← Agregar esta línea
   authStore.logout();
 };
 
@@ -129,6 +154,7 @@ onUnmounted(() => {
   // --- Limpia todo al salir del componente ---
   if (warningTimerId) clearTimeout(warningTimerId);
   if (logoutTimerId) clearTimeout(logoutTimerId);
+  if (countdownInterval) clearInterval(countdownInterval);
 
   activityEvents.forEach(event => {
     window.removeEventListener(event, resetInactivityTimer);

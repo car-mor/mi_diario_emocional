@@ -58,13 +58,24 @@ const routes = [
       path: '/register-patient',
       name: 'register-patient',
       component: () => import('@/modules/auth/views/RegisterPatientView.vue'),
-// Ruta pública
     },
         {
       path: '/register-professional',
       name: 'register-professional',
       component: () => import('@/modules/auth/views/RegisterProfessionalView.vue'),
       meta: { requiresAuth: false, requiredRole: 'professional' } // Ruta pública
+    },
+    {
+      path: '/privacy-policy',
+      name: 'privacy-policy',
+      component: () => import('../modules/auth/views/PrivacyPolicyView.vue'), // Asumiendo este nombre de archivo
+      meta: { requiresAuth: false } // Es una ruta pública
+    },
+    {
+      path: '/terms-and-conditions',
+      name: 'terms-and-conditions',
+      component: () => import('../modules/auth/views/TermsAndConditionsView.vue'), // Asumiendo este nombre de archivo
+      meta: { requiresAuth: false } // Es una ruta pública
     },
 
     // Rutas Protegidas (requieren autenticación y rol específico)

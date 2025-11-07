@@ -321,8 +321,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, type Ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, type Ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { isAxiosError } from 'axios';
 import BackgroundWrapper from '@/modules/auth/components/BackgroundWrapper.vue'
 import * as AuthServices from '@/modules/auth/services/authServices';
@@ -340,6 +340,7 @@ import {
 } from '@tabler/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const step = ref(1)
 const linkCode = ref('')
@@ -348,8 +349,9 @@ const error = ref('')
 const passwordError = ref('')
 const loading = ref(false)
 const linkCodeError = ref('')
-const errorMessage = ref('')   // <-- AÑADE ESTA LÍNEA
+const errorMessage = ref('')
 const errorPopup = ref(false)
+const termsAccepted = ref(false)
 
 const nameError = ref('');
 const aliasError = ref('');
@@ -361,6 +363,16 @@ const emailError = ref('');
 
 const hasAttemptedStep2 = ref(false);
 const hasAttemptedStep3 = ref(false);
+
+onMounted(() => {
+  if (route.query.terms === 'true') {
+    termsAccepted.value = true;
+  } else {
+    // Si intentan acceder a la URL de registro directamente,
+    // los echamos a la página de bienvenida.
+    router.push({ name: 'welcome' });
+  }
+});
 
 const form = reactive({
   name: '',
@@ -598,6 +610,12 @@ async function createAccount() {
     return;
   }
 
+  if (!termsAccepted.value) {
+    errorMessage.value = "No se han aceptado los términos y condiciones.";
+    errorPopup.value = true;
+    return;
+  }
+
   loading.value = true
 
   try {
@@ -607,7 +625,7 @@ async function createAccount() {
   email: form.email,
   password: form.password,
   name: form.name,
-  paternal_last_name: form.paternalLastName, // <-- Asegúrate que los nombres coincidan
+  paternal_last_name: form.paternalLastName,
   maternal_last_name: form.maternalLastName,
   date_of_birth: form.dateOfBirth,
   role: 'patient', // Rol fijo
@@ -615,7 +633,8 @@ async function createAccount() {
   // Campos del modelo Patient
   alias: form.alias,
   gender: form.gender,
-  professional_id: professionalId.value, // Este campo no lo usas en PreRegistration, pero no causa error
+  professional_id: professionalId.value, // Este campo no se usa en PreRegistration, pero no causa error
+  terms_accepted: termsAccepted.value
 }
 
     // 2. Envía la solicitud al endpoint de registro

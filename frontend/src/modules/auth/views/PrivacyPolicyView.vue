@@ -18,7 +18,7 @@
       <!-- Introduction -->
       <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
         <p class="text-lg text-gray-700 leading-relaxed mb-4">
-          En <span class="font-semibold text-[#70BFE9]">Mi Diario Emocional</span> (en adelante, "la Aplicación"), tu confianza y la protección de tus datos son nuestra máxima prioridad. Entendemos la naturaleza profundamente personal y sensible de la información que nos confías. Este Aviso de Privacidad explica de manera transparente cómo recopilamos, usamos y, sobre todo, cómo protegemos tus datos personales.
+          En <span class="font-semibold text-[#70BFE9]">Mi Diario Emocional</span> en adelante, "la Aplicación", tu confianza y la protección de tus datos son nuestra máxima prioridad. Entendemos la naturaleza profundamente personal y sensible de la información que nos confías. Este Aviso de Privacidad explica de manera transparente cómo recopilamos, usamos y, sobre todo, cómo protegemos tus datos personales.
         </p>
         <div class="bg-[#70BFE9]/10 border-l-4 border-[#70BFE9] p-4 rounded">
           <p class="text-sm text-gray-700 flex items-start">
@@ -38,7 +38,7 @@
         </h2>
         <div class="space-y-3 text-gray-700">
           <p>
-            <span class="font-semibold">Mi Diario Emocional</span> (en adelante, "nosotros"), con domicilio en [Tu Domicilio Legal, Ciudad, Estado, C.P.], es el responsable del tratamiento (uso) de tus datos personales.
+            <span class="font-semibold">Mi Diario Emocional</span> en adelante, "nosotros", con domicilio en Gustavo A. Madero, Ciudad de México, 07320, es el responsable del tratamiento (uso) de tus datos personales.
           </p>
           <div class="bg-gray-50 p-4 rounded-lg flex items-center">
             <IconMail class="w-5 h-5 text-[#70BFE9] mr-3 flex-shrink-0" />
@@ -125,7 +125,7 @@
             <div class="bg-red-50 p-4 rounded-lg">
               <p class="text-sm text-gray-700 flex items-start">
                 <IconInfoCircle class="w-5 h-5 mr-2 text-red-500 flex-shrink-0 mt-0.5" />
-                De acuerdo con la ley, tus entradas del diario son consideradas <strong>Datos Personales Sensibles</strong> ya que revelan tu estado de salud mental y emocional. Requerimos tu consentimiento explícito (que otorgas al aceptar este aviso) para su tratamiento.
+                De acuerdo con la ley, tus entradas del diario son consideradas <strong>Datos Personales Sensibles</strong> Ya que revelan tu estado de salud mental y emocional. Requerimos tu consentimiento explícito (que otorgas al aceptar este aviso) para su tratamiento.
               </p>
             </div>
           </div>
@@ -159,10 +159,6 @@
               <li class="flex items-start">
                 <IconCircleCheck class="w-5 h-5 mr-2 text-[#70BFE9] flex-shrink-0 mt-0.5" />
                 <span><strong>Pacientes:</strong> Almacenar de forma segura tus entradas del diario; mostrarte tu historial; y generar los análisis y reportes de emociones derivados de tus textos.</span>
-              </li>
-              <li class="flex items-start">
-                <IconCircleCheck class="w-5 h-5 mr-2 text-[#70BFE9] flex-shrink-0 mt-0.5" />
-                <span><strong>Vinculación:</strong> Si (y solo si) un Paciente lo solicita explícitamente, transferir sus datos (entradas, análisis) al Terapeuta que ha seleccionado.</span>
               </li>
             </ul>
           </div>
@@ -247,7 +243,7 @@
           <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
             <p class="flex items-start">
               <IconShieldCheck class="w-5 h-5 mr-2 text-green-600 flex-shrink-0 mt-0.5" />
-              Fuera de este caso, <strong>no vendemos, alquilamos ni compartimos</strong> tus datos personales con terceros.
+              Fuera de este caso,  <span class="font-bold"> no vendemos, alquilamos ni compartimos </span> tus datos personales con terceros.
             </p>
           </div>
         </div>
@@ -297,7 +293,7 @@
             <strong>Para ejercer estos derechos:</strong> Usa la opción "Eliminar mi cuenta" en tu perfil para cancelar tus datos, o contacta a
             <a href="mailto:midiarioemocional_help@outlook.com" class="text-[#70BFE9] hover:text-[#5AA3CC] transition-colors">
               midiarioemocional_help@outlook.com
-            </a> para Acceso, Rectificación u Oposición.
+            </a> para Acceso, Rectificación, Cancelación u Oposición.
           </p>
         </div>
       </div>

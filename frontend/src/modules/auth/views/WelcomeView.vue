@@ -14,12 +14,12 @@
         <div
           class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-8 text-center shadow-lg border border-gray-200 dark:border-gray-700"
         >
-          <h1 class="mb-4 text-4xl text-brand dark:text-[#70BFE9] font-heading font-semibold">
-            ¡Bienvenidos!
+          <h1 class="mb-4 text-3xl text-brand text-[#70BFE9] font-heading font-semibold">
+            ¿Cómo te sientes hoy?
           </h1>
 
           <p class="mb-8 text-gray-600 dark:text-gray-300 leading-relaxed">
-            Registra y reflexiona sobre tus emociones cada día.
+            Registra en tu diario y reflexiona sobre cómo te sientes cada día.
           </p>
 
           <div class="flex flex-col items-center gap-4">

@@ -161,7 +161,7 @@
           <div class="flex items-center space-x-3 text-center sm:text-left">
             <p class="text-sm text-gray-600 dark:text-gray-300">
               <span v-if="reportInfo?.is_available">
-                El reporte semanal está listo para descargar.
+                Descargar reporte del periodo de tiempo seleccionado.
               </span>
               <span v-else>
                 <span v-if="diaryHistory.length === 0">

@@ -421,7 +421,7 @@ const validateDateOfBirth = () => {
   const dayDifference = today.getDate() - birthDate.getDate();
 
   if (age > 120) {
-    dateOfBirthError.value = 'La fecha de nacimiento no es válida (supera los 120 años).';
+    dateOfBirthError.value = 'La fecha de nacimiento no es válida.';
     return false;
   }
 

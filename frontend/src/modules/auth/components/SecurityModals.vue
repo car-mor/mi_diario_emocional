@@ -63,7 +63,7 @@
         <div class="flex flex-col space-y-4">
           <button type="submit" class="px-4 py-2 bg-[#7DBFF8] text-white rounded font-semibold" :disabled="isCodeInvalidated">Verificar Código</button>
           <button type="button" @click="sendVerificationCode" :disabled="!canResendCode" class="px-4 py-2 font-semibold rounded" :class="{'bg-gray-200 hover:bg-gray-300': canResendCode, 'bg-gray-100 text-gray-400 cursor-not-allowed': !canResendCode}">
-            {{ isCodeInvalidated ? 'Código invalidado' : canResendCode ? `Reenviar (${resendAttempts}/${maxResendAttempts})` : 'Límite alcanzado' }}
+            {{ isCodeInvalidated ? 'Código invalidado' : canResendCode ? `Reenvios (${resendAttempts}/${maxResendAttempts})` : 'Límite alcanzado' }}
           </button>
           <button type="button" @click="emit('close')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded">Cancelar y Reiniciar</button>
         </div>
@@ -204,6 +204,7 @@ async function changePassword() {
   if (!currentPassword.value || !newPassword.value || !newPasswordConfirm.value) { passwordError.value = "Todos los campos son requeridos."; return; }
   if (newPassword.value !== newPasswordConfirm.value) { passwordError.value = "Las nuevas contraseñas no coinciden."; return; }
   if (!isPasswordValid.value) { passwordError.value = "La nueva contraseña no cumple los requisitos."; return; }
+  if (currentPassword.value === newPassword.value) { passwordError.value = "La nueva contraseña no puede ser igual a la actual."; return; }
   passwordError.value = null;
 
   try {

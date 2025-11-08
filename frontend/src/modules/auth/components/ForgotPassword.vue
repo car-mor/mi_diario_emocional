@@ -66,7 +66,7 @@
       </p>
 
       <p v-if="isResendDisabled && remainingTime > 0" class="text-sm text-gray-500 mb-4">
-        Podrás reenviar el código en {{ Math.ceil(remainingTime / 1000) }} segundos
+        Podrás reenviar el código en {{ Math.ceil(remainingTime / 1000 / 60) }} minutos
       </p>
 
       <button
@@ -86,7 +86,7 @@
           loading
             ? 'Enviando...'
             : isResendDisabled
-              ? `Esperar ${Math.ceil(remainingTime / 1000)}s`
+              ? `Esperar ${Math.ceil(remainingTime / 1000 / 60)} minutos`
               : 'Volver a enviar código'
         }}
       </button>
@@ -359,7 +359,7 @@ const verifyCode = async () => {
 const passwordRequirements = [
     { regex: /[a-z]/, text: 'Al menos una letra minúscula' },
     { regex: /[A-Z]/, text: 'Al menos una letra mayúscula' },
-    // { regex: /\d/, text: 'Al menos un número' },
+    { regex: /\d/, text: 'Al menos un número' },
     { regex: /[@$!%*?&]/, text: 'Al menos un carácter especial (@$!%*?&)' },
     { regex: /.{8,32}/, text: 'Entre 8 y 32 caracteres' }
 ];

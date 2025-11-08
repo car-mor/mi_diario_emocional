@@ -72,38 +72,31 @@
             <IconHeartbeat class="w-5 h-5 mr-2" />
             Mi Diario Emocional
           </h6>
-          <p class="text-sm mb-4 text-white/90 leading-relaxed">
+          <p class="text-sm mb-4 text-justify text-white/90 leading-relaxed">
             Una plataforma segura para el seguimiento emocional y la conexión terapéutica,
             diseñada con los más altos estándares de privacidad y seguridad.
           </p>
           <div class="flex gap-3">
             <a
-              href="#"
+              href="https://www.facebook.com/profile.php?id=61583184495757"
               class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300 hover:-translate-y-1"
               aria-label="Facebook"
             >
               <IconBrandFacebook class="w-5 h-5" />
             </a>
             <a
-              href="#"
-              class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300 hover:-translate-y-1"
-              aria-label="Twitter"
-            >
-              <IconBrandX class="w-5 h-5" />
-            </a>
-            <a
-              href="#"
+              href="https://www.instagram.com/midiario_emocional?igsh=MTFybjhmaHhuZWd1MA%3D%3D&utm_source=qr"
               class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300 hover:-translate-y-1"
               aria-label="Instagram"
             >
               <IconBrandInstagram class="w-5 h-5" />
             </a>
             <a
-              href="#"
+              href="https://www.youtube.com/@Mi-diario-emocional"
               class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300 hover:-translate-y-1"
-              aria-label="LinkedIn"
-            >
-              <IconBrandLinkedin class="w-5 h-5" />
+              aria-label="YouTube"
+              >
+              <IconBrandYoutubeFilled class="w-5 h-5" />
             </a>
           </div>
         </div>
@@ -139,11 +132,10 @@ import {
   IconMail,
   IconHeartbeat,
   IconBrandFacebook,
-  IconBrandX,
   IconBrandInstagram,
-  IconBrandLinkedin,
   IconCopyright,
-  IconHeart
+  IconHeart,
+  IconBrandYoutubeFilled
 } from '@tabler/icons-vue';
 
 const router = useRouter();

@@ -128,7 +128,7 @@
       <IconCircleCheckFilled class="text-green-500 w-16 h-16 mb-4" />
       <h3 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">¡Éxito!</h3>
       <p class="text-gray-600 dark:text-gray-300 mb-4">
-        Tu cuenta ha sido activada correctamente. Serás redirigido en unos segundos...
+        Tu cuenta ha sido activada correctamente.
       </p>
       <button
         @click="closeSuccessPopup"

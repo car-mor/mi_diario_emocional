@@ -10,9 +10,7 @@
 
         <p class="text-center text-lg text-gray-700 dark:text-gray-400 mb-10">
           Debido a la naturaleza sensible del proyecto, hemos adoptado directrices de la norma
-          **ISO/IEC 27001** como guía para la confidencialidad y protección de tus datos.
-          Consideramos la viabilidad de implementar un SGSI (Sistema de Gestión de Seguridad de la
-          Información) en el futuro para garantizar un estándar aún más alto.
+          <span class="font-bold">ISO/IEC 27001</span> como guía para la confidencialidad y protección de tus datos.
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -47,12 +45,9 @@
         </div>
       </div>
     </main>
-
-    <WelcomeFooter />
   </div>
 </template>
 
 <script setup lang="ts">
-import WelcomeFooter from '../components/WelcomeFooter.vue'
 import { IconLockSquareRounded, IconShieldLock, IconFileTextShield } from '@tabler/icons-vue'
 </script>

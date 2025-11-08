@@ -629,6 +629,10 @@ class ChangePasswordSerializer(serializers.Serializer):
         if not user.check_password(data["current_password"]):
             raise serializers.ValidationError({"current_password": "La contraseña actual es incorrecta."})
 
+        # 2. Validar que la vieja contraseña no sea igual a la nueva
+        if data["current_password"] == data["new_password"]:
+            raise serializers.ValidationError({"new_password": "La nueva contraseña no puede ser igual a la actual."})
+
         # 3. Validar la nueva contraseña con las reglas de Django
         try:
             validate_password(data["new_password"], user)

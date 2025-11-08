@@ -18,7 +18,7 @@
       <!-- Introduction -->
       <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
         <p class="text-lg text-gray-700 leading-relaxed">
-          Bienvenido/a a <span class="font-semibold text-[#70BFE9]">Mi Diario Emocional</span> (en adelante, "la Aplicación").
+          Bienvenidos a <span class="font-semibold text-[#70BFE9]">Mi Diario Emocional</span>, en adelante, "la Aplicación".
           Estos Términos y Condiciones ("Términos") rigen tu acceso y uso de nuestra aplicación y servicios.
           Al crear una cuenta o utilizar nuestra Aplicación, aceptas cumplir con estos Términos.
         </p>
@@ -61,7 +61,7 @@
           <div class="bg-blue-50 p-4 rounded-lg flex items-start">
             <IconUsers class="w-5 h-5 mr-2 text-[#70BFE9] flex-shrink-0 mt-0.5" />
             <p class="text-sm">
-              <strong>Vinculación opcional:</strong> La Aplicación permite a los Pacientes vincularse con un profesional verificado (en adelante, "Terapeuta")
+              <strong>Vinculación obligatoria:</strong> La Aplicación permite a los Pacientes vincularse con un profesional verificado (en adelante, "Terapeuta")
               para compartir sus entradas y facilitar un proceso terapéutico.
             </p>
           </div>
@@ -176,7 +176,7 @@
               Para Pacientes
             </h3>
             <p class="text-white/90 text-sm leading-relaxed">
-              <strong>Tú tienes el control total.</strong> Al usar el "Código de Vínculo" de un Terapeuta, otorgas tu consentimiento
+              <strong>Tú tienes el control total.</strong> Al usar el "Código de Vínculación" de un Terapeuta, otorgas tu consentimiento
               explícito e informado para que dicho Terapeuta tenga acceso completo a todas tus entradas del diario
               (pasadas, presentes y futuras) mientras la vinculación esté activa.
               Puedes desvincularte de tu Terapeuta en cualquier momento desde tu perfil, revocando su acceso inmediatamente.
@@ -191,7 +191,7 @@
             <p class="text-white/90 text-sm leading-relaxed">
               Al aceptar la vinculación, te comprometes a mantener la más estricta confidencialidad sobre los datos de tus pacientes,
               de acuerdo con tu ética profesional y las leyes de protección de datos aplicables.
-              <strong>El uso indebido de la información del paciente resultará en la terminación inmediata de tu cuenta.</strong>
+              <strong>El uso indebido de la información del paciente resultará en la terminación inmediata y permanente de tu cuenta.</strong>
             </p>
           </div>
         </div>

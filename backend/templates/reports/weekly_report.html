@@ -132,8 +132,30 @@
         .no-data { font-size: 11pt; color: var(--color-text-light); font-style: italic; }
 
         /* --- 2b. Nube de Palabras (Etiquetas) --- */
-        .word-cloud-container { line-height: 1.8; text-align: left; }
-        .word-cloud-container span { display: inline-block; padding: 2px 6px; margin: 3px; border-radius: 4px; background-color: var(--color-bg-light); color: var(--color-text-medium); font-weight: 600; }
+        .word-cloud-container { 
+            line-height: 1.8; 
+            text-align: left; /* Ya lo tienes, pero es el valor por defecto */
+            /* Añade esto para controlar el flujo de los elementos */
+            display: block; /* Asegura que el contenedor ocupe su propio bloque */
+        }
+        .word-cloud-container span { 
+            display: inline-block; 
+            padding: 2px 6px; 
+            margin: 3px; /* Reduce el margen si quieres que estén más pegadas */
+            border-radius: 4px; 
+            background-color: var(--color-bg-light); 
+            color: var(--color-text-medium); 
+            font-weight: 600; 
+            /* Agrega float: left; para forzar que se peguen a la izquierda */
+            float: left;
+        }
+        /* Limpia los floats después del contenedor si es necesario */
+        .word-cloud-container::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
         .size-5 { font-size: 2em; color: var(--color-primary); }
         .size-4 { font-size: 1.6em; }
         .size-3 { font-size: 1.3em; }
@@ -226,13 +248,13 @@
     </section>
 
     <section class="analysis-cloud">
-     <div class="analysis-cloud">
-        <br>
-            <h2>Nube de Palabras Clave</h2>
+       <div class="analysis-cloud">
+            <br>
+            <h2>15 Palabras clave más frecuentes</h2>
             
             {% if word_frequency %}
             <div class="word-cloud-container">
-                {% for word, count, size_class in word_frequency %}
+                {% for word, count, size_class in word_frequency|slice:":15" %}
                     <span class="{{ size_class }}">{{ word }} ({{ count }})</span>
                 {% endfor %}
             </div>
@@ -277,7 +299,7 @@
                                     <span class="tag tag-ai">{{ emotion|capfirst }}</span>
                                 {% endfor %}
                             {% else %}
-                                 <span class="tag-none">Análisis neutral.</span>
+                                   <span class="tag-none">Análisis neutral.</span>
                             {% endif %}
                         </div>
                     </div>

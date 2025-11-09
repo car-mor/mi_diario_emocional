@@ -121,21 +121,89 @@
                   <div class="flex-1">
                     <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Sentimiento seleccionado:</h4>
                     <div v-if="entry.selected_emotions && entry.selected_emotions.length > 0" class="flex flex-wrap gap-2">
-                      <span v-for="emotion in entry.selected_emotions" :key="emotion" class="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-2.5 py-1 rounded-full font-medium">
+                      <span v-for="emotion in entry.selected_emotions" :key="emotion" class="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
                         {{ emotion }}
                       </span>
                     </div>
                     <p v-else class="text-sm text-gray-400 dark:text-gray-500 italic">Ninguno reportado.</p>
                   </div>
+
                   <div class="flex-1">
-                    <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Análisis de IA:</h4>
-                    <div v-if="entry.analyzed_emotions && entry.analyzed_emotions.length > 0 && entry.analyzed_emotions[0] !== 'neutro'" class="flex flex-wrap gap-2">
-                      <span v-for="emotion in entry.analyzed_emotions" :key="emotion" class="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2.5 py-1 rounded-full font-medium">
-                        {{ emotion }}
-                      </span>
-                    </div>
-                    <p v-else class="text-sm text-gray-400 dark:text-gray-500 italic">Análisis neutral.</p>
-                  </div>
+<h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Análisis de IA:</h4>
+
+  <div
+    v-if="entry.analyzed_emotions && entry.analyzed_emotions.length > 0 && entry.analyzed_emotions[0] !== 'neutro'"
+    class="space-y-2"
+  >
+    <!-- Badges con emociones detectadas -->
+    <div class="flex flex-wrap gap-2">
+      <span
+        v-for="emotion in entry.analyzed_emotions"
+        :key="emotion"
+        :class="getEmotionBadgeClass(emotion)"
+        class="text-xs px-3 py-1.5 rounded-full font-medium inline-flex items-center gap-1.5"
+      >
+        <span class="capitalize">{{ emotion }}</span>
+        <span class="font-bold">
+          {{ getEmotionPercentage(entry, emotion) }}%
+        </span>
+      </span>
+    </div>
+
+    <!-- Dropdown expandible para todas las probabilidades -->
+    <details
+      v-if="entry.analyzed_scores && Object.keys(entry.analyzed_scores).length > 0"
+      class="group"
+    >
+      <summary class="text-xs text-blue-500 dark:text-blue-400 cursor-pointer hover:underline select-none list-none flex items-center gap-1">
+        <svg
+          class="w-4 h-4 transition-transform group-open:rotate-90"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span>Ver todas las probabilidades</span>
+      </summary>
+
+      <!-- Contenido del dropdown -->
+      <div class="mt-2 ml-5 space-y-1.5 text-xs bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+        <div
+          v-for="[emotion, prob] in getSortedEmotionScores(entry)"
+          :key="emotion"
+          class="flex justify-between items-center py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors"
+        >
+          <span class="capitalize text-gray-700 dark:text-gray-300 font-medium">
+            {{ emotion }}
+          </span>
+
+          <!-- Mini barra de progreso -->
+          <div class="flex items-center gap-2 flex-1 max-w-[150px] ml-4">
+            <div class="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 overflow-hidden">
+              <div
+                :class="getEmotionColorClass(emotion)"
+                class="h-full rounded-full transition-all duration-300"
+                :style="{ width: `${Math.round(prob * 100)}%` }"
+              ></div>
+            </div>
+            <span class="font-bold text-gray-800 dark:text-gray-200 w-10 text-right">
+              {{ Math.round(prob * 100) }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <p
+    v-else
+    class="text-sm text-gray-400 dark:text-gray-500 italic"
+  >
+    Análisis neutral.
+  </p>
+</div>
                 </div>
               </div>
             </div>
@@ -243,7 +311,50 @@ const patientId = route.params.id as string;
 
 // --- LÓGICA COMPUTADA ---
 const hasData = computed(() => diaryHistory.value.length > 0);
+function getEmotionPercentage(entry: DiaryEntry, emotion: string): number {
+  if (!entry.analyzed_scores || !entry.analyzed_scores[emotion]) {
+    return 0;
+  }
 
+  const probability = entry.analyzed_scores[emotion];
+  return Math.round(probability * 100);
+}
+/**
+ * Obtiene las clases de color para el badge según la emoción
+ */
+function getEmotionBadgeClass(emotion: string): string {
+  const emotionClasses: Record<string, string> = {
+    alegria: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+    tristeza: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    ira: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+    miedo: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+    sorpresa: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
+    asco: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+  };
+
+  return emotionClasses[emotion] || 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+}
+
+function getEmotionColorClass(emotion: string): string {
+  const emotionColors: Record<string, string> = {
+    alegria: 'bg-yellow-400 dark:bg-yellow-500',
+    tristeza: 'bg-blue-500 dark:bg-blue-400',
+    ira: 'bg-red-500 dark:bg-red-400',
+    miedo: 'bg-purple-500 dark:bg-purple-400',
+    sorpresa: 'bg-pink-500 dark:bg-pink-400',
+    asco: 'bg-green-500 dark:bg-green-400'
+  };
+  return emotionColors[emotion] || 'bg-blue-500 dark:bg-blue-400';
+}
+
+function getSortedEmotionScores(entry: DiaryEntry): Array<[string, number]> {
+  if (!entry.analyzed_scores) {
+    return [];
+  }
+
+  return Object.entries(entry.analyzed_scores)
+    .sort((a, b) => b[1] - a[1]); // Ordenar de mayor a menor
+}
 const tabClass = (tabName: 'historial' | 'grafica' | 'nube') => ({
   'py-2 px-4 text-lg font-medium transition-colors border-b-2': true,
   'text-blue-500 border-blue-500 dark:text-blue-400 dark:border-blue-400': activeTab.value === tabName,

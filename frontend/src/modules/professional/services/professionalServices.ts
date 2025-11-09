@@ -20,6 +20,7 @@ export interface DiaryEntry {
     content: string;
     selected_emotions: string[];
     analyzed_emotions: string[];
+    analyzed_scores: { [key: string]: number };
 }
 // Interfaz para la información del reporte
 export interface ReportInfo {

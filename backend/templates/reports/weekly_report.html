@@ -1,3 +1,4 @@
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,20 +6,34 @@
     <title>Reporte Semanal - {{ patient.user.get_full_name }}</title>
     <style>
         /* --- Importar Fuente Profesional --- */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
         /* --- Variables de Color --- */
         :root {
             --color-primary: #3457B2;
             --color-primary-light: #7DBFF8;
             --color-logo: #70BFE9;
-            --color-accent-user: #10B981; /* Verde para el usuario */
-            --color-accent-ai: #3B82F6;   /* Azul para la IA */
             --color-text-dark: #1F2937;
             --color-text-medium: #4B5563;
             --color-text-light: #6B7281;
             --color-bg-light: #F9FAFB;
             --color-border: #E5E7EB;
+            
+            /* Colores específicos para emociones */
+            --color-alegria: #FEF3C7;
+            --color-alegria-text: #92400E;
+            --color-tristeza: #DBEAFE;
+            --color-tristeza-text: #1E40AF;
+            --color-ira: #FEE2E2;
+            --color-ira-text: #991B1B;
+            --color-miedo: #E9D5FF;
+            --color-miedo-text: #6B21A8;
+            --color-sorpresa: #FBCFE8;
+            --color-sorpresa-text: #9D174D;
+            --color-asco: #D1FAE5;
+            --color-asco-text: #065F46;
+            --color-neutro: #F3F4F6;
+            --color-neutro-text: #374151;
         }
 
         /* --- Configuración de Página y Tipografía --- */
@@ -67,20 +82,19 @@
             object-fit: contain;
         }
         .logo-title {
-            font-size: 18pt; /* text-xl */
+            font-size: 18pt;
             font-weight: 600;
             color: var(--color-logo);
-            margin-left: 15px; /* space-x-3 */
+            margin-left: 15px;
         }
-        .header-report-title { text-align: right; }
+        .header-report-title { text-align: center; }
         .header-report-title h1 { margin-bottom: 0; }
         .header-report-title p { font-size: 14pt; color: var(--color-text-medium); }
-
 
         /* --- 1. Info del Paciente (Grid) --- */
         .info-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr; /* Columna 1 más ancha */
+            grid-template-columns: 1.5fr 1fr 1fr;
             gap: 15px 20px;
             background-color: var(--color-bg-light);
             border: 1px solid var(--color-border);
@@ -107,76 +121,277 @@
         /* --- 2. Análisis (Grid de 2 Columnas) --- */
         .analysis-grid {
             display: grid;
-            grid-template-columns: 1.2fr 1fr; /* 55% y 45% */
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
             margin-bottom: 30px;
-            page-break-inside: avoid; /* Intenta no romper esta sección */
+            page-break-inside: avoid;
         }
 
-        /* --- 2a. Gráfica de Barras (Emociones) --- */
-        .bar-chart-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 10pt; }
-        .bar-chart-label { width: 100%; white-space: wrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; color: var(--color-text-medium); font-weight: 600; }
-        .bar-chart-bar-bg { width: 100%; background-color: var(--color-border); border-radius: 4px; }
+        /* --- 2a. Gráfica de Barras (Emociones) - MEJORADA --- */
+        .bar-chart-item { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 12px; 
+            font-size: 10pt; 
+        }
+        .bar-chart-label { 
+            width: 140px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            padding-right: 10px; 
+            color: var(--color-text-medium); 
+            font-weight: 600; 
+        }
+        .bar-chart-bar-bg { 
+            flex: 1; 
+            background-color: var(--color-border); 
+            border-radius: 4px; 
+        }
         .bar-chart-bar {
             height: 20px;
-            background-color: var(--color-primary-light);
             border-radius: 4px;
             text-align: right;
             padding-right: 6px;
-            color: var(--color-text-dark);
+            color: white;
             font-size: 10pt;
             font-weight: 600;
             line-height: 20px;
-            min-width: 25px; /* Para que se vea el número '1' */
+            min-width: 25px;
         }
         .no-data { font-size: 11pt; color: var(--color-text-light); font-style: italic; }
 
         /* --- 2b. Nube de Palabras (Etiquetas) --- */
         .word-cloud-container { 
             line-height: 1.8; 
-            text-align: left; /* Ya lo tienes, pero es el valor por defecto */
-            /* Añade esto para controlar el flujo de los elementos */
-            display: block; /* Asegura que el contenedor ocupe su propio bloque */
+            text-align: center;
         }
         .word-cloud-container span { 
             display: inline-block; 
-            padding: 2px 6px; 
-            margin: 3px; /* Reduce el margen si quieres que estén más pegadas */
-            border-radius: 4px; 
+            padding: 4px 8px; 
+            margin: 4px; 
+            border-radius: 6px; 
             background-color: var(--color-bg-light); 
             color: var(--color-text-medium); 
             font-weight: 600; 
-            /* Agrega float: left; para forzar que se peguen a la izquierda */
-            float: left;
         }
-        /* Limpia los floats después del contenedor si es necesario */
-        .word-cloud-container::after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-
-        .size-5 { font-size: 2em; color: var(--color-primary); }
-        .size-4 { font-size: 1.6em; }
-        .size-3 { font-size: 1.3em; }
-        .size-2 { font-size: 1.1em; }
-        .size-1 { font-size: 1.0em; color: var(--color-text-light); }
-
+        .size-5 { font-size: 2em; color: var(--color-primary); background-color: #E0F2FE; }
+        .size-4 { font-size: 1.6em; color: #1E40AF; background-color: #DBEAFE; }
+        .size-3 { font-size: 1.3em; color: #374151; background-color: #F3F4F6; }
+        .size-2 { font-size: 1.1em; color: #6B7280; background-color: #F9FAFB; }
+        .size-1 { font-size: 1.0em; color: var(--color-text-light); background-color: #FEFEFE; }
 
         /* --- 3. Registro de Entradas --- */
         .entry-log { margin-top: 30px; }
-        .entry-card { border: 1px solid var(--color-border); border-radius: 8px; margin-bottom: 15px; padding: 15px; page-break-inside: avoid; }
-        .entry-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-        .entry-header h3 { font-size: 13pt; margin-bottom: 0; color: var(--color-primary); }
-        .entry-header span { font-size: 10pt; color: var(--color-text-light); }
-        .entry-content { font-size: 11pt; color: var(--color-text-medium); white-space: pre-wrap; margin-bottom: 15px; }
-        .entry-emotions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-top: 15px; border-top: 1px dashed var(--color-border); }
-        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
-        .tag { font-size: 9pt; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
-        .tag-user { background-color: #DEF7EC; color: #046C4E; }
-        .tag-ai { background-color: #DBEAFE; color: #1E40AF; }
-        .tag-none { font-size: 10pt; color: var(--color-text-light); font-style: italic; }
+        .entry-card { 
+            border: 1px solid var(--color-border); 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            padding: 15px; 
+            page-break-inside: avoid; 
+        }
+        .entry-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: baseline; 
+            margin-bottom: 10px; 
+        }
+        .entry-header h3 { 
+            font-size: 13pt; 
+            margin-bottom: 0; 
+            color: var(--color-primary); 
+        }
+        .entry-header span { 
+            font-size: 10pt; 
+            color: var(--color-text-light); 
+        }
+        .entry-content { 
+            font-size: 11pt; 
+            color: var(--color-text-medium); 
+            white-space: pre-wrap; 
+            margin-bottom: 15px; 
+            line-height: 1.5;
+        }
+        .entry-emotions-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            padding-top: 15px; 
+            border-top: 1px dashed var(--color-border); 
+        }
+        .tag-list { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 6px; 
+        }
+        .tag { 
+            font-size: 9pt; 
+            font-weight: 600; 
+            padding: 3px 8px; 
+            border-radius: 12px; 
+        }
 
+        /* --- Colores específicos para emociones --- */
+        .tag-alegria { background-color: var(--color-alegria); color: var(--color-alegria-text); }
+        .tag-tristeza { background-color: var(--color-tristeza); color: var(--color-tristeza-text); }
+        .tag-ira { background-color: var(--color-ira); color: var(--color-ira-text); }
+        .tag-miedo { background-color: var(--color-miedo); color: var(--color-miedo-text); }
+        .tag-sorpresa { background-color: var(--color-sorpresa); color: var(--color-sorpresa-text); }
+        .tag-asco { background-color: var(--color-asco); color: var(--color-asco-text); }
+        .tag-neutro { background-color: var(--color-neutro); color: var(--color-neutro-text); }
+
+        /* Colores para barras de emociones individuales */
+        .bar-alegria { background-color: #F59E0B; }
+        .bar-tristeza { background-color: #3B82F6; }
+        .bar-ira { background-color: #EF4444; }
+        .bar-miedo { background-color: #8B5CF6; }
+        .bar-sorpresa { background-color: #EC4899; }
+        .bar-asco { background-color: #10B981; }
+        .bar-neutro { background-color: #6B7280; }
+
+        /* Colores para combinaciones de emociones - GRADIENTES */
+        .bar-miedo-sorpresa { background: linear-gradient(90deg, #8B5CF6 50%, #EC4899 50%); }
+        .bar-tristeza { background-color: #3B82F6; }
+        .bar-alegria-sorpresa { background: linear-gradient(90deg, #F59E0B 50%, #EC4899 50%); }
+        .bar-asco-ira { background: linear-gradient(90deg, #10B981 50%, #EF4444 50%); }
+
+        /* Color por defecto para combinaciones no definidas */
+        .bar-combinacion { background-color: var(--color-primary); }
+
+        /* --- Sección de probabilidades de emociones --- */
+        .emotion-probabilities {
+            margin-top: 10px;
+            background-color: var(--color-bg-light);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 9pt;
+        }
+        .probability-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            padding: 2px 0;
+        }
+        .probability-bar-bg {
+            flex: 1;
+            background-color: var(--color-border);
+            border-radius: 2px;
+            margin: 0 8px;
+            height: 6px;
+        }
+        .probability-bar {
+            height: 6px;
+            border-radius: 2px;
+        }
+        .probability-value {
+            font-weight: 600;
+            min-width: 30px;
+            text-align: right;
+        }
+
+        /* --- Mejoras de diseño general --- */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--color-border), transparent);
+            margin: 25px 0;
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, var(--color-primary-light) 0%, #E0F2FE 100%);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        /* --- DISEÑO MODERNO: Sección de Distribución de Emociones --- */
+        .distribution-section {
+            margin: 25px 0;
+        }
+        
+        .emotion-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .emotion-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--color-border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .emotion-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+        }
+        
+        .emotion-percentage {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+        
+        .emotion-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-dark);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        
+        .emotion-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .emotion-count {
+            font-size: 12px;
+            color: var(--color-text-medium);
+            font-weight: 500;
+        }
+        
+        .emotion-trend {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: var(--color-bg-light);
+            color: var(--color-text-medium);
+            font-weight: 500;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--color-border);
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+            transition: width 0.5s ease;
+        }
     </style>
 </head>
 <body>
@@ -191,12 +406,12 @@
             <h1 class="logo-title">Mi diario emocional</h1>
         </div>
         <div class="header-report-title">
-            <h1>Reporte de Análisis</h1>
-            <p>{{ report_title }}</p>
+            <h1>Reporte de Análisis de Emociones Combinadas</h1>
         </div>
     </div>
 
     <h4>Terapeuta: {{ therapist_name }}</h4>
+    
     <section class="info-grid">
         <div>
             <h4>Paciente</h4>
@@ -219,20 +434,62 @@
         </div>
     </section>
 
-    
-    <section class="analysis-cloud">
-        
-        <div class="analysis-cloud">
-            <h2>Emociones Frecuentes</h2>
-            
+    <div class="highlight-box">
+        <h3 style="margin-bottom: 5px; color: var(--color-primary);">Resumen del Periodo</h3>
+        <p style="font-size: 10pt; color: var(--color-text-medium); margin: 0;">
+            Análisis emocional basado en {{ diary_entries|length }} entradas del diario durante el periodo seleccionado.
+        </p>
+    </div>
+
+    <!-- SECCIÓN MODERNA: Distribución de Combinaciones de Emociones -->
+    <section class="distribution-section">
+        <h2>Distribución de Combinaciones de Emociones</h2>
+        {% if emotion_combinations %}
+            <div class="emotion-cards-grid">
+                {% for comb, count in emotion_combinations %}
+                    {% with total_entries=diary_entries|length %}
+                    <div class="emotion-card">
+                        <div class="emotion-percentage">
+                            {% widthratio count total_entries 100 %}%
+                        </div>
+                        <div class="emotion-name">{{ comb }}</div>
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {% widthratio count total_entries 100 %}%"></div>
+                        </div>
+                        
+                        <div class="emotion-stats">
+                            <div class="emotion-count">{{ count }} de {{ total_entries }}</div>
+                            <div class="emotion-trend">
+                                {% widthratio count total_entries 100 as percentage %}
+                                {% if percentage > 30 %}Alta{% elif percentage > 15 %}Media{% else %}Baja{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No se encontraron combinaciones de emociones en este periodo.</p>
+        {% endif %}
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="analysis-grid">
+        <div>
+            <h2>Frecuencia de Combinaciones de Emociones</h2>
             {% if emotion_combinations %}
                 {% with max_count=emotion_combinations.0.1 %}
                 <div class="chart-container">
                     {% for comb, count in emotion_combinations %}
                         <div class="bar-chart-item">
-                            <div class="bar-chart-label" title="{{ comb }}">{{ comb }}</div>
+                            <div class="bar-chart-label" title="{{ comb }}">
+                                {{ comb }}
+                            </div>
                             <div class="bar-chart-bar-bg">
-                                <div class="bar-chart-bar" style="width: {% widthratio count max_count 100 %}%;">
+                                <div class="bar-chart-bar {{ comb|get_emotion_class }}" 
+                                     style="width: {% widthratio count max_count 100 %}%;">
                                     {{ count }}
                                 </div>
                             </div>
@@ -245,26 +502,21 @@
             {% endif %}
         </div>
 
-    </section>
-
-    <section class="analysis-cloud">
-       <div class="analysis-cloud">
-            <br>
+        <div>
             <h2>15 Palabras clave más frecuentes</h2>
-            
             {% if word_frequency %}
             <div class="word-cloud-container">
                 {% for word, count, size_class in word_frequency|slice:":15" %}
                     <span class="{{ size_class }}">{{ word }} ({{ count }})</span>
                 {% endfor %}
             </div>
-            
             {% else %}
                 <p class="no-data">No se encontraron palabras clave en este periodo.</p>
             {% endif %}
         </div>
-
     </section>
+
+    <div class="section-divider"></div>
 
     <section class="entry-log">
         <h2>Registro de Entradas del Periodo</h2>
@@ -277,17 +529,22 @@
                 </div>
                 
                 <div class="entry-content">
-                    {{ entry.content }}
+                    {{ entry.content|truncatewords:180 }}
+                    {% if entry.content|wordcount > 180 %}
+                        <em style="color: var(--color-text-light); font-size: 9pt;">
+                            [...] (entrada completa disponible en la plataforma)
+                        </em>
+                    {% endif %}
                 </div>
                 
                 <div class="entry-emotions-grid">
                     <div>
-                        <h4>Sentimiento Reportado</h4>
+                        <h4>Sentimiento seleccionado</h4>
                         <div class="tag-list">
                             {% for emotion in entry.selected_emotions %}
-                                <span class="tag tag-user">{{ emotion|capfirst }}</span>
+                                <span class="tag tag-{{ emotion|lower }}">{{ emotion|capfirst }}</span>
                             {% empty %}
-                                <span class="tag-none">Ninguno reportado.</span>
+                                <span class="tag tag-neutro">Ninguno reportado</span>
                             {% endfor %}
                         </div>
                     </div>
@@ -296,12 +553,33 @@
                         <div class="tag-list">
                             {% if entry.analyzed_emotions and entry.analyzed_emotions.0 != 'neutro' %}
                                 {% for emotion in entry.analyzed_emotions %}
-                                    <span class="tag tag-ai">{{ emotion|capfirst }}</span>
+                                    <span class="tag tag-{{ emotion|lower }}">{{ emotion|capfirst }}</span>
                                 {% endfor %}
                             {% else %}
-                                   <span class="tag-none">Análisis neutral.</span>
+                                <span class="tag tag-neutro">Análisis neutral</span>
                             {% endif %}
                         </div>
+
+                        <!-- Probabilidades de emociones -->
+                        {% if entry.analyzed_scores %}
+                        <div class="emotion-probabilities">
+                            <h5 style="margin: 0 0 8px 0; font-size: 8pt; color: var(--color-text-light);">
+                                Probabilidades Detalladas:
+                            </h5>
+                            {% for emotion, score in entry.analyzed_scores.items|dictsortreversed:1 %}
+                                {% if forloop.counter <= 5 %}
+                                <div class="probability-item">
+                                    <span style="font-size: 8pt; min-width: 60px;">{{ emotion|capfirst }}</span>
+                                    <div class="probability-bar-bg">
+                                        <div class="probability-bar bar-{{ emotion|lower }}" 
+                                             style="width: {{ score|multiply:100|floatformat:2 }}%;"></div>
+                                    </div>
+                                    <span class="probability-value">{{ score|multiply:100|floatformat:1 }}%</span>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -309,6 +587,14 @@
             <p class="no-data">No hay entradas en el diario para este periodo.</p>
         {% endfor %}
     </section>
+
+    <!-- Pie de página con información adicional -->
+    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--color-border);">
+        <p style="font-size: 9pt; color: var(--color-text-light); text-align: center;">
+            Reporte generado el {% now "d M, Y" %} • 
+            Para más detalles consulte la plataforma Mi Diario Emocional
+        </p>
+    </div>
 
 </body>
 </html>

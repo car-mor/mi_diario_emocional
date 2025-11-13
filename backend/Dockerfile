@@ -1,25 +1,38 @@
 FROM python:3.11-slim
 
-WORKDIR /app
-
-# Copiar requirements PRIMERO para mejor cache
-COPY requirements.txt .
-
-# Instalar dependencias del sistema y Python
+# 1. Dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    gcc libpq-dev \
+    gcc g++ libpq-dev curl \
     libpango-1.0-0 libpangoft2-1.0-0 \
     libgobject-2.0-0 libcairo2 \
-    && rm -rf /var/lib/apt/lists/*
+    libgdk-pixbuf-2.0-0 shared-mime-info \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
+# 2. Variables de entorno
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=8000
+
+# 3. Directorio de trabajo
+WORKDIR /app
+
+# 4. ✅ CAMBIO: Ahora requirements.txt está en la raíz del contexto
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar spaCy
-RUN python -m spacy download es_core_news_md || true
+# 5. Instalar modelo spaCy
+RUN python -m spacy download es_core_news_md || echo "⚠️ spaCy download skipped"
 
-# Copiar aplicación
+# 6. ✅ CAMBIO: Copiar todo desde la raíz del contexto
 COPY . .
 
+# 7. Crear directorio para archivos estáticos
+RUN mkdir -p staticfiles
+
+# 8. Exponer puerto
 EXPOSE 8000
 
-CMD ["gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2"]
+# 9. Comando de inicio con variable de entorno $PORT
+CMD ["sh", "-c", "gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"]

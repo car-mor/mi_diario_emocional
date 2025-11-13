@@ -15,12 +15,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+import time
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import include, path
+from django.views.decorators.csrf import csrf_exempt
+
+
+@csrf_exempt
+def health_check(request):
+    return JsonResponse({"status": "healthy", "service": "mi-diario-emocional", "timestamp": time.time()})
+
 
 urlpatterns = [
+    path("", health_check, name="root_health_check"),
+    path("health/", health_check, name="health_check"),
     path("admin/", admin.site.urls),
     # Rutas de la API
     # Incluimos las URLs de la app 'users' (contiene login/registro/token)

@@ -106,6 +106,9 @@ DATABASES = {
             "DB_HOST", default="localhost"
         ),  # Opcional: define un valor por defecto si la variable no existe
         "PORT": config("DB_PORT", default="5432"),
+        "OPTIONS": {
+            "sslmode": "require",
+        },
     }
 }
 
@@ -187,7 +190,7 @@ EMAIL_PORT = config("EMAIL_PORT", cast=int)  # Aseguramos que el puerto sea un e
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)  # Aseguramos que sea booleano
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER # El correo que aparecerá como remitente
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # El correo que aparecerá como remitente
 
 CORS_ALLOWED_ORIGINS = [
     # Allow requests from your Vue development server

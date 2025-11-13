@@ -1,7 +1,7 @@
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"  
-buildContext = "backend"       # ← Le dice a Railway que entre a backend
+dockerfilePath = "backend/Dockerfile"  # ← Ruta COMPLETA desde la raíz
+# NO pongas buildContext
 
 [deploy]
 startCommand = "gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"

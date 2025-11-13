@@ -18,15 +18,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # 3. Directorio de trabajo
 WORKDIR /app
 
-# 4. ✅ CAMBIO: Ahora requirements.txt está en la raíz del contexto
-COPY requirements.txt .
+# 4. ✅ Volver a la ruta completa
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. Instalar modelo spaCy
 RUN python -m spacy download es_core_news_md || echo "⚠️ spaCy download skipped"
 
-# 6. ✅ CAMBIO: Copiar todo desde la raíz del contexto
-COPY . .
+# 6. ✅ Copiar desde backend/
+COPY backend/ .
 
 # 7. Crear directorio para archivos estáticos
 RUN mkdir -p staticfiles

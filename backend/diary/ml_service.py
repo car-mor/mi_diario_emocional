@@ -3,7 +3,6 @@ Módulo de predicción de emociones con modelo BETO fine-tuneado
 Compatible con el modelo entrenado en el notebook mejorado
 """
 
-import os
 import re
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -11,6 +10,7 @@ from typing import Dict, List, Tuple
 import emoji
 import spacy
 import torch
+from decouple import config
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 # ============================================================
@@ -18,7 +18,8 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 # ============================================================
 BASE_DIR = Path(__file__).resolve().parent
 # MODEL_DIR = BASE_DIR / "ml_model"  # Carpeta donde descomprimiste el modelo
-MODEL_ID = os.environ.get("EMOTION_MODEL_ID", "c-armor/finetuned_emotions")
+MODEL_ID = config("EMOTION_MODEL_ID", default="c-armor/finetuned_emotions")
+HF_TOKEN = config("HF_TOKEN", default=None)
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 EMOTION_LABELS = ["alegria", "tristeza", "ira", "miedo", "sorpresa", "asco"]
 
@@ -49,8 +50,11 @@ try:
     NLP = spacy.load("es_core_news_md")
 
     # Cargar BETO fine-tuneado
-    TOKENIZER = AutoTokenizer.from_pretrained(MODEL_ID)
-    MODEL = AutoModelForSequenceClassification.from_pretrained(MODEL_ID)
+    TOKENIZER = AutoTokenizer.from_pretrained(
+        MODEL_ID,
+        token=HF_TOKEN,
+    )
+    MODEL = AutoModelForSequenceClassification.from_pretrained(MODEL_ID, token=HF_TOKEN)
     MODEL.to(DEVICE)
     MODEL.eval()  # Modo evaluación (importante)
 

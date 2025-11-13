@@ -18,14 +18,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# 3. Instala requerimientos CON TORCH CPU
+# 3. ✅ INSTALA PYTORCH CPU PRIMERO (SEPARADO)
+RUN pip install --no-cache-dir torch==2.1.2+cpu --index-url https://download.pytorch.org/whl/cpu
+
+# 4. Copia requirements.txt SIN torch
 COPY backend/requirements.txt .
+
+# 5. Instala el resto de dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. Instala spaCy
+# 6. Instala spaCy
 RUN python -m spacy download es_core_news_md
 
-# 5. Copia código
+# 7. Copia código
 COPY backend/ .
 
 

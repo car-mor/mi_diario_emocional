@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# 1. Actualizar índices e instalar dependencias del sistema en un solo paso
+# 1. Dependencias del sistema
 RUN apt-get update && apt-get install -y \
     gcc g++ libpq-dev curl \
     libpango-1.0-0 libpangoft2-1.0-0 \
@@ -18,21 +18,23 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # 3. Directorio de trabajo
 WORKDIR /app
 
-# 4. Instalar dependencias de Python PRIMERO (mejor caching)
-COPY requirements.txt .
+# 4. Copiar requirements.txt PRIMERO (desde la carpeta backend)
+COPY ./requirements.txt .
+
+# 5. Instalar dependencias de Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Instalar modelo spaCy (no crítico)
+# 6. Instalar modelo spaCy (no crítico)
 RUN python -m spacy download es_core_news_md || echo "⚠️  spaCy download skipped"
 
-# 6. Copiar código
+# 7. Copiar todo el código del backend
 COPY . .
 
-# 7. Crear directorio para archivos estáticos
+# 8. Crear directorio para archivos estáticos
 RUN mkdir -p staticfiles
 
-# 8. Exponer puerto
+# 9. Exponer puerto
 EXPOSE 8000
 
-# 9. Comando de inicio
+# 10. Comando de inicio
 CMD ["gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120"]

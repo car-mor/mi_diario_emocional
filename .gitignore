@@ -25,5 +25,3 @@ Thumbs.db
 backend/diary/ml_model/
 
 backend/.env.production
-
-Dockerfile

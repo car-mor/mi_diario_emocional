@@ -10,7 +10,7 @@
       style="filter: none"
     />
 
-    <!-- Círculo inferior derecho (medio fuera del contenedor) -->
+    <!-- Círculo inferior derecho (medio fuera del contenedor -->
     <div
       aria-hidden="true"
       class="absolute -right-24 -bottom-20 w-64 h-64 md:-right-40 md:-bottom-24 md:w-80 md:h-80 rounded-full bg-[#70BFE9] pointer-events-none"

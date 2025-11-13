@@ -61,4 +61,4 @@ ENV PATH="/opt/venv/bin:$PATH" \
     PORT=8000
 
 # 5. Comando de inicio
-CMD ["gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120"]
+CMD ["sh", "-c", "gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"]

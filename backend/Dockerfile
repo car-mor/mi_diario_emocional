@@ -1,38 +1,59 @@
-FROM python:3.11-slim
+# --- ETAPA 1: EL CONSTRUCTOR (BUILDER) ---
+FROM python:3.11 AS builder
 
-# 1. Dependencias del sistema
-RUN apt-get update && apt-get install -y \
-    gcc g++ libpq-dev curl \
-    libpango-1.0-0 libpangoft2-1.0-0 \
-    libgobject-2.0-0 libcairo2 \
-    libgdk-pixbuf-2.0-0 shared-mime-info \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
-
-# 2. Variables de entorno
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PORT=8000
-
-# 3. Directorio de trabajo
 WORKDIR /app
 
-# 4. ✅ Volver a la ruta completa
+# 1. Instala dependencias de CONSTRUCCIÓN
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    libpq-dev \
+    pkg-config \
+    libpango-1.0-0 libpangoft2-1.0-0 \
+    libgobject-2.0-0 libcairo2 \
+    libgdk-pixbuf-2.0-0 \
+ && rm -rf /var/lib/apt/lists/*
+
+# 2. Crea virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# 3. Instala requerimientos CON TORCH CPU
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Instalar modelo spaCy
-RUN python -m spacy download es_core_news_md || echo "⚠️ spaCy download skipped"
+# 4. Instala spaCy
+RUN python -m spacy download es_core_news_md
 
-# 6. ✅ Copiar desde backend/
+# 5. Copia código
 COPY backend/ .
 
-# 7. Crear directorio para archivos estáticos
-RUN mkdir -p staticfiles
 
-# 8. Exponer puerto
-EXPOSE 8000
+# --- ETAPA 2: LA IMAGEN FINAL (SLIM) ---
+FROM python:3.11-slim
 
-# 9. Comando de inicio con variable de entorno $PORT
+WORKDIR /app
+
+# 1. Solo dependencias de RUNTIME
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    libpango-1.0-0 libpangoft2-1.0-0 \
+    libgobject-2.0-0 libcairo2 \
+    libgdk-pixbuf-2.0-0 \
+ && rm -rf /var/lib/apt/lists/* \
+ && apt-get clean
+
+# 2. Copia VENV desde builder
+COPY --from=builder /opt/venv /opt/venv
+
+# 3. Copia código desde builder
+COPY --from=builder /app /app
+
+# 4. Variables de entorno
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=8000
+
+# 5. Comando de inicio
 CMD ["sh", "-c", "gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"]

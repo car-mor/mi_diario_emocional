@@ -78,7 +78,7 @@ threadpoolctl==3.6.0
 tinycss2==1.4.0
 tinyhtml5==2.0.0
 tokenizers==0.22.1
-torch==2.9.0
+torch==2.1.2+cpu --index-url https://download.pytorch.org/whl/cpu
 tqdm==4.67.1
 transformers==4.57.1
 typer==0.19.2

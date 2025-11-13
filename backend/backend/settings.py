@@ -34,10 +34,9 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB en bytes
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
 
 # Application definition
 

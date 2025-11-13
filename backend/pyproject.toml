@@ -1,0 +1,47 @@
+[tool.ruff]
+# Define el largo máximo de línea, 120 es el estándar de Black.
+line-length = 120
+
+# Activa las reglas de Pyflakes (F), pycodestyle (E, W) e isort (I).
+# Es un excelente punto de partida.
+select = ["E", "F", "W", "I"]
+
+# Ignora reglas específicas si alguna te molesta (opcional).
+# ignore = ["E501"] 
+
+# Excluye directorios que no quieres que Ruff analice.
+# ¡Es importante excluir las migraciones!
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "*/migrations/*.py", # Excluye todos los archivos de migración
+]
+
+
+[tool.ruff.lint]
+# Permite que ruff arregle automáticamente las violaciones de importación desordenada.
+fixable = ["I", "E", "W"]
+
+[tool.ruff.format]
+# Ruff también puede funcionar como formateador, similar a Black.
+# Esta opción lo activa.
+quote-style = "double"     # Usa comillas dobles
+indent-style = "space"     # Indentación con espacios
+docstring-code-format = true  # Formatea código dentro de docstrings

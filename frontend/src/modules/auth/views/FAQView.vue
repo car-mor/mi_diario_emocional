@@ -31,31 +31,45 @@
       </div>
     </main>
 
-    <WelcomeFooter />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import WelcomeFooter from '../components/WelcomeFooter.vue'
 
 const openIndex = ref<number | null>(null)
 
 const faqItems = [
   {
-    question: '¿Qué es Diario Emocional?',
-    answer: 'Es una aplicación para registrar y gestionar tus emociones a lo largo del tiempo.',
+    question: '¿Qué es Mi diario emocional?',
+    answer: 'Es una aplicación en donde puedes escribir cómo te sientes día con día, consultar tus escritos  anteriores y acceder a material de autoayuda actualizado semanalmente por profesionales de la salud mental.',
+  },
+  {
+    question: '¿Cómo me ayuda la Inteligencia Artificial (IA)?',
+    answer:
+      'Utilizamos IA para analizar las entradas de tu diario y así ayudarte a ser más consciente de cómo te sientes. Su función es identificar emociones clave que podrían no ser muy obvias a simple vista.',
+  },
+  {
+    question: '¿Puedo usar la aplicación si no tengo un terapeuta?',
+    answer:
+      'No, la aplicación está diseñada para ser utilizada en conjunto con un profesional de la salud mental. La idea es que pueda revisar tus entradas y ayudarte a trabajar en tus emociones de manera más efectiva.',
   },
   {
     question: '¿Mis datos están seguros?',
     answer:
-      'Sí, toda tu información se almacena de forma segura y se rige por la Declaración ISO/IEC 27001.',
+      'Sí, toda tu información se almacena de forma segura y se apega a la Declaración ISO/IEC 27001.',
   },
   {
-    question: '¿Cómo puedo contactar al equipo?',
+    question: '¿Tengo acceso a mi cuenta de manera inmediata como profesional de la salud mental?',
     answer:
-      'Puedes encontrarnos a través de la información de contacto en la parte inferior de la página.',
+      'No, todas las cuentas de profesionales de la salud mental son revisadas manualmente para verificar su cédula profesional y credenciales antes de ser aprobadas.',
   },
+  {
+    question: '¿Cómo puedo contactar al equipo de soporte?',
+    answer:
+      'Puedes encontrarnos a través de la información de contacto que se encuentra en la parte inferior de la página.',
+  },
+
 ]
 
 const toggle = (index: number) => {

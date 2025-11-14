@@ -28,6 +28,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 5. Copia código de tu app
 COPY backend/ .
 
+RUN DJANGO_SECRET_KEY="dummy_build_key_no_importa" \
+    DB_NAME="dummy" \
+    DB_USER="dummy" \
+    DB_PASSWORD="dummy" \
+    DB_HOST="localhost" \
+    EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend" \
+    EMAIL_HOST="dummy" \
+    EMAIL_HOST_USER="dummy" \
+    EMAIL_HOST_PASSWORD="dummy" \
+    HF_SPACE_URL="http://dummy.url" \
+    python manage.py collectstatic --noinput
+
 # 6. +++ AÑADIDO +++
 # ¡Este es el paso clave para arreglar tu panel de admin!
 # Ejecuta collectstatic para que WhiteNoise encuentre el CSS.

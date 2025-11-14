@@ -19,8 +19,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # 3. ✅ INSTALA PYTORCH CPU PRIMERO (SEPARADO)
-RUN pip install --no-cache-dir torch==2.1.2+cpu --index-url https://download.pytorch.org/whl/cpu
-
+RUN pip install --no-cache-dir torch==2.2.0+cpu --index-url https://download.pytorch.org/whl/cpu
 # 4. Copia requirements.txt SIN torch
 COPY backend/requirements.txt .
 

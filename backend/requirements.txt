@@ -75,7 +75,7 @@ sympy==1.14.0
 threadpoolctl==3.6.0
 tinycss2==1.4.0
 tinyhtml5==2.0.0
-tokenizers==0.18.1
+tokenizers==0.15.0
 tqdm==4.67.1
 transformers==4.36.0
 typer==0.19.2

@@ -37,6 +37,8 @@ RUN DJANGO_SECRET_KEY="dummy_build_key_no_importa" \
     EMAIL_HOST="dummy" \
     EMAIL_HOST_USER="dummy" \
     EMAIL_HOST_PASSWORD="dummy" \
+    EMAIL_PORT="587" \
+    EMAIL_USE_TLS="True" \
     HF_SPACE_URL="http://dummy.url" \
     python manage.py collectstatic --noinput
 

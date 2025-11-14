@@ -42,7 +42,7 @@
           <button @click="openConfirmationModal" class="px-6 py-2 bg-[#7DBFF8] hover:bg-[#3457B2] text-white rounded-lg font-semibold w-full max-w-xs">
             Generar otro código
           </button>
-          <img src="/src/assets/images/soporte_profesional.png" alt="Ilustración de soporte" class="w-full max-w-xs h-auto mt-4"/>
+          <img src="/images/soporte_profesional.png" alt="Ilustración de soporte" class="w-full max-w-xs h-auto mt-4"/>
         </div>
       </div>
 

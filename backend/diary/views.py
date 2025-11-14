@@ -7,8 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .ml_service import (
-    NLP,
     analizar_emociones_con_beto,
+    get_spacy_model,
     lematizar_texto_para_lista,
     preprocesar_texto,
 )
@@ -16,7 +16,17 @@ from .models import DiaryEntry
 from .permissions import IsPatient
 from .serializers import DiaryEntrySerializer
 
-STOP_WORDS = NLP.Defaults.stop_words if NLP else set()
+
+def get_stop_words():
+    """Obtiene las stop words de spaCy (carga el modelo solo si es necesario)"""
+    try:
+        nlp = get_spacy_model()
+        return nlp.Defaults.stop_words
+    except Exception:
+        return set()
+
+
+STOP_WORDS = get_stop_words()
 
 
 class DiaryEntryViewSet(viewsets.ModelViewSet):

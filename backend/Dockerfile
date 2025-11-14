@@ -71,4 +71,4 @@ ENV PATH="/opt/venv/bin:$PATH" \
 
 # 5. Comando de inicio (Este se queda igual)
 # collectstatic ya se hizo en el build, aquí solo corremos el server
-CMD ["sh", "-c", "gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"]
+CMD ["sh", "-c", "python manage.py migrate && gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"]

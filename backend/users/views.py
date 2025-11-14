@@ -28,24 +28,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from weasyprint import HTML
 
-from diary.ml_service import get_spacy_model, lematizar_texto_para_lista, preprocesar_texto
+from diary.ml_service import obtener_frecuencia_palabras
 from diary.models import DiaryEntry
 from diary.serializers import DiaryEntrySerializer
 
 from .models import EmailChangeRequest, PasswordReset, Patient, PreRegistration, Professional, User
 from .permissions import IsPatient, IsProfessional
 
-
-def get_stop_words():
-    """Obtiene las stop words de spaCy (carga el modelo solo si es necesario)"""
-    try:
-        nlp = get_spacy_model()
-        return nlp.Defaults.stop_words
-    except:
-        return set()
-
-
-STOP_WORDS = get_stop_words()
 # Importa los serializadores y modelos
 from .serializers import (
     ChangePasswordSerializer,
@@ -691,12 +680,7 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         # --- Lógica para la Nube de Palabras ---
         full_text = " ".join([entry.content for entry in diary_entries])
         if full_text.strip():
-            lemmas = lematizar_texto_para_lista(preprocesar_texto(full_text))
-            important_words = [
-                lemma for lemma in lemmas if lemma not in STOP_WORDS and lemma.isalpha() and len(lemma) > 2
-            ]
-            word_counts = Counter(important_words)
-            most_common_words_raw = word_counts.most_common(50)
+            most_common_words_raw = obtener_frecuencia_palabras(full_text)
         else:
             most_common_words_raw = []
 
@@ -771,12 +755,7 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         # Lógica para Nube de Palabras
         full_text = " ".join([entry.content for entry in diary_entries])
         if full_text.strip():
-            lemmas = lematizar_texto_para_lista(preprocesar_texto(full_text))
-            important_words = [
-                lemma for lemma in lemmas if lemma not in STOP_WORDS and lemma.isalpha() and len(lemma) > 2
-            ]
-            word_counts = Counter(important_words)
-            most_common_words_raw = word_counts.most_common(50)
+            most_common_words_raw = obtener_frecuencia_palabras(full_text)
         else:
             most_common_words_raw = []
 

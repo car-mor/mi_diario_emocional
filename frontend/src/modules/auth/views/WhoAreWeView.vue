@@ -22,7 +22,7 @@ Este proyecto naci√≥ para crear un espacio seguro donde puedas entender mejor c√
 
       <div class="flex justify-center lg:justify-end">
         <img
-      :src="happyBrain"
+      src="/images/cerebro_feliz.png"
       alt="Cerebro feliz"
       class="rounded-lg w-64 h-64 md:w-80 md:h-80 lg:w-auto lg:h-[400px] dark:border-gray-700"
     />
@@ -82,8 +82,3 @@ Este proyecto naci√≥ para crear un espacio seguro donde puedas entender mejor c√
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import happyBrain from '@/assets/images/cerebro_feliz.png'
-
-</script>

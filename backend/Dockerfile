@@ -42,11 +42,6 @@ RUN DJANGO_SECRET_KEY="dummy_build_key_no_importa" \
     HF_SPACE_URL="http://dummy.url" \
     python manage.py collectstatic --noinput
 
-# 6. +++ AÑADIDO +++
-# ¡Este es el paso clave para arreglar tu panel de admin!
-# Ejecuta collectstatic para que WhiteNoise encuentre el CSS.
-RUN python manage.py collectstatic --noinput
-
 # --- ETAPA 2: LA IMAGEN FINAL (SLIM) ---
 FROM python:3.11-slim
 

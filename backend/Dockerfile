@@ -4,6 +4,7 @@ FROM python:3.11 AS builder
 WORKDIR /app
 
 # 1. Instala dependencias de CONSTRUCCIÓN
+# (Mantenemos pango/cairo para WeasyPrint, tal como acordamos)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
@@ -18,19 +19,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# 3. ✅ INSTALA PYTORCH CPU PRIMERO (SEPARADO)
-RUN pip install --no-cache-dir torch==2.2.0+cpu --index-url https://download.pytorch.org/whl/cpu
-# 4. Copia requirements.txt SIN torch
+# 3. Copia tu NUEVO requirements.txt (el ligero)
 COPY backend/requirements.txt .
 
-# 5. Instala el resto de dependencias
+# 4. Instala el resto de dependencias (ahora mucho más rápido)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 6. Instala spaCy
-RUN python -m spacy download es_core_news_md
-
-# 7. Copia código
+# 5. Copia código de tu app
 COPY backend/ .
+
+# 6. +++ AÑADIDO +++
+# ¡Este es el paso clave para arreglar tu panel de admin!
+# Ejecuta collectstatic para que WhiteNoise encuentre el CSS.
+RUN python manage.py collectstatic --noinput
 
 # --- ETAPA 2: LA IMAGEN FINAL (SLIM) ---
 FROM python:3.11-slim
@@ -38,6 +39,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # 1. Solo dependencias de RUNTIME
+# (libpq5 para postgres, pango/cairo para WeasyPrint)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     libpango-1.0-0 libpangoft2-1.0-0 \
@@ -50,6 +52,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /opt/venv /opt/venv
 
 # 3. Copia código desde builder
+# Esto AHORA INCLUYE la carpeta 'staticfiles' que creamos arriba
 COPY --from=builder /app /app
 
 # 4. Variables de entorno
@@ -57,5 +60,6 @@ ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# 5. Comando de inicio
+# 5. Comando de inicio (Este se queda igual)
+# collectstatic ya se hizo en el build, aquí solo corremos el server
 CMD ["sh", "-c", "gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"]

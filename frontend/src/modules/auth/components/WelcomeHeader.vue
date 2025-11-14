@@ -6,7 +6,7 @@
       <div class="flex items-center space-x-3">
 
         <div class="flex items-center justify-center">
-          <img :src="logoWelcome" alt="Logo <3" class="w-14 h-14 object-contain" />
+          <LogoHeader class="w-14 h-14 object-contain" />
         </div>
         <h1 class="text-xl font-semibold text-[#70BFE9]">Mi diario emocional</h1>
       </div>
@@ -109,10 +109,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 // Importando solo los iconos de Tabler que necesitas
+import LogoHeader from '../../../assets/images/logo.png'
 import { IconHome, IconMenu2 } from '@tabler/icons-vue'
 import { useThemeStore } from '@/store/theme'
-
-const logoWelcome = `${import.meta.env.VITE_API_BASE_URL}/media/logo.png}`
 
 const theme = useThemeStore()
 const showMobileMenu = ref(false)

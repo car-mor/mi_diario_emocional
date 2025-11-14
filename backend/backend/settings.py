@@ -38,6 +38,10 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://midiarioemocional-production.up.railway.app/",
+    "https://*.railway.app",  # Permite cualquier subdominio de Railway
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -146,7 +150,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
@@ -207,4 +212,4 @@ AUTH_USER_MODEL = "users.User"
 
 # Configuración de Archivos de Medios
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media_root"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media_root")

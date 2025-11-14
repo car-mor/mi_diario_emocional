@@ -32,6 +32,7 @@ RUN python -m spacy download es_core_news_md
 # 7. Copia código
 COPY backend/ .
 
+RUN python manage.py collectstatic --noinput
 
 # --- ETAPA 2: LA IMAGEN FINAL (SLIM) ---
 FROM python:3.11-slim

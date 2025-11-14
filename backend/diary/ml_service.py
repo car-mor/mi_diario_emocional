@@ -1,6 +1,5 @@
 """
 Módulo de predicción de emociones con modelo BETO fine-tuneado
-Compatible con el modelo entrenado en el notebook mejorado
 """
 
 import re

@@ -1,4 +1,4 @@
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "backend/Dockerfile"  # ← Ruta COMPLETA desde la raíz
-# NO pongas buildContext
+dockerfilePath = "backend/Dockerfile"
+watchPatterns = ["backend/**"]  # Solo deploy si cambia backend/

@@ -28,14 +28,24 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from weasyprint import HTML
 
-from diary.ml_service import NLP, lematizar_texto_para_lista, preprocesar_texto
+from diary.ml_service import get_spacy_model, lematizar_texto_para_lista, preprocesar_texto
 from diary.models import DiaryEntry
 from diary.serializers import DiaryEntrySerializer
 
 from .models import EmailChangeRequest, PasswordReset, Patient, PreRegistration, Professional, User
 from .permissions import IsPatient, IsProfessional
 
-STOP_WORDS = NLP.Defaults.stop_words if NLP else set()
+
+def get_stop_words():
+    """Obtiene las stop words de spaCy (carga el modelo solo si es necesario)"""
+    try:
+        nlp = get_spacy_model()
+        return nlp.Defaults.stop_words
+    except:
+        return set()
+
+
+STOP_WORDS = get_stop_words()
 # Importa los serializadores y modelos
 from .serializers import (
     ChangePasswordSerializer,

@@ -7,10 +7,10 @@
 
         <div class="flex items-center justify-center">
           <img
-      :src="LogoHeader"
-      alt="Logo Mi Diario Emocional"
-      class="w-14 h-14 object-contain"
-    />
+    src="/images/logo.png"
+    alt="Logo Mi Diario Emocional"
+    class="w-14 h-14 object-contain"
+  />
         </div>
         <h1 class="text-xl font-semibold text-[#70BFE9]">Mi diario emocional</h1>
       </div>
@@ -113,7 +113,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 // Importando solo los iconos de Tabler que necesitas
-import LogoHeader from '@/assets/images/logo.png'
 import { IconHome, IconMenu2 } from '@tabler/icons-vue'
 import { useThemeStore } from '@/store/theme'
 

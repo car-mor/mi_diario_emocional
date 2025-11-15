@@ -62,7 +62,7 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
         emociones_lista, scores_dict = analizar_emociones_con_beto(content)
         serializer.save(
             patient=patient_profile,
-            analyzed_emocions=emociones_lista,
+            analyzed_emotions=emociones_lista,
             analyzed_scores=scores_dict,
         )
 

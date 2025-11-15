@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "reports",
     "api",
     "corsheaders",
+    "anymail",
 ]
 
 MIDDLEWARE = [
@@ -193,12 +194,7 @@ SIMPLE_JWT = {
 }
 
 EMAIL_BACKEND = config("EMAIL_BACKEND")
-EMAIL_HOST = config("EMAIL_HOST")
-EMAIL_PORT = config("EMAIL_PORT", cast=int)  # Aseguramos que el puerto sea un entero
-EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)  # Aseguramos que sea booleano
-EMAIL_HOST_USER = config("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # El correo que aparecerá como remitente
+DEFAULT_FROM_EMAIL = config("EMAIL_HOST")
 
 CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="http://localhost:5173").split(",")
 CORS_ALLOW_CREDENTIALS = True

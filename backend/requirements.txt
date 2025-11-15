@@ -57,3 +57,4 @@ wrapt==1.17.3
 zopfli==0.2.3.post1
 whitenoise==6.6.0
 gradio_client
+django-anymail[brevo]

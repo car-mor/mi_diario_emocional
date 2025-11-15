@@ -54,6 +54,11 @@ CODE_STYLE = "background-color: #f0f0f0; padding: 15px 20px; border-radius: 8px;
 # --- 3. Funciones de Correo Actualizadas ---
 
 def send_password_reset_email(user_email: str, code: str):
+Warning: SPROCKET_DEPRECATED_CALL
+    """Función para enviar el código de verificación por correo."""
+    
+    print(f"MODO DE PRUEBA: Se debería enviar el código {code} a {user_email}")
+    return True
     """Función para enviar el código de recuperación de contraseña."""
     
     subject = f"{code} es tu código para restablecer la contraseña en Mi diario emocional"

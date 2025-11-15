@@ -248,7 +248,7 @@ function closeErrorModal() {
     showErrorModal.value = false;
 }
 
-const avatarUrl = computed(() => (userProfile.value as AuthServices.PatientProfile)?.profile_picture);
+const avatarUrl = computed(() => (userProfile.value as AuthServices.PatientProfile)?.profile_picture_url);
 
 const hasCustomAvatar = computed(() => {
     return avatarUrl.value?.includes('/media/') || false;
@@ -305,7 +305,7 @@ async function handleAvatarChange(event: Event) {
         // } else if (response.data.profile_picture) {
         //     avatarUrl.value = response.data.profile_picture;
         // }
-        authStore.updateUserProfile({ profile_picture: response.data.profile_picture_url });
+        authStore.updateUserProfile({ profile_picture_url: response.data.profile_picture_url });
         successTitle.value = '¡Foto actualizada!';
         successMessage.value = 'Tu foto de perfil ha sido actualizada correctamente.';
         showSuccessModal.value = true;
@@ -392,7 +392,7 @@ async function confirmDeleteAvatar() {
         // } else if (response.data.profile_picture) {
         //     avatarUrl.value = response.data.profile_picture;
         // }
-        authStore.updateUserProfile({ profile_picture: response.data.profile_picture_url });
+        authStore.updateUserProfile({ profile_picture_url: response.data.profile_picture_url });
 
         successTitle.value = '¡Foto eliminada!';
         successMessage.value = 'Tu foto de perfil ha sido eliminada correctamente.';

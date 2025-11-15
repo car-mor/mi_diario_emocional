@@ -37,6 +37,10 @@ RUN DJANGO_SECRET_KEY="dummy_build_key_no_importa" \
     EMAIL_HOST_USER="dummy@example.com" \
     HF_SPACE_URL="http://dummy.url" \
     ANYMAIL_BREVO_API_KEY="dummy-key-for-build" \
+    DO_SPACES_ACCESS_KEY="dummy-key" \
+    DO_SPACES_SECRET_KEY="dummy-secret" \
+    DO_SPACES_BUCKET_NAME="dummy-bucket" \
+    DO_SPACES_REGION="nyc3" \
     python manage.py collectstatic --noinput
 
 # --- ETAPA 2: LA IMAGEN FINAL (SLIM) ---

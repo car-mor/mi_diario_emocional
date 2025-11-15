@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Soporte de postgreSQL
     "django.contrib.postgres",
+    "storages",
     # Apps de Terceros (Django REST Framework y JWT)
     "rest_framework",
     "rest_framework_simplejwt",
@@ -147,19 +148,47 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# --- Static files (CSS, JavaScript, Images) ---
+# ESTO SE QUEDA IGUAL. WhiteNoise manejará tus archivos /static (CSS/JS del Admin).
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+
+# --- ACTUALIZADO: Configuración de Archivos de Medios (MEDIA) ---
+
+# 1. Variables de DigitalOcean Spaces (leídas desde Railway via decouple)
+DO_SPACES_ACCESS_KEY = config("DO_SPACES_ACCESS_KEY")
+DO_SPACES_SECRET_KEY = config("DO_SPACES_SECRET_KEY")
+DO_SPACES_BUCKET_NAME = config("DO_SPACES_BUCKET_NAME")
+DO_SPACES_REGION = config("DO_SPACES_REGION")
+DO_SPACES_ENDPOINT = f"https://{DO_SPACES_REGION}.digitaloceanspaces.com"
+DO_SPACES_CUSTOM_DOMAIN = f"{DO_SPACES_BUCKET_NAME}.{DO_SPACES_REGION}.digitaloceanspaces.com"
+
+# 2. Configuración de STORAGES (Django 4.2+)
 STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    # --- MODIFICADO ---
+    "default": {  # Este es el 'default' para MEDIA (fotos de perfil)
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "access_key": DO_SPACES_ACCESS_KEY,
+            "secret_key": DO_SPACES_SECRET_KEY,
+            "bucket_name": DO_SPACES_BUCKET_NAME,
+            "endpoint_url": DO_SPACES_ENDPOINT,
+            "default_acl": "public-read",  # Para que las fotos se vean
+            "location": "media",  # Los archivos se guardarán en la carpeta /media/
+            "custom_domain": DO_SPACES_CUSTOM_DOMAIN,
+        },
     },
-    "staticfiles": {
+    # ------------------
+    "staticfiles": {  # Este se queda igual, para WhiteNoise (CSS/JS del Admin)
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
+
+
+# 3. URLs de Media
+# MEDIA_URL ahora apunta a nuestra carpeta 'media' en la nube
+MEDIA_URL = f"https://{DO_SPACES_CUSTOM_DOMAIN}/media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -212,5 +241,4 @@ CORS_ALLOW_METHODS = [
 AUTH_USER_MODEL = "users.User"
 
 # Configuración de Archivos de Medios
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media_root")
+MEDIA_URL = f"https://{DO_SPACES_CUSTOM_DOMAIN}/media/"

@@ -189,12 +189,11 @@ export interface PatientProfile {
     name: string;
     paternal_last_name: string;
     maternal_last_name: string;
-    description: string; // <-- La descripción es un string, aunque puede ser vacío.
+    description: string;
     email: string;
     alias: string;
     gender: string;
-    // CRÍTICO: Incluir el campo que viene de Django
-    profile_picture: string | null; // <-- URL de la foto o null/default
+    profile_picture_url: string | null; // <-- URL de la foto o null/default
     professional_name?: string;
     is_linked: boolean;
     current_streak: number;

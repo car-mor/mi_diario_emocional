@@ -2,6 +2,7 @@ import re
 import secrets
 from datetime import date, timedelta
 
+from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.templatetags.static import static
@@ -257,7 +258,7 @@ class PatientProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email")
     professional_name = serializers.CharField(source="professional.user.name", read_only=True, allow_null=True)
 
-    profile_picture = serializers.SerializerMethodField()
+    profile_picture_url = serializers.SerializerMethodField(method_name="get_profile_picture_url")
     is_linked = serializers.SerializerMethodField()
 
     class Meta:
@@ -271,17 +272,28 @@ class PatientProfileSerializer(serializers.ModelSerializer):
             "gender",
             "professional_name",
             "description",
-            "profile_picture",
+            "profile_picture_url",
             "is_linked",
             "current_streak",
         ]
         read_only_fields = fields
 
-    def get_profile_picture(self, obj):
+    # --- CAMBIO 2: Lógica de la URL corregida ---
+    def get_profile_picture_url(self, obj):
         request = self.context.get("request")
+
+        # 1. Si el usuario SÍ tiene una foto (MEDIA file en DigitalOcean)
         if obj.profile_picture and hasattr(obj.profile_picture, "url"):
-            return request.build_absolute_uri(obj.profile_picture.url)
-        return request.build_absolute_uri(static("images/avatar-icon.png"))
+            # django-storages (S3) ya devuelve la URL absoluta. No usar build_absolute_uri.
+            return obj.profile_picture.url
+
+        # 2. Si NO tiene foto, devuelve la URL absoluta del avatar por defecto (STATIC file)
+        if request:
+            # build_absolute_uri arreglará el 'http' vs 'https' (si settings.py está bien)
+            return request.build_absolute_uri(static("images/avatar-icon.png"))
+
+        # 3. Fallback
+        return None
 
     def get_is_linked(self, obj):
         """Devuelve true si el paciente está vinculado a un profesional."""
@@ -297,7 +309,7 @@ class PatientProfileUpdateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "alias": {"required": False},
             "description": {"required": False},
-            "profile_picture": {"required": False, "allow_null": True},
+            "profile_picture": {"required": False, "allow_null": True, "write_only": True},
         }
 
     def validate_alias(self, value):
@@ -332,11 +344,19 @@ class PatientProfileUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def get_profile_picture_url(self, obj):
-        """Devuelve la URL completa de la foto después de actualizar"""
         request = self.context.get("request")
+        # 1. Si el usuario SÍ tiene una foto (MEDIA file en DigitalOcean)
         if obj.profile_picture and hasattr(obj.profile_picture, "url"):
-            return request.build_absolute_uri(obj.profile_picture.url)
-        return request.build_absolute_uri(static("images/avatar-icon.png"))
+            # django-storages (S3) ya devuelve la URL absoluta. No usar build_absolute_uri.
+            return obj.profile_picture.url
+
+            # 2. Si NO tiene foto, devuelve la URL absoluta del avatar por defecto (STATIC file)
+        if request:
+            # build_absolute_uri arreglará el 'http' vs 'https' (si settings.py está bien)
+            return request.build_absolute_uri(static("images/avatar-icon.png"))
+
+            # 3. Fallback
+        return None
 
     def update(self, instance, validated_data):
         """Manejar la actualización del perfil"""
@@ -711,9 +731,20 @@ class PatientListSerializer(serializers.ModelSerializer):
         born = obj.user.date_of_birth
         return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
 
-    def get_avatar_full_url(self, obj):
-        request = self.context.get("request")
-        if obj.profile_picture and hasattr(obj.profile_picture, "url"):
-            return request.build_absolute_uri(obj.profile_picture.url)
-        # Devuelve una URL por defecto si no hay avatar (puedes cambiarla)
+
+# --- CAMBIO 6: Lógica de URL corregida ---
+def get_avatar_full_url(self, obj):
+    request = self.context.get("request")
+
+    # 1. Si el usuario SÍ tiene una foto (MEDIA file en DigitalOcean)
+    if obj.profile_picture and hasattr(obj.profile_picture, "url"):
+        # django-storages (S3) ya devuelve la URL absoluta. No usar build_absolute_uri.
+        return obj.profile_picture.url
+
+        # 2. Si NO tiene foto, devuelve la URL absoluta del avatar por defecto (STATIC file)
+    if request:
+        # build_absolute_uri arreglará el 'http' vs 'https' (si settings.py está bien)
         return request.build_absolute_uri(static("images/avatar-icon.png"))
+
+        # 3. Fallback
+    return None

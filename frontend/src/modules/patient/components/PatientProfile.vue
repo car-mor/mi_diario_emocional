@@ -19,7 +19,7 @@
                 <!-- Imagen del avatar -->
                 <img
                     v-else
-                    :src="avatarUrl || 'http://localhost:8000/static/images/avatar-icon.png'"
+                    :src="avatarUrl || '/images/avatar-icon.png'"
                     alt="User avatar"
                     class="w-40 h-40 rounded-xl object-cover cursor-pointer hover:opacity-80 transition-opacity"
                     @click="clickAvatarInput"
@@ -238,7 +238,8 @@ const descriptionError = ref<string | null>(null);
 const avatarInput = ref<HTMLInputElement | null>(null);
 // const avatarUrl = ref<string | null>(null);
 // Lee directamente del 'userProfile' del store. Ya no es una variable local.
-const avatarUrl = computed(() => (userProfile.value as AuthServices.PatientProfile)?.profile_picture);
+const avatarUrl = computed(() => (userProfile.value as AuthServices.PatientProfile)?.profile_picture_url);
+
 //-------------- constantes para modales ------------------
 const showDeleteModal = ref(false);
 const showSuccessModal = ref(false);
@@ -262,7 +263,9 @@ function closeErrorModal() {
 
 // Computed para saber si el usuario tiene una foto personalizada
 const hasCustomAvatar = computed(() => {
-    // Una foto personalizada siempre vendrá de la carpeta 'media'
+    // --- *** CORRECCIÓN 3 (Lógica de Avatar) *** ---
+    // La API ahora nos da la URL completa (de DigitalOcean) o la URL del static (de Railway).
+    // Si la URL incluye '/media/', es una foto subida por el usuario (de DigitalOcean).
     return avatarUrl.value?.includes('/media/') || false;
 });
 
@@ -304,10 +307,12 @@ async function saveDescription() {
         console.error('Error al guardar descripción:', error);
     }
 }
+// Si la imagen falla (incluso la de DigitalOcean o la de Railway),
+// usamos el fallback local de la carpeta /public.
 function handleImageError(event: Event) {
   console.error('❌ Error al cargar imagen:', avatarUrl.value);
   const target = event.target as HTMLImageElement;
-  target.src = 'http://localhost:8000/static/images/avatar-icon.png';
+  target.src = '/images/avatar-icon.png'; // <-- Se elimina 'localhost:8000'
 }
 
 async function handleAvatarChange(event: Event) {
@@ -349,8 +354,7 @@ async function handleAvatarChange(event: Event) {
         const response = await AuthServices.updatePatientProfile(formData);
 
         console.log('✅ Respuesta de actualización:', response.data);
-        authStore.updateUserProfile({ profile_picture: response.data.profile_picture_url });
-
+        authStore.updateUserProfile({ profile_picture_url: response.data.profile_picture_url });
         // Mostrar modal de éxito
         successTitle.value = '¡Foto actualizada!';
         successMessage.value = 'Tu foto de perfil ha sido actualizada correctamente.';
@@ -452,7 +456,7 @@ async function confirmDeleteAvatar() {
         const response = await AuthServices.updatePatientProfile(formData);
 
         console.log('✅ Respuesta de eliminación:', response.data);
-        authStore.updateUserProfile({ profile_picture: response.data.profile_picture_url });
+        authStore.updateUserProfile({ profile_picture_url: response.data.profile_picture_url });
         console.log('✅ Avatar eliminado, nueva URL:', avatarUrl.value);
 
         // Mostrar modal de éxito

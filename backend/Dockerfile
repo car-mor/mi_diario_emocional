@@ -34,12 +34,9 @@ RUN DJANGO_SECRET_KEY="dummy_build_key_no_importa" \
     DB_PASSWORD="dummy" \
     DB_HOST="localhost" \
     EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend" \
-    EMAIL_HOST="dummy" \
-    EMAIL_HOST_USER="dummy" \
-    EMAIL_HOST_PASSWORD="dummy" \
-    EMAIL_PORT="587" \
-    EMAIL_USE_TLS="True" \
+    EMAIL_HOST_USER="dummy@example.com" \
     HF_SPACE_URL="http://dummy.url" \
+    ANYMAIL_BREVO_API_KEY="dummy-key-for-build" \
     python manage.py collectstatic --noinput
 
 # --- ETAPA 2: LA IMAGEN FINAL (SLIM) ---

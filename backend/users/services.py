@@ -97,6 +97,8 @@ def send_password_reset_email(user_email: str, code: str):
 def send_verification_email(user_email: str, code: str):
     """Función para enviar el código de verificación por correo."""
 
+    print(f"DEBUG: Intentando enviar correo. EMAIL_BACKEND actual es: {settings.EMAIL_BACKEND}")
+
     subject = f"Confirmación de Cuenta Mi diario emocional - Código de Verificación"
 
     # Mensaje de texto plano (fallback)

@@ -666,9 +666,12 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
             # MODO SEMANAL (por defecto): Usamos la lógica de la semana más reciente.
             start_date, end_date, is_report_available, next_report_date = self._get_most_recent_week_info(patient)
         # ------------------------------------
+        start_datetime = timezone.make_aware(timezone.datetime.combine(start_date, timezone.datetime.min.time()))
+        end_datetime = timezone.make_aware(timezone.datetime.combine(end_date, timezone.datetime.max.time()))
+        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__range=[start_datetime, end_datetime])
 
-        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__date__range=[start_date, end_date])
         # --- Lógica para la Gráfica de Emociones Combinadas ---
+
         combination_counts = Counter()
         for entry in diary_entries:
             emotions = entry.analyzed_emotions
@@ -741,8 +744,10 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
                 )
             report_title = "Resumen Semanal"
 
-        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__date__range=[start_date, end_date])
+        start_datetime = timezone.make_aware(timezone.datetime.combine(start_date, timezone.datetime.min.time()))
+        end_datetime = timezone.make_aware(timezone.datetime.combine(end_date, timezone.datetime.max.time()))
 
+        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__range=[start_datetime, end_datetime])
         # --- AÑADIMOS LA LÓGICA DE CÁLCULO QUE FALTABA ---
         # Lógica para Emociones Combinadas
         combination_counts = Counter()

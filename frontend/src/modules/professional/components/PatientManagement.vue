@@ -48,7 +48,7 @@
 
                                 <td class="px-6 py-2 lg:py-4 whitespace-normal text-sm text-gray-700 dark:text-gray-300 flex items-center justify-center" data-label="Avatar">
                                     <img
-                                        :src="patient.avatar_url"
+                                        :src="patient.avatar_url || '/images/avatar-icon.png'"
                                         :alt="`Avatar de ${patient.alias}`"
                                         class="w-15 h-15 rounded-full object-cover border-2 border-blue-400"
                                     />
@@ -150,7 +150,7 @@ const fetchPatients = async () => {
   try {
     const response = await ProfessionalService.getLinkedPatients();
     // Renombramos 'avatar_url' a 'avatarUrl' para que coincida con tu template
-    patientList.value = response.data.map(p => ({ ...p, avatarUrl: p.avatar_url }));
+    patientList.value = response.data;
   } catch (err) {
     console.error("Error al cargar pacientes:", err);
     error.value = "No se pudo cargar la lista de pacientes.";

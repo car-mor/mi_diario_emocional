@@ -76,7 +76,11 @@
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.email }}</td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ patient.alias }}</td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 text-center">
-                  <img :src="patient.avatar_url" :alt="`Avatar de ${patient.alias}`" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400 mx-auto" />
+                  <img
+                                        :src="patient.avatar_url || '/images/avatar-icon.png'"
+                                        :alt="`Avatar de ${patient.alias}`"
+                                        class="w-15 h-15 rounded-full object-cover border-2 border-blue-400"
+                                    />
                 </td>
               </tr>
             </tbody>

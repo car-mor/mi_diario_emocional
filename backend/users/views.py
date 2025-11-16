@@ -811,10 +811,13 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         logo_data_uri = None
         try:
             # settings.BASE_DIR apunta a la carpeta 'backend'
-            logo_path = os.path.join(settings.STATIC_ROOT, "images", "logo.png")
-            with open(logo_path, "rb") as image_file:
-                image_b64 = base64.b64encode(image_file.read()).decode("utf-8")
+            logo_url = f"https://{settings.DO_SPACES_CUSTOM_DOMAIN}/logo.png"
+            response = requests.get(logo_url)
+            if response.status_code == 200:
+                image_bytes = response.content
+                image_b64 = base64.b64encode(image_bytes).decode("utf-8")
                 logo_data_uri = f"data:image/png;base64,{image_b64}"
+
         except (FileNotFoundError, IOError):
             logo_data_uri = None  # El logo es opcional
 

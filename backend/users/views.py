@@ -444,6 +444,12 @@ class UserProfileView(RetrieveUpdateAPIView):
             return user.patient_profile
         raise exceptions.NotFound("No se encontró el perfil asociado a este usuario.")
 
+    def get_serializer_context(self):
+        """Pasa el objeto 'request' al serializer."""
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
     def update(self, request, *args, **kwargs):
         print("--- DATOS RECIBIDOS EN EL SERVIDOR (PATCH) ---")
         print(f"request.data: {request.data}")
@@ -650,6 +656,12 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
             return user.professional_profile.patients.all().select_related("user")
         return Patient.objects.none()
 
+    def get_serializer_context(self):
+        """Pasa el objeto 'request' al serializer."""
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
     def retrieve(self, request, *args, **kwargs):
         patient = self.get_object()
         start_date_param = request.query_params.get("start_date")
@@ -666,12 +678,9 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
             # MODO SEMANAL (por defecto): Usamos la lógica de la semana más reciente.
             start_date, end_date, is_report_available, next_report_date = self._get_most_recent_week_info(patient)
         # ------------------------------------
-        start_datetime = timezone.make_aware(timezone.datetime.combine(start_date, timezone.datetime.min.time()))
-        end_datetime = timezone.make_aware(timezone.datetime.combine(end_date, timezone.datetime.max.time()))
-        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__range=[start_datetime, end_datetime])
 
+        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__date__range=[start_date, end_date])
         # --- Lógica para la Gráfica de Emociones Combinadas ---
-
         combination_counts = Counter()
         for entry in diary_entries:
             emotions = entry.analyzed_emotions
@@ -744,10 +753,8 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
                 )
             report_title = "Resumen Semanal"
 
-        start_datetime = timezone.make_aware(timezone.datetime.combine(start_date, timezone.datetime.min.time()))
-        end_datetime = timezone.make_aware(timezone.datetime.combine(end_date, timezone.datetime.max.time()))
+        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__date__range=[start_date, end_date])
 
-        diary_entries = DiaryEntry.objects.filter(patient=patient, entry_date__range=[start_datetime, end_datetime])
         # --- AÑADIMOS LA LÓGICA DE CÁLCULO QUE FALTABA ---
         # Lógica para Emociones Combinadas
         combination_counts = Counter()

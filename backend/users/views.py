@@ -811,7 +811,7 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         logo_data_uri = None
         try:
             # settings.BASE_DIR apunta a la carpeta 'backend'
-            logo_path = os.path.join(settings.BASE_DIR, "media_root", "logo.png")
+            logo_path = os.path.join(settings.STATIC_ROOT, "images", "logo.png")
             with open(logo_path, "rb") as image_file:
                 image_b64 = base64.b64encode(image_file.read()).decode("utf-8")
                 logo_data_uri = f"data:image/png;base64,{image_b64}"

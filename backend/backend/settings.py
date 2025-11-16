@@ -185,6 +185,9 @@ STORAGES = {
     },
 }
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 
 # 3. URLs de Media
 # MEDIA_URL ahora apunta a nuestra carpeta 'media' en la nube

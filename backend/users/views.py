@@ -2,10 +2,10 @@
 import base64
 import os
 import secrets
-import uuid
 from collections import Counter
 from datetime import date, timedelta
 
+import requests
 from django.conf import settings  # Para acceder a variables de configuración
 from django.contrib.auth.hashers import check_password
 from django.db import transaction
@@ -796,22 +796,17 @@ class ProfessionalActionsViewSet(viewsets.ReadOnlyModelViewSet):
         avatar_data_uri = None
         if patient.profile_picture:
             try:
-                # 1. Abrir el archivo de la imagen en modo binario
-                with open(patient.profile_picture.path, "rb") as image_file:
-                    # 2. Leer los bytes y codificarlos a Base64
-                    image_bytes = image_file.read()
+                image_url = patient.profile_picture.url
+                response = requests.get(image_url)
+                if response.status_code == 200:
+                    image_bytes = response.content
                     image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-
-                    # 3. Crear el Data URI completo para el HTML
-                    # (Tenemos que adivinar el tipo de imagen, usualmente jpeg o png)
-                    content_type = (
-                        "image/png" if patient.profile_picture.name.lower().endswith(".png") else "image/jpeg"
-                    )
+                    content_type = response.headers.get("Content-Type", "image/jpeg")
                     avatar_data_uri = f"data:{content_type};base64,{image_b64}"
 
-            except (FileNotFoundError, IOError):
-                # Si el archivo está roto o no se encuentra, simplemente no se mostrará
-                avatar_data_uri = None
+            except Exception as e:
+                print(f"Error al descargar avatar para PDF: {e}")
+                avatar_data_uri = None  # Falla de forma segura
 
         logo_data_uri = None
         try:

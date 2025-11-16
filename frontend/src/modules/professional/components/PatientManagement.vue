@@ -150,7 +150,8 @@ const fetchPatients = async () => {
   try {
     const response = await ProfessionalService.getLinkedPatients();
     // Renombramos 'avatar_url' a 'avatarUrl' para que coincida con tu template
-    patientList.value = response.data.map(p => ({ ...p, avatarUrl: p.avatar_url }));
+    // patientList.value = response.data.map(p => ({ ...p, avatarUrl: p.avatar_url }));
+    patientList.value = response.data;
   } catch (err) {
     console.error("Error al cargar pacientes:", err);
     error.value = "No se pudo cargar la lista de pacientes.";

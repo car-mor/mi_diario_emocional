@@ -718,13 +718,12 @@ class PatientListSerializer(serializers.ModelSerializer):
         born = obj.user.date_of_birth
         return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
 
+    # --- CAMBIO 6: Lógica de URL corregida ---
+    def get_avatar_full_url(self, obj):
+        # 1. Si SÍ tiene foto, devuelve la URL de DigitalOcean.
+        if obj.profile_picture and hasattr(obj.profile_picture, "url"):
+            return obj.profile_picture.url
 
-# --- CAMBIO 6: Lógica de URL corregida ---
-def get_avatar_full_url(self, obj):
-    # 1. Si SÍ tiene foto, devuelve la URL de DigitalOcean.
-    if obj.profile_picture and hasattr(obj.profile_picture, "url"):
-        return obj.profile_picture.url
-
-    # 2. Si NO tiene foto, devuelve None.
-    # El frontend (Vercel) se encargará de mostrar el /images/avatar-icon.png local.
-    return None
+        # 2. Si NO tiene foto, devuelve None.
+        # El frontend (Vercel) se encargará de mostrar el /images/avatar-icon.png local.
+        return None

@@ -28,7 +28,7 @@
                             v-if="openIndex === index"
                             class="p-4 bg-gray-50 border-t border-gray-200 text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 transition-opacity"
                             >
-                                <p>{{ item.answer }}</p>
+                                <p v-html="item.answer"></p>
                             </div>
                         </div>
                     </div>
@@ -88,10 +88,10 @@ const faqItems = [
       'Los resultados de las emociones combinadas reflejan la interacción entre diferentes emociones y pueden proporcionar una visión más completa del estado emocional.',
   },
   {
-  question: '¿En dónde puedo ver tutoriales acerca del funcionamiento de la app?',
-  answer:
-    'Nuestro canal de YouTube cuenta con varios tutoriales en los cuales se explica el funcionamiento de la app. Puedes acceder a ellos en el siguiente enlace: <a href="https://www.youtube.com/@Mi-diario-emocional" target="_blank">YouTube - Mi diario emocional</a>',
-}
+    question: '¿En dónde puedo ver tutoriales acerca del funcionamiento de la app?',
+    answer:
+      'Nuestro canal de YouTube cuenta con varios tutoriales en los cuales se explica el funcionamiento de la app. Puedes acceder a ellos en el siguiente enlace: <a href="https://www.youtube.com/@Mi-diario-emocional" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">https://www.youtube.com/@Mi-diario-emocional</a>',
+  },
 ]
 
 const toggle = (index: number) => {

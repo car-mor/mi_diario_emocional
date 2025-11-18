@@ -6,7 +6,7 @@
         <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 shadow-lg bg-gradient-to-br from-[#5AA3CC] to-[#70BFE9]">
           <IconShieldLock class="w-10 h-10 text-white" stroke-width="2" />
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4 dark:text-[#70BFE9]">
           Aviso de Privacidad
         </h1>
         <p class="text-xl text-gray-600 mb-2 dark:text-[#70BFE9]">Mi Diario Emocional</p>

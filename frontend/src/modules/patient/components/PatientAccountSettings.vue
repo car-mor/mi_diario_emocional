@@ -607,8 +607,8 @@ async function changeEmail() {
 const aliasRequirements = [
     { regex: /^.{1,40}$/, text: 'Entre 1 y 40 caracteres' },
     { regex: /^(?!\s*$).+/, text: 'No puede consistir solo en espacios' },
-    { regex: /\d/, text: 'Debe contener al menos un número' },
-    { regex: /[@$!%*?&]/, text: 'Debe contener un carácter especial (@$!%*?&)' }
+    // { regex: /\d/, text: 'Debe contener al menos un número' },
+    // { regex: /[@$!%*?&]/, text: 'Debe contener un carácter especial (@$!%*?&)' }
 ];
 
 const aliasValidation = computed(() => {

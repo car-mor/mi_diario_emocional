@@ -87,6 +87,11 @@ const faqItems = [
     answer:
       'Los resultados de las emociones combinadas reflejan la interacción entre diferentes emociones y pueden proporcionar una visión más completa del estado emocional.',
   },
+  {
+    question: '¿En dónde puedo ver tutoriales acerca del funcionamiento de la app?',
+    answer:
+      'Nuestro canal de YouTube cuenta con varios tutoriales en los cuales se explica el funcionamiento de la app. Puedes acceder a ellos en el siguiente enlace: https://www.youtube.com/@Mi-diario-emocional',
+  },
 ]
 
 const toggle = (index: number) => {

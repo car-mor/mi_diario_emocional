@@ -9,8 +9,8 @@
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
           Aviso de Privacidad
         </h1>
-        <p class="text-xl text-gray-600 mb-2">Mi Diario Emocional</p>
-        <p class="text-sm text-gray-500">
+        <p class="text-xl text-gray-600 mb-2 dark:text-[#70BFE9]">Mi Diario Emocional</p>
+        <p class="text-sm text-gray-500 dark:text-[#70BFE9]">
           Fecha de última actualización: 20 de noviembre de 2025
         </p>
       </div>

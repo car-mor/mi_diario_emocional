@@ -1,7 +1,7 @@
 <template>
     <div class="flex">
         <main class="flex-1 flex flex-col overflow-hidden">
-            <div class="dark:bg-gray-800 transition-colors flex-1 p-4 overflow-y-auto">    
+            <div class="dark:bg-gray-800 transition-colors flex-1 p-4 overflow-y-auto">
                 <div class="p-4 flex flex-col text-left">
                     <div class="flex items-center justify-start mb-4">
                         <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 ml-4">
@@ -11,7 +11,7 @@
                     </div>
                 <div class="max-w-3xl mx-auto px-4">
                     <h2 class="text font-semibold text-gray-800 dark:text-gray-200 mb-6">Te mostramos la Lista de Tutoriales</h2>
-                    
+
                     <div class="space-y-6">
                         <div
                             v-for="(video, index) in videoItems"
@@ -23,7 +23,7 @@
                                 class="w-full flex items-center p-4 text-left font-semibold text-lg text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" :class="['w-6 h-6 mr-3 transition-transform', openVideoIndex === index ? 'rotate-180 text-[#70BFE9]' : 'text-gray-400']" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M6 9l6 6l6 -6"></path></svg>
-                                
+
                                 <span>{{ video.title }}</span>
                             </button>
 
@@ -32,10 +32,10 @@
                                 class="p-4 bg-gray-50 border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600"
                             >
                                 <div class="relative w-full aspect-video">
-                                    <iframe 
-                                        :src="video.src" 
-                                        frameborder="0" 
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    <iframe
+                                        :src="video.src"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         allowfullscreen
                                         class="absolute inset-0 w-full h-full rounded-lg shadow-xl"
                                         title="Video Tutorial"
@@ -47,7 +47,7 @@
                     </div>
                 </div>
 
-                <router-view /> 
+                <router-view />
             </div>
         </main>
     </div>
@@ -63,17 +63,23 @@ const videoItems = [
         title: 'Introducción a la plataforma y primeros pasos',
         description: 'Aprende a navegar por la interfaz y configura tu perfil profesional en menos de 5 minutos.',
         // URL de YouTube (ejemplo: reemplazar con tu ID de video real)
-        src: 'https://www.youtube.com/embed/IzZ3VCQKDl0?si=Zc9JZHd-qRNu9yHb',
+        src: 'https://youtu.be/W-wyh0S2REM?si=2Y12v8Zx0F7Wprff',
+    },
+    {
+        title: 'Bienvenidos a los tutoriales',
+        description: 'Este video es la puerta de entrada a nuestra serie de tutoriales y te da una visión general de la plataforma diseñada para el autoconocimiento y el apoyo clínico.',
+        // URL de YouTube (ejemplo: reemplazar con tu ID de video real)
+        src: 'https://youtu.be/PuTNYjN4A_c?si=krj2WCIz-aFqfN7Z',
     },
     {
         title: 'Gestión de pacientes: Enlace y seguimiento',
         description: 'Descubre cómo compartir tu código de enlace y monitorear el progreso emocional de tus pacientes.',
-        src: 'https://www.youtube.com/embed/IzZ3VCQKDl0?si=Zc9JZHd-qRNu9yHb',
+        src: 'https://youtu.be/6Ip18mu-fjU?si=KGZwrZV1EC_hxje2 ',
     },
     {
-        title: 'Análisis de datos y reportes emocionales',
-        description: 'Tutorial avanzado para interpretar los datos combinados y generar reportes útiles para tus sesiones.',
-        src: 'https://www.youtube.com/embed/IzZ3VCQKDl0?si=Zc9JZHd-qRNu9yHb',
+        title: 'Registro, validación y uso de la app',
+        description: 'En este video, te guiaremos paso a paso a través del proceso de registro en Mi Diario Emocional para que puedas acceder a las herramientas de gestión clínica y seguimiento remoto de pacientes.',
+        src: 'https://youtu.be/WEMTfx2suAM?si=NEeM0bmSgOAn5Ph9',
     },
 ];
 

@@ -6,11 +6,11 @@
         <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 shadow-lg bg-gradient-to-br from-[#5AA3CC] to-[#70BFE9]">
           <IconFileText class="w-10 h-10 text-white" stroke-width="2" />
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <h1 class="text-4xl md:text-5xl font-bold dark:text-[#70BFE9] text-gray-900 mb-4">
           Términos y Condiciones de Uso
         </h1>
-        <p class="text-xl text-gray-600 mb-2">Mi Diario Emocional</p>
-        <p class="text-sm text-gray-500">
+        <p class="text-xl text-gray-600 mb-2 dark:text-[#70BFE9]">Mi Diario Emocional</p>
+        <p class="text-sm text-gray-500 dark:text-[#70BFE9]">
           Fecha de entrada en vigor: 20 de noviembre de 2025
         </p>
       </div>

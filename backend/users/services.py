@@ -3,9 +3,7 @@ import secrets
 from django.conf import settings
 from django.core.mail import send_mail
 
-# --- 1. Plantilla Base de Correo HTML ---
-# Usamos CSS "en línea" (style="...") porque Gmail y Outlook
-# eliminan las etiquetas <style> por seguridad.
+# --- 1. Plantilla Base de Correo HTML con Logo y Enlace ---
 
 EMAIL_HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -20,22 +18,35 @@ EMAIL_HTML_TEMPLATE = """
             <td align="center">
                 <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     
+                    <!-- Encabezado con Logo -->
                     <tr>
-                        <td style="padding: 20px; text-align: center; background-color: #f9f9f9; border-bottom: 1px solid #eee;">
+                        <td style="padding: 30px 20px; text-align: center; background-color: #f9f9f9; border-bottom: 1px solid #eee;">
+                            <!-- Logo enlazado -->
+                            <a href="{website_url}" style="text-decoration: none;">
+                                <img src="{logo_url}" alt="Mi diario emocional" style="max-width: 180px; height: auto; display: block; margin: 0 auto 15px;">
+                            </a>
                             <h1 style="margin: 0; font-size: 24px; color: #333;">
                                 <strong>Mi diario emocional</strong>
                             </h1>
                         </td>
                     </tr>
                     
+                    <!-- Contenido Principal -->
                     <tr>
                         <td style="padding: 30px 40px; color: #333; line-height: 1.6;">
                             {content}
                         </td>
                     </tr>
                     
+                    <!-- Botón de Acción (opcional) -->
+                    {action_button}
+                    
+                    <!-- Footer -->
                     <tr>
                         <td style="padding: 20px 40px; text-align: center; background-color: #f9f9f9; border-top: 1px solid #eee; color: #777;">
+                            <p style="margin: 0 0 10px 0;">
+                                <a href="{website_url}" style="color: #4A90E2; text-decoration: none; font-weight: bold;">Visitar Mi diario emocional</a>
+                            </p>
                             <p style="margin: 0; font-size: 12px;">© 2025 <strong>Mi diario emocional</strong>. Todos los derechos reservados.</p>
                         </td>
                     </tr>
@@ -47,6 +58,17 @@ EMAIL_HTML_TEMPLATE = """
 </html>
 """
 
+# Botón de acción opcional
+ACTION_BUTTON_TEMPLATE = """
+<tr>
+    <td style="padding: 10px 40px 30px; text-align: center;">
+        <a href="{button_url}" style="display: inline-block; padding: 12px 30px; background-color: #4A90E2; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+            {button_text}
+        </a>
+    </td>
+</tr>
+"""
+
 # --- 2. Estilo reutilizable para los Códigos ---
 CODE_STYLE = "background-color: #f0f0f0; padding: 15px 20px; border-radius: 8px; font-size: 28px; text-align: center; letter-spacing: 3px; font-weight: bold; margin: 20px 0;"
 
@@ -54,12 +76,20 @@ CODE_STYLE = "background-color: #f0f0f0; padding: 15px 20px; border-radius: 8px;
 # --- 3. Funciones de Correo Actualizadas ---
 
 
+def get_email_config():
+    """Obtiene la configuración del correo desde settings."""
+    return {
+        "logo_url": getattr(settings, "EMAIL_LOGO_URL"),
+        "website_url": getattr(settings, "WEBSITE_URL"),
+    }
+
+
 def send_password_reset_email(user_email: str, code: str):
     """Función para enviar el código de recuperación de contraseña."""
 
+    config = get_email_config()
     subject = f"{code} es tu código para restablecer la contraseña en Mi diario emocional"
 
-    # Mensaje de texto plano (para clientes de correo antiguos)
     message = (
         f"Hola,\n\n"
         f"Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.\n\n"
@@ -70,7 +100,6 @@ def send_password_reset_email(user_email: str, code: str):
         f"El equipo de Mi diario emocional"
     )
 
-    # Contenido HTML para el correo
     html_content = (
         f'<h3 style="color: #333;">Hola,</h3>'
         f"<p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta para <strong>Mi diario emocional</strong>.</p>"
@@ -81,8 +110,12 @@ def send_password_reset_email(user_email: str, code: str):
         f"<p>Atentamente,<br>El equipo de <strong>Mi diario emocional</strong></p>"
     )
 
-    # Insertamos el contenido en la plantilla
-    html_message = EMAIL_HTML_TEMPLATE.format(title="Restablecer Contraseña", content=html_content)
+    html_message = EMAIL_HTML_TEMPLATE.format(
+        logo_url=config["logo_url"],
+        website_url=config["website_url"],
+        content=html_content,
+        action_button="",  # Sin botón en este correo
+    )
 
     try:
         send_mail(
@@ -97,18 +130,15 @@ def send_password_reset_email(user_email: str, code: str):
 def send_verification_email(user_email: str, code: str):
     """Función para enviar el código de verificación por correo."""
 
-    print(f"DEBUG: Intentando enviar correo. EMAIL_BACKEND actual es: {settings.EMAIL_BACKEND}")
-
+    config = get_email_config()
     subject = f"Confirmación de Cuenta Mi diario emocional - Código de Verificación"
 
-    # Mensaje de texto plano (fallback)
     message = (
         f"Hola,\n\nGracias por registrarte en Mi diario emocional. "
         f"Tu código de verificación de cuenta es: {code}\n\n"
         f"Por favor, utilízalo en la aplicación para activar tu cuenta."
     )
 
-    # Contenido HTML
     html_content = (
         f'<h3 style="color: #333;">¡Bienvenido a Mi diario emocional!</h3>'
         f"<p>Gracias por registrarte. Tu código de verificación de cuenta es:</p>"
@@ -119,17 +149,13 @@ def send_verification_email(user_email: str, code: str):
         f"<p>Atentamente,<br>El equipo de <strong>Mi diario emocional</strong></p>"
     )
 
-    # Insertamos el contenido en la plantilla
-    html_message = EMAIL_HTML_TEMPLATE.format(title="Verifica tu Cuenta", content=html_content)
+    html_message = EMAIL_HTML_TEMPLATE.format(
+        logo_url=config["logo_url"], website_url=config["website_url"], content=html_content, action_button=""
+    )
 
     try:
         send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user_email],
-            fail_silently=False,
-            html_message=html_message,  # <-- Añadimos la versión HTML
+            subject, message, settings.DEFAULT_FROM_EMAIL, [user_email], fail_silently=False, html_message=html_message
         )
         return True
     except Exception as e:
@@ -140,9 +166,9 @@ def send_verification_email(user_email: str, code: str):
 def send_verification_change_email(user_email: str, code: str):
     """Función para enviar el código de verificación por correo."""
 
+    config = get_email_config()
     subject = f"{code} es tu código de verificación para Mi diario emocional"
 
-    # Mensaje de texto plano (fallback)
     message = (
         f"Hola,\n\n"
         f"Hemos recibido una solicitud para cambiar el correo electrónico de tu cuenta a esta dirección.\n\n"
@@ -153,7 +179,6 @@ def send_verification_change_email(user_email: str, code: str):
         f"El equipo de Mi diario emocional"
     )
 
-    # Contenido HTML
     html_content = (
         f'<h3 style="color: #333;">Hola,</h3>'
         f"<p>Hemos recibido una solicitud para cambiar el correo electrónico de tu cuenta en <strong>Mi diario emocional</strong> a esta dirección.</p>"
@@ -164,17 +189,13 @@ def send_verification_change_email(user_email: str, code: str):
         f"<p>Atentamente,<br>El equipo de <strong>Mi diario emocional</strong></p>"
     )
 
-    # Insertamos el contenido en la plantilla
-    html_message = EMAIL_HTML_TEMPLATE.format(title="Confirmar Cambio de Correo", content=html_content)
+    html_message = EMAIL_HTML_TEMPLATE.format(
+        logo_url=config["logo_url"], website_url=config["website_url"], content=html_content, action_button=""
+    )
 
     try:
         send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user_email],
-            fail_silently=False,
-            html_message=html_message,
+            subject, message, settings.DEFAULT_FROM_EMAIL, [user_email], fail_silently=False, html_message=html_message
         )
         return True
     except Exception as e:
@@ -182,26 +203,18 @@ def send_verification_change_email(user_email: str, code: str):
         return False
 
 
-def generate_verification_code(length=6):
-    """
-    Genera un código de verificación numérico aleatorio.
-    """
-    return "".join(secrets.token_urlsafe(6).upper()[:length])
-
-
 def send_approval_email(user_email: str):
     """Envía un correo notificando que la cuenta ha sido aprobada."""
 
+    config = get_email_config()
     subject = "¡Tu cuenta en Mi diario emocional ha sido aprobada!"
 
-    # Mensaje de texto plano (fallback)
     message = (
         "Hola,\n\nNos complace informarte que tu cuenta de profesional ha sido validada y activada. "
         "Ya puedes iniciar sesión en la aplicación y comenzar a usar todas las herramientas.\n\n"
         "¡Bienvenido a Mi diario emocional!"
     )
 
-    # Contenido HTML
     html_content = (
         f'<h3 style="color: #333;">¡Tu cuenta ha sido aprobada!</h3>'
         f"<p>Hola,</p>"
@@ -210,17 +223,20 @@ def send_approval_email(user_email: str):
         f"<p>¡Bienvenido a <strong>Mi diario emocional</strong>!</p>"
     )
 
-    # Insertamos el contenido en la plantilla
-    html_message = EMAIL_HTML_TEMPLATE.format(title="Cuenta Aprobada", content=html_content)
+    # Botón para ir a la app
+    action_button = ACTION_BUTTON_TEMPLATE.format(
+        button_url=config["website_url"] + "/login", button_text="Iniciar Sesión"
+    )
+
+    html_message = EMAIL_HTML_TEMPLATE.format(
+        logo_url=config["logo_url"],
+        website_url=config["website_url"],
+        content=html_content,
+        action_button=action_button,
+    )
 
     try:
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user_email],
-            html_message=html_message,  # <-- Añadimos la versión HTML
-        )
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user_email], html_message=html_message)
         return True
     except Exception as e:
         print(f"Error al enviar correo de aprobación a {user_email}: {e}")
@@ -230,9 +246,9 @@ def send_approval_email(user_email: str):
 def send_rejection_email(user_email: str):
     """Envía un correo notificando que la cuenta ha sido rechazada."""
 
+    config = get_email_config()
     subject = "Actualización sobre tu registro en Mi diario emocional"
 
-    # Mensaje de texto plano (fallback)
     message = (
         "Hola,\n\nDespués de revisar tu solicitud de registro como profesional en Mi diario emocional, "
         "hemos encontrado inconsistencias y, por el momento, no ha sido aprobada.\n\n"
@@ -240,7 +256,6 @@ def send_rejection_email(user_email: str):
         "Lamentamos los inconvenientes."
     )
 
-    # Contenido HTML
     html_content = (
         f'<h3 style="color: #333;">Actualización sobre tu registro</h3>'
         f"<p>Hola,</p>"
@@ -251,18 +266,18 @@ def send_rejection_email(user_email: str):
         f"<p>Lamentamos los inconvenientes,<br>El equipo de <strong>Mi diario emocional</strong></p>"
     )
 
-    # Insertamos el contenido en la plantilla
-    html_message = EMAIL_HTML_TEMPLATE.format(title="Solicitud de Registro", content=html_content)
+    html_message = EMAIL_HTML_TEMPLATE.format(
+        logo_url=config["logo_url"], website_url=config["website_url"], content=html_content, action_button=""
+    )
 
     try:
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user_email],
-            html_message=html_message,  # <-- Añadimos la versión HTML
-        )
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user_email], html_message=html_message)
         return True
     except Exception as e:
         print(f"Error al enviar correo de rechazo a {user_email}: {e}")
         return False
+
+
+def generate_verification_code(length=6):
+    """Genera un código de verificación numérico aleatorio."""
+    return "".join(secrets.token_urlsafe(6).upper()[:length])

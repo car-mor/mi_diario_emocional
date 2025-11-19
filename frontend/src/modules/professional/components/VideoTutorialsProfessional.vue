@@ -63,23 +63,23 @@ const videoItems = [
         title: 'Introducción a la plataforma y primeros pasos',
         description: 'Aprende a navegar por la interfaz y configura tu perfil profesional en menos de 5 minutos.',
         // URL de YouTube (ejemplo: reemplazar con tu ID de video real)
-        src: 'https://youtu.be/W-wyh0S2REM?si=2Y12v8Zx0F7Wprff',
+        src: 'https://www.youtube.com/embed/W-wyh0S2REM?si=WWPKQaAlStp8Fz2f',
     },
     {
         title: 'Bienvenidos a los tutoriales',
         description: 'Este video es la puerta de entrada a nuestra serie de tutoriales y te da una visión general de la plataforma diseñada para el autoconocimiento y el apoyo clínico.',
         // URL de YouTube (ejemplo: reemplazar con tu ID de video real)
-        src: 'https://youtu.be/PuTNYjN4A_c?si=krj2WCIz-aFqfN7Z',
+        src: 'https://www.youtube.com/embed/PuTNYjN4A_c?si=e4TY5DEU1CljLsiI',
     },
     {
         title: 'Gestión de pacientes: Enlace y seguimiento',
         description: 'Descubre cómo compartir tu código de enlace y monitorear el progreso emocional de tus pacientes.',
-        src: 'https://youtu.be/6Ip18mu-fjU?si=KGZwrZV1EC_hxje2 ',
+        src: 'https://www.youtube.com/embed/6Ip18mu-fjU?si=9fDv-AVKWLS3rc6B',
     },
     {
         title: 'Registro, validación y uso de la app',
         description: 'En este video, te guiaremos paso a paso a través del proceso de registro en Mi Diario Emocional para que puedas acceder a las herramientas de gestión clínica y seguimiento remoto de pacientes.',
-        src: 'https://youtu.be/WEMTfx2suAM?si=NEeM0bmSgOAn5Ph9',
+        src: 'https://www.youtube.com/embed/WEMTfx2suAM?si=kdz8DhKhL0FrY0Kp',
     },
 ];
 

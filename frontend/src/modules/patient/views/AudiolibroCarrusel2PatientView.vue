@@ -1,8 +1,10 @@
 <template>
     <div class="dark:bg-gray-800 transition-colors flex h-screen bg-gray-100">
         <main class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-1">
-            <StreakAndTitle title="Audiolibro Completo" :streakCount="2" />
-
+            <StreakAndTitle
+              title="Audiolibro completo"
+              :streak-count="streakCount"
+            />
             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 lg:p-16 max-w-4xl mx-auto my-6">
                 <div class="text-center mb-8">
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-800 leading-tight mb-2">
@@ -73,6 +75,31 @@
 </template>
 
 <script setup lang="ts">
-import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
-import UserProfile from "../components/PatientProfile.vue";
+import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
+    import { computed } from 'vue';
+  import { useAuthStore } from '@/store/auth';
+    const authStore = useAuthStore();
+
+    interface PatientProfile {
+    name: string;
+    paternal_last_name: string;
+    maternal_last_name: string;
+    email: string;
+    alias: string;
+    gender: string;
+    professional_name?: string;
+    is_linked: boolean;
+    current_streak: number;
+}
+
+const streakCount = computed(() => {
+  // Primero, verificamos si el usuario es un paciente y si su perfil ha cargado
+  if (authStore.userType === 'patient' && authStore.userProfile) {
+    // Si es así, le decimos a TypeScript que trate el perfil como un PatientProfile
+    // y accedemos a 'current_streak' de forma segura.
+    return (authStore.userProfile as PatientProfile).current_streak || 0;
+  }
+  // Si no es un paciente, la racha es 0.
+  return 0;
+});
 </script>

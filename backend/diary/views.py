@@ -43,12 +43,12 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         patient_profile = self.request.user.patient_profile
 
-        # Usar el método unificado del modelo
-        patient_profile.update_streak()
+        patient_profile.update_streak_on_new_entry()
 
-        # --- Lógica de ML (se queda igual) ---
+        # Lógica de ML (mantener igual)
         content = serializer.validated_data.get("content", "")
         emociones_lista, scores_dict = analizar_emociones_con_beto(content)
+
         serializer.save(
             patient=patient_profile,
             analyzed_emotions=emociones_lista,

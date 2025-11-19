@@ -3,9 +3,15 @@
         <!-- Área principal central -->
         <main class="dark:bg-gray-800 flex-1 flex flex-col overflow-hidden">
         <div class="flex flex-col items-center text-center">
-            <h2 class="text-2xl mt-3 font-semibold text-gray-800 dark:text-gray-200">
+
+            <h2 class="text-2xl mt-3 font-semibold text-[#7DBFF8] dark:text-gray-200">
                 Perfil del usuario
             </h2>
+
+      <StreakAndTitle
+      title="Inicio: Recursos de Autoayuda"
+      :streak-count="streakCount"
+    />
         </div>
             <!-- Avatar -->
             <div class="mt-13 flex flex-col items-center text-center">
@@ -483,38 +489,27 @@ const handleLogout = async () => {
     }
 };
 
-// async function loadPatientData() {
-//     loadingProfile.value = true;
+interface PatientProfile {
+    name: string;
+    paternal_last_name: string;
+    maternal_last_name: string;
+    email: string;
+    alias: string;
+    gender: string;
+    professional_name?: string; // Es opcional y puede ser nulo
+    is_linked: boolean;
+    current_streak: number;
+}
 
-//     if (!authStore.authToken) {
-//         router.push({ name: 'login' });
-//         loadingProfile.value = false;
-//         return;
-//     }
+const streakCount = computed(() => {
+  // Primero, verificamos si el usuario es un paciente y si su perfil ha cargado
+  if (authStore.userType === 'patient' && authStore.userProfile) {
+    // Si es así, le decimos a TypeScript que trate el perfil como un PatientProfile
+    // y accedemos a 'current_streak' de forma segura.
+    return (authStore.userProfile as PatientProfile).current_streak || 0;
+  }
+  // Si no es un paciente, la racha es 0.
+  return 0;
+});
 
-//     try {
-//         const response = await AuthServices.fetchUserProfile();
-//         const patientProfile = response.data as AuthServices.PatientProfile;
-
-//         patientData.value = patientProfile;
-//         userDescription.value = patientProfile.description || 'Añade una breve descripción sobre ti...';
-//         originalDescription.value = userDescription.value;
-//         avatarUrl.value = patientProfile.profile_picture;
-
-//     } catch (error) {
-//         console.error("Falló la carga del perfil de usuario:", error);
-//     } finally {
-//         loadingProfile.value = false;
-//     }
-// }
-
-// onMounted(() => {
-//     loadPatientData();
-
-//     return () => {
-//         if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
-//             URL.revokeObjectURL(avatarUrl.value);
-//         }
-//     };
-// });
 </script>

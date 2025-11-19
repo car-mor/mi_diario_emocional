@@ -94,29 +94,72 @@ class Patient(models.Model):
     current_streak = models.IntegerField(default=0)
     last_entry_date = models.DateField(null=True, blank=True)
 
-    def update_streak(self):
-        """Actualiza la racha cuando se crea una nueva entrada"""
+    def update_streak_on_new_entry(self):
+        """Actualiza la racha cuando se crea una nueva entrada - Lógica unificada"""
         today = timezone.now().date()
 
+        print(f"DEBUG STREAK: Actualizando racha - Última entrada: {self.last_entry_date}, Hoy: {today}")
+
+        # Si es la primera entrada o no hay última entrada
         if not self.last_entry_date:
-            # Primera entrada
             self.current_streak = 1
             self.first_entry_date = today
+            print(f"DEBUG STREAK: Primera entrada - Streak: 1")
+
         else:
             days_diff = (today - self.last_entry_date).days
+            print(f"DEBUG STREAK: Diferencia de días: {days_diff}")
 
             if days_diff == 1:
-                # Día consecutivo - incrementar racha
+                # Día consecutivo - incrementar
                 self.current_streak += 1
+                print(f"DEBUG STREAK: Día consecutivo - Nuevo streak: {self.current_streak}")
             elif days_diff == 0:
-                # Mismo día - mantener racha (no debería pasar normalmente)
-                pass
+                # Mismo día - mantener streak actual
+                print(f"DEBUG STREAK: Mismo día - Mantener streak: {self.current_streak}")
             else:
-                # Más de 1 día de diferencia - reiniciar racha
+                # Más de 1 día de diferencia - reiniciar
                 self.current_streak = 1
+                print(f"DEBUG STREAK: Break en la racha - Nuevo streak: 1")
 
+        # Siempre actualizar la última fecha de entrada
         self.last_entry_date = today
         self.save()
+
+        print(f"DEBUG STREAK: Resultado final - Streak: {self.current_streak}, Última entrada: {self.last_entry_date}")
+
+    def verify_streak_consistency(self):
+        """Verifica la consistencia de la racha basándose en las entradas reales"""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from diary.models import DiaryEntry
+
+        # Obtener todas las entradas ordenadas por fecha
+        entries = DiaryEntry.objects.filter(patient=self).order_by("entry_date")
+
+        if not entries:
+            return 0
+
+        current_streak = 1
+        current_date = timezone.now().date()
+
+        # Empezar desde la entrada más reciente y verificar consecutividad
+        for i in range(len(entries) - 1, 0, -1):
+            current_entry_date = entries[i].entry_date.date()
+            previous_entry_date = entries[i - 1].entry_date.date()
+
+            days_diff = (current_entry_date - previous_entry_date).days
+
+            if days_diff == 1:
+                current_streak += 1
+            else:
+                break
+
+        print(f"DEBUG VERIFICACIÓN: Streak calculado: {current_streak}, Streak en BD: {self.current_streak}")
+
+        return current_streak
 
     def __str__(self):
         return self.alias

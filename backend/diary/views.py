@@ -1,3 +1,4 @@
+import logging
 from collections import Counter
 
 from django.utils import timezone
@@ -16,11 +17,7 @@ from .models import DiaryEntry
 from .permissions import IsPatient
 from .serializers import DiaryEntrySerializer
 
-# --- 2. ELIMINADO ---
-# Ya no necesitamos get_stop_words() ni STOP_WORDS aquí.
-# Borra esas funciones y la variable global.
-# def get_stop_words(): ...
-# STOP_WORDS = get_stop_words()
+logger = logging.getLogger(__name__)
 
 
 class DiaryEntryViewSet(viewsets.ModelViewSet):
@@ -42,8 +39,15 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         patient_profile = self.request.user.patient_profile
+        today = timezone.now().date()
+        logger.debug(
+            f"Creando entrada para {patient_profile.alias} - Última entrada: {patient_profile.last_entry_date}"
+        )
 
+        # Usar el método unificado
         patient_profile.update_streak_on_new_entry()
+
+        logger.debug(f"Después de update_streak - Streak: {patient_profile.current_streak}")
 
         # Lógica de ML (mantener igual)
         content = serializer.validated_data.get("content", "")
@@ -54,6 +58,7 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
             analyzed_emotions=emociones_lista,
             analyzed_scores=scores_dict,
         )
+        logger.info(f"Entrada creada para {patient_profile.alias} - Streak actual: {patient_profile.current_streak}")
 
     @action(detail=False, methods=["get"], url_path="emotion-combinations")
     def emotion_combinations(self, request):

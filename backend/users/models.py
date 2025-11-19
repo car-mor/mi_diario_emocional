@@ -1,10 +1,13 @@
 # Create your models here.
 import uuid
+from datetime import timedelta
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
+
+from diary.models import DiaryEntry
 
 
 # Manager para el modelo de usuario personalizado
@@ -98,68 +101,99 @@ class Patient(models.Model):
         """Actualiza la racha cuando se crea una nueva entrada - Lógica unificada"""
         today = timezone.now().date()
 
-        print(f"DEBUG STREAK: Actualizando racha - Última entrada: {self.last_entry_date}, Hoy: {today}")
+        # print(f"DEBUG STREAK: Actualizando racha - Última entrada: {self.last_entry_date}, Hoy: {today}")
 
         # Si es la primera entrada o no hay última entrada
         if not self.last_entry_date:
             self.current_streak = 1
             self.first_entry_date = today
-            print(f"DEBUG STREAK: Primera entrada - Streak: 1")
+            # print(f"DEBUG STREAK: Primera entrada - Streak: 1")
 
         else:
             days_diff = (today - self.last_entry_date).days
-            print(f"DEBUG STREAK: Diferencia de días: {days_diff}")
-
+            # print(f"DEBUG STREAK: Diferencia de días: {days_diff}")
             if days_diff == 1:
                 # Día consecutivo - incrementar
                 self.current_streak += 1
-                print(f"DEBUG STREAK: Día consecutivo - Nuevo streak: {self.current_streak}")
+                # print(f"DEBUG STREAK: Día consecutivo - Nuevo streak: {self.current_streak}")
             elif days_diff == 0:
-                # Mismo día - mantener streak actual
-                print(f"DEBUG STREAK: Mismo día - Mantener streak: {self.current_streak}")
-            else:
+                pass
+            elif days_diff > 1:
                 # Más de 1 día de diferencia - reiniciar
-                self.current_streak = 1
-                print(f"DEBUG STREAK: Break en la racha - Nuevo streak: 1")
+                self.current_streak = 0
 
         # Siempre actualizar la última fecha de entrada
         self.last_entry_date = today
         self.save()
 
-        print(f"DEBUG STREAK: Resultado final - Streak: {self.current_streak}, Última entrada: {self.last_entry_date}")
-
     def verify_streak_consistency(self):
-        """Verifica la consistencia de la racha basándose en las entradas reales"""
-        from datetime import timedelta
+        """Verifica y corrige la racha basándose en TODAS las entradas reales"""
 
-        from django.utils import timezone
-
-        from diary.models import DiaryEntry
-
-        # Obtener todas las entradas ordenadas por fecha
-        entries = DiaryEntry.objects.filter(patient=self).order_by("entry_date")
+        # Obtener TODAS las entradas ordenadas por fecha (más reciente primero)
+        entries = DiaryEntry.objects.filter(patient=self).order_by("-entry_date")
 
         if not entries:
+            # No hay entradas - racha debería ser 0
+            if self.current_streak != 0 or self.last_entry_date is not None:
+                self.current_streak = 0
+                self.last_entry_date = None
+                self.first_entry_date = None
+                self.save()
+                print(f"DEBUG CORRECCIÓN: {self.alias} - Sin entradas. Streak corregido a 0")
             return 0
 
-        current_streak = 1
-        current_date = timezone.now().date()
+        # Calcular racha real basada en días consecutivos desde la entrada más reciente
+        current_streak_calculated = 1
+        last_date = entries[0].entry_date.date()
+        first_date_in_streak = last_date
 
-        # Empezar desde la entrada más reciente y verificar consecutividad
-        for i in range(len(entries) - 1, 0, -1):
+        # Recorrer TODAS las entradas para encontrar la secuencia consecutiva más larga
+        for i in range(1, len(entries)):
             current_entry_date = entries[i].entry_date.date()
-            previous_entry_date = entries[i - 1].entry_date.date()
-
-            days_diff = (current_entry_date - previous_entry_date).days
+            days_diff = (last_date - current_entry_date).days
 
             if days_diff == 1:
-                current_streak += 1
+                # Día consecutivo - incrementar racha
+                current_streak_calculated += 1
+                last_date = current_entry_date
+                first_date_in_streak = current_entry_date
+            elif days_diff == 0:
+                # Mismo día - ignorar y continuar (no afecta la racha)
+                continue
             else:
+                # Break en la secuencia - terminamos de calcular
                 break
 
-        print(f"DEBUG VERIFICACIÓN: Streak calculado: {current_streak}, Streak en BD: {self.current_streak}")
+        # Obtener la fecha de la primera entrada histórica para first_entry_date
+        first_entry_ever = entries.last().entry_date.date()
 
-        return current_streak
+        # Verificar si hay inconsistencia
+        needs_correction = (
+            current_streak_calculated != self.current_streak
+            or self.last_entry_date != entries[0].entry_date.date()
+            or (self.first_entry_date is None and entries.exists())
+            or (self.first_entry_date is not None and self.first_entry_date != first_entry_ever)
+        )
+
+        if needs_correction:
+            print(f"DEBUG CORRECCIÓN: {self.alias} - Streak inconsistente")
+            print(
+                f"  BD: streak={self.current_streak}, last_date={self.last_entry_date}, first_date={self.first_entry_date}"
+            )
+            print(
+                f"  Calculado: streak={current_streak_calculated}, last_date={entries[0].entry_date.date()}, first_date={first_entry_ever}"
+            )
+
+            # Corregir TODOS los campos en la base de datos
+            self.current_streak = current_streak_calculated
+            self.last_entry_date = entries[0].entry_date.date()  # Fecha de la entrada más reciente
+            self.first_entry_date = first_entry_ever  # Fecha de la primera entrada histórica
+
+            self.save()
+
+            print(f"DEBUG CORRECCIÓN: {self.alias} - Streak corregido a {self.current_streak}")
+
+        return current_streak_calculated
 
     def __str__(self):
         return self.alias

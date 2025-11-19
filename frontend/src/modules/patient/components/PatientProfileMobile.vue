@@ -225,7 +225,7 @@ import { storeToRefs } from 'pinia';
 import * as AuthServices from '@/modules/auth/services/authServices';
 import { IconEdit } from '@tabler/icons-vue';
 import { type PatientUpdatePayload } from '@/modules/auth/services/authServices';
-
+import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
 const router = useRouter();
 const authStore = useAuthStore();
 const descriptionTextarea = ref<HTMLTextAreaElement | null>(null);

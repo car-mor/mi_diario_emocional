@@ -1,13 +1,10 @@
 # Create your models here.
 import uuid
-from datetime import timedelta
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
-
-from diary.models import DiaryEntry
 
 
 # Manager para el modelo de usuario personalizado
@@ -128,6 +125,11 @@ class Patient(models.Model):
 
     def verify_streak_consistency(self):
         """Verifica y corrige la racha basándose en TODAS las entradas reales"""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from diary.models import DiaryEntry
 
         # Obtener TODAS las entradas ordenadas por fecha (más reciente primero)
         entries = DiaryEntry.objects.filter(patient=self).order_by("-entry_date")

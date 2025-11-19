@@ -40,14 +40,10 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         patient_profile = self.request.user.patient_profile
         today = timezone.now().date()
-        logger.debug(
-            f"Creando entrada para {patient_profile.alias} - Última entrada: {patient_profile.last_entry_date}"
-        )
+        logger.debug(f"📝 CREANDO ENTRADA para {patient_profile.alias}")
 
-        # Usar el método unificado
+        # ✅ Esta llamada ahora hace el cálculo COMPLETO con todas las entradas
         patient_profile.update_streak_on_new_entry()
-
-        logger.debug(f"Después de update_streak - Streak: {patient_profile.current_streak}")
 
         # Lógica de ML (mantener igual)
         content = serializer.validated_data.get("content", "")
@@ -58,7 +54,7 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
             analyzed_emotions=emociones_lista,
             analyzed_scores=scores_dict,
         )
-        logger.info(f"Entrada creada para {patient_profile.alias} - Streak actual: {patient_profile.current_streak}")
+        logger.info(f"✅ ENTRADA CREADA - {patient_profile.alias}: Streak = {patient_profile.current_streak}")
 
     @action(detail=False, methods=["get"], url_path="emotion-combinations")
     def emotion_combinations(self, request):

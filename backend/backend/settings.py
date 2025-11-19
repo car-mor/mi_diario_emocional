@@ -36,6 +36,9 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
 
+EMAIL_LOGO_URL = config("EMAIL_LOGO_URL")  # URL pública de tu logo
+WEBSITE_URL = config("WEBSITE_URL")
+
 CSRF_TRUSTED_ORIGINS = [
     "https://midiarioemocional-production.up.railway.app",
     "https://*.railway.app",  # Permite cualquier subdominio de Railway

@@ -310,10 +310,10 @@ class PatientProfileUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("El alias no puede consistir solo en espacios.")
         if len(value) > 40:
             raise serializers.ValidationError("El alias no puede exceder los 40 caracteres.")
-        if not re.search(r"\d", value):
-            raise serializers.ValidationError("El alias debe contener al menos un número.")
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>_\-+=~`/\\[\]]', value):
-            raise serializers.ValidationError("El alias debe contener al menos un carácter especial.")
+        # if not re.search(r"\d", value):
+        #     raise serializers.ValidationError("El alias debe contener al menos un número.")
+        # if not re.search(r'[!@#$%^&*(),.?":{}|<>_\-+=~`/\\[\]]', value):
+        #     raise serializers.ValidationError("El alias debe contener al menos un carácter especial.")
 
         return value
 

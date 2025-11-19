@@ -154,7 +154,7 @@ async function confirmCodeGeneration() {
 
   } catch (error) {
     console.error('Error al generar código:', error);
-    handleError({ message: 'No se pudo generar un nuevo código. Intenta más tarde.' });
+    handleError({ message: 'No se pudo generar un nuevo código. (Máximo3 intentos por día)' });
   }
 }
 

@@ -2,7 +2,11 @@
     <div class="flex h-screen">
         <!-- Área principal central -->
         <main class="dark:bg-gray-800 flex-1 flex flex-col overflow-hidden">
-
+        <div class="flex flex-col items-center text-center">
+            <h2 class="text-2xl mt-3 font-semibold text-gray-800 dark:text-gray-200">
+                Perfil del usuario
+            </h2>
+        </div>
             <!-- Avatar -->
             <div class="mt-13 flex flex-col items-center text-center">
                 <div class="relative w-40 h-40">

@@ -83,28 +83,30 @@
     >
       <nav class="flex flex-col space-y-4">
         <a
-          href="#"
+          href="/faq"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Preguntas frecuentes
         </a>
         <a
-          href="#"
+          href="/who-are-we"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           ¿Quiénes somos?
         </a>
         <a
-          href="#"
+          href="/data-protection"
           class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Cómo protegemos los datos
         </a>
-        <button
+
+        <router-link
+          to="/login"
           class="text-left text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200"
         >
           Iniciar sesión
-        </button>
+        </router-link>
       </nav>
     </div>
   </header>

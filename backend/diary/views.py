@@ -41,20 +41,29 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
         return DiaryEntry.objects.none()
 
     def perform_create(self, serializer):
-        # ... (toda la lógica de 'streak' se queda igual)
         patient_profile = self.request.user.patient_profile
         today = timezone.now().date()
-        if patient_profile.last_entry_date:
+
+        # NUEVO: Verificar si es la PRIMERA entrada
+        is_first_entry = patient_profile.last_entry_date is None
+
+        if not is_first_entry:
             days_diff = (today - patient_profile.last_entry_date).days
+
             if days_diff == 1:
+                # INCREMENTO
                 patient_profile.current_streak += 1
             elif days_diff > 1:
+                # REINICIO
                 patient_profile.current_streak = 1
+            # days_diff == 0: no se debería llegar aquí debido a la restricción
+            # del frontend/API, pero si se llega, no se hace nada.
         else:
-            patient_profile.current_streak = 1
-        patient_profile.last_entry_date = today
-        if not patient_profile.first_entry_date:
+            # INICIO DE LA RACHA (Solo la primera vez)
+            patient_profile.current_streak = 1  # <-- Forzamos el inicio a 1.
             patient_profile.first_entry_date = today
+
+        patient_profile.last_entry_date = today  # Actualiza la fecha de la última entrada
         patient_profile.save()
 
         # --- Lógica de ML (se queda igual) ---

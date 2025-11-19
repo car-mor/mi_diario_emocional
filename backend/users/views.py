@@ -441,8 +441,11 @@ class UserProfileView(RetrieveUpdateAPIView):
         if user.role == "professional":
             return user.professional_profile
         elif user.role == "patient":
-            # SOLO devolver el perfil, NO actualizar la racha automáticamente
-            return user.patient_profile
+            patient_profile = user.patient_profile
+
+            patient_profile.check_and_break_streak_daily()
+
+            return patient_profile
         raise exceptions.NotFound("No se encontró el perfil asociado a este usuario.")
 
     def get_serializer_context(self):

@@ -1,4 +1,3 @@
-import logging
 from collections import Counter
 
 from django.utils import timezone
@@ -16,8 +15,6 @@ from .ml_service import (
 from .models import DiaryEntry
 from .permissions import IsPatient
 from .serializers import DiaryEntrySerializer
-
-logger = logging.getLogger(__name__)
 
 
 class DiaryEntryViewSet(viewsets.ModelViewSet):
@@ -40,9 +37,7 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         patient_profile = self.request.user.patient_profile
         today = timezone.now().date()
-        logger.debug(f"📝 CREANDO ENTRADA para {patient_profile.alias}")
 
-        # ✅ Esta llamada ahora hace el cálculo COMPLETO con todas las entradas
         patient_profile.update_streak_on_new_entry()
 
         # Lógica de ML (mantener igual)
@@ -54,7 +49,6 @@ class DiaryEntryViewSet(viewsets.ModelViewSet):
             analyzed_emotions=emociones_lista,
             analyzed_scores=scores_dict,
         )
-        logger.info(f"✅ ENTRADA CREADA - {patient_profile.alias}: Streak = {patient_profile.current_streak}")
 
     @action(detail=False, methods=["get"], url_path="emotion-combinations")
     def emotion_combinations(self, request):

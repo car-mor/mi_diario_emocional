@@ -98,20 +98,31 @@ class Patient(models.Model):
     last_entry_date = models.DateField(null=True, blank=True)
 
     def update_streak_on_new_entry(self):
-        """Actualiza la racha basándose en TODAS las entradas históricas"""
+        """Actualiza la racha basándose en TODAS las entradas históricas - VERSIÓN CORREGIDA"""
         import logging
 
         from django.utils import timezone
-
-        from diary.models import DiaryEntry
 
         logger = logging.getLogger(__name__)
 
         today = timezone.now().date()
         logger.debug(f"🚀 CALCULANDO RACHA COMPLETA para {self.alias} - Hoy: {today}")
 
-        # Obtener TODAS las entradas ordenadas por fecha (más antigua primero)
-        entries = DiaryEntry.objects.filter(patient=self).order_by("entry_date")
+        # Obtener TODAS las entradas usando el related_name
+        entries = self.diary_entries.all().order_by("entry_date")
+
+        # DEBUG: Mostrar todas las entradas con comparación de fechas
+        logger.debug(f"🔍 DIAGNÓSTICO COMPLETO para {self.alias}:")
+        for entry in entries:
+            utc_time = entry.entry_date
+            local_time = timezone.localtime(utc_time)
+            naive_date = utc_time.date()  # ¡INCORRECTO!
+            local_date = local_time.date()  # ✅ CORRECTO
+
+            logger.debug(f"   - UTC: {utc_time}")
+            logger.debug(f"     Local: {local_time} -> Fecha: {local_date}")
+            logger.debug(f"     Naive: {naive_date} -> {'❌ PROBLEMA' if naive_date != local_date else '✅ OK'}")
+            logger.debug(f"     Título: {entry.title}")
 
         if not entries:
             # Primera entrada del usuario
@@ -122,18 +133,21 @@ class Patient(models.Model):
             logger.info(f"✅ PRIMERA ENTRADA - {self.alias}: Streak = 1")
             return
 
-        # Obtener todas las fechas de entradas únicas (sin duplicados por mismo día)
+        # ✅ CORREGIDO: Usar timezone.localtime() para obtener la fecha correcta
         entry_dates = set()
         for entry in entries:
-            entry_dates.add(entry.entry_date.date())
+            # ¡ESTA ES LA LÍNEA CLAVE CORREGIDA!
+            local_datetime = timezone.localtime(entry.entry_date)
+            local_date = local_datetime.date()
+            entry_dates.add(local_date)
 
         # Convertir a lista ordenada
         unique_dates = sorted(list(entry_dates))
-        logger.debug(f"📅 Fechas de entradas únicas: {unique_dates}")
+        logger.debug(f"📅 Fechas de entradas únicas (CORREGIDAS): {unique_dates}")
 
         # Calcular la secuencia consecutiva MÁS LARGA
         longest_streak = 1
-        current_streak = 0
+        current_streak = 1
 
         for i in range(1, len(unique_dates)):
             days_diff = (unique_dates[i] - unique_dates[i - 1]).days
@@ -144,9 +158,9 @@ class Patient(models.Model):
                 longest_streak = max(longest_streak, current_streak)
             else:
                 # Break en la secuencia - reiniciar racha actual
-                current_streak = 0
+                current_streak = 1
 
-        logger.debug(f"📊 Cálculo completo - Racha más larga: {longest_streak}, Racha actual BD: {self.current_streak}")
+        logger.debug(f"📊 Cálculo completo - Racha más larga: {longest_streak}")
 
         # Verificar si la entrada de hoy extiende la racha
         latest_entry_date = unique_dates[-1] if unique_dates else None
@@ -183,7 +197,6 @@ class Patient(models.Model):
 
     def verify_streak_consistency(self):
         """Verificación rápida - ahora update_streak_on_new_entry ya hace el cálculo completo"""
-        from django.utils import timezone
 
         logger = logging.getLogger(__name__)
 

@@ -41,6 +41,8 @@ RUN DJANGO_SECRET_KEY="dummy_build_key_no_importa" \
     DO_SPACES_SECRET_KEY="dummy-secret" \
     DO_SPACES_BUCKET_NAME="dummy-bucket" \
     DO_SPACES_REGION="nyc3" \
+    EMAIL_LOGO_URL="dummy-logo-url" \
+    WEBSITE_URL="http://dummy-website-url" \
     python manage.py collectstatic --noinput
 
 # --- ETAPA 2: LA IMAGEN FINAL (SLIM) ---

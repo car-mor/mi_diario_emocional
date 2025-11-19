@@ -1,10 +1,13 @@
 # Create your models here.
+import logging
 import uuid
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 
 # Manager para el modelo de usuario personalizado
@@ -99,25 +102,27 @@ class Patient(models.Model):
         today = timezone.now().date()
 
         # print(f"DEBUG STREAK: Actualizando racha - Última entrada: {self.last_entry_date}, Hoy: {today}")
+        logger.debug(f"Actualizando racha - Última entrada: {self.last_entry_date}, Hoy: {today}")
 
         # Si es la primera entrada o no hay última entrada
         if not self.last_entry_date:
             self.current_streak = 1
             self.first_entry_date = today
-            # print(f"DEBUG STREAK: Primera entrada - Streak: 1")
+            logger.debug(f"Primera entrada - Streak: 1")
 
         else:
             days_diff = (today - self.last_entry_date).days
-            # print(f"DEBUG STREAK: Diferencia de días: {days_diff}")
+            logger.debug(f"Diferencia de días: {days_diff}")
             if days_diff == 1:
                 # Día consecutivo - incrementar
                 self.current_streak += 1
-                # print(f"DEBUG STREAK: Día consecutivo - Nuevo streak: {self.current_streak}")
+                logger.debug(f"Día consecutivo - Nuevo streak: {self.current_streak}")
             elif days_diff == 0:
                 pass
             elif days_diff > 1:
                 # Más de 1 día de diferencia - reiniciar
                 self.current_streak = 0
+                logger.debug(f"Racha rota - Streak reiniciado a 0")
 
         # Siempre actualizar la última fecha de entrada
         self.last_entry_date = today
@@ -141,7 +146,7 @@ class Patient(models.Model):
                 self.last_entry_date = None
                 self.first_entry_date = None
                 self.save()
-                print(f"DEBUG CORRECCIÓN: {self.alias} - Sin entradas. Streak corregido a 0")
+                logger.info(f"CORRECCIÓN: {self.alias} - Sin entradas. Streak corregido a 0")
             return 0
 
         # Calcular racha real basada en días consecutivos desde la entrada más reciente
@@ -178,11 +183,11 @@ class Patient(models.Model):
         )
 
         if needs_correction:
-            print(f"DEBUG CORRECCIÓN: {self.alias} - Streak inconsistente")
-            print(
+            logger.warning(f"CORRECCIÓN: {self.alias} - Streak inconsistente")
+            logger.warning(
                 f"  BD: streak={self.current_streak}, last_date={self.last_entry_date}, first_date={self.first_entry_date}"
             )
-            print(
+            logger.warning(
                 f"  Calculado: streak={current_streak_calculated}, last_date={entries[0].entry_date.date()}, first_date={first_entry_ever}"
             )
 
@@ -193,7 +198,7 @@ class Patient(models.Model):
 
             self.save()
 
-            print(f"DEBUG CORRECCIÓN: {self.alias} - Streak corregido a {self.current_streak}")
+            logger.info(f"CORRECCIÓN: {self.alias} - Streak corregido a {self.current_streak}")
 
         return current_streak_calculated
 

@@ -94,6 +94,19 @@ class Patient(models.Model):
     current_streak = models.IntegerField(default=0)
     last_entry_date = models.DateField(null=True, blank=True)
 
+    def check_and_update_streak(self):
+        """Verifica la racha contra la fecha actual y la reinicia si es necesario."""
+        if self.last_entry_date:
+            today = timezone.now().date()
+            days_diff = (today - self.last_entry_date).days
+
+            if days_diff > 1 and self.current_streak > 0:
+                # La racha está rota, y debe ser reiniciada
+                self.current_streak = 0  # Reinicio a 0 si la racha ha pasado más de 1 día
+                self.save(update_fields=["current_streak"])
+                return True  # Retorna True si hubo un cambio
+        return False
+
     def __str__(self):
         return self.alias
 

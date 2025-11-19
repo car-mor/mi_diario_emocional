@@ -40,7 +40,10 @@ export const useDiaryStore = defineStore('diary', () => {
       const response = await DiaryService.createDiaryEntry(entryData);
       // Añadimos la nueva entrada al principio de la lista para que aparezca primero
       entries.value.unshift(response.data);
-      await authStore.fetchUserProfile();
+      // Forzar una actualización completa del perfil
+    await authStore.fetchUserProfile();
+    console.log('DEBUG: Después de crear entrada - current_streak:',
+      authStore.userProfile?.current_streak);
       return response.data;
     } catch (err: unknown) {
       if (isAxiosError(err) && err.response) {

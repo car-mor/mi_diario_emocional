@@ -78,6 +78,8 @@
 import StreakAndTitle from "../components/StreakAndTitlePatient.vue"
     import { computed } from 'vue';
   import { useAuthStore } from '@/store/auth';
+import UserProfile from "../components/PatientProfile.vue";
+
     const authStore = useAuthStore();
 
     interface PatientProfile {

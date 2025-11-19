@@ -17,7 +17,7 @@
 
                     <img
                         v-else
-                        :src="avatarUrl || 'http://localhost:8000/static/images/avatar-icon.png'"
+                        :src="avatarUrl || '/images/avatar-icon.png'"
                         alt="User avatar"
                         class="w-40 h-40 rounded-xl object-cover cursor-pointer hover:opacity-80 transition-opacity"
                         @click="clickAvatarInput"
@@ -52,41 +52,68 @@
                     {{ hasCustomAvatar ? 'Toca la imagen para cambiar la foto' : 'Toca la imagen para agregar una foto' }}
                 </p>
             </div>
+<!-- Descripción -->
+            <div class="mx-6 mt-4">
+  <!-- Modo visualización -->
+  <div v-if="!isEditingDescription">
+    <!-- Si tiene descripción -->
+    <div v-if="userDescription.trim()" class="relative">
+      <div class="flex items-start justify-between gap-3 mb-3">
+        <p class="flex-1 text-center text-sm text-gray-600 dark:text-gray-400">
+          {{ userDescription }}
+        </p>
+        <button
+          @click="isEditingDescription = true"
+          class="flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          aria-label="Editar descripción"
+        >
+          <IconEdit class="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        </button>
+      </div>
+    </div>
 
-            <!-- Descripción -->
-            <div @dblclick="isEditingDescription = true" class="group relative cursor-pointer mx-6">
-                <IconEdit
-                    v-if="!isEditingDescription"
-                    class="w-4 h-4 text-gray-400 absolute top-0 right-0 mt-1 mr-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                    @click="isEditingDescription = true"
-                />
-                <p v-if="!isEditingDescription" class="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
-                    {{ userDescription }}
-                </p>
+    <!-- Si NO tiene descripción (estado vacío) -->
+    <div v-else class="text-center">
+      <p class="text-sm text-gray-500 dark:text-gray-400 italic mb-3">
+        Aún no has agregado una descripción
+      </p>
+      <button
+        @click="startEditing"
+        class="w-full flex items-center justify-center gap-2 bg-[#7DBFF8] hover:bg-[#3457B2] text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+      >
+        <IconEdit class="w-4 h-4" />
+        <span class="text-sm">Agregar descripción</span>
+      </button>
+    </div>
+  </div>
 
-                <div v-else class="mt-4">
-                    <textarea
-                        v-model="userDescription"
-                        class="w-full p-2 border rounded resize-none text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        rows="4"
-                    ></textarea>
-                    <p v-if="descriptionError" class="text-red-500 text-xs mt-1">{{ descriptionError }}</p>
-                    <div class="flex justify-end space-x-2 mt-2">
-                        <button
-                            @click="cancelEdit"
-                            class="text-xs text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-1 px-3 rounded-lg transition-colors"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            @click="saveDescription"
-                            class="text-xs bg-[#7DBFF8] hover:bg-[#3457B2] text-white font-semibold py-1 px-3 rounded-lg transition-colors text-center"
-                        >
-                            Guardar
-                        </button>
-                    </div>
-                </div>
-            </div>
+  <!-- Modo edición -->
+  <div v-else>
+    <textarea
+      ref="descriptionTextarea"
+      v-model="userDescription"
+      class="w-full p-2 border rounded-lg resize-none text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-[#7DBFF8] focus:border-transparent"
+      rows="4"
+      placeholder="Escribe algo sobre ti..."
+    ></textarea>
+    <p v-if="descriptionError" class="text-red-500 text-xs mt-1">{{ descriptionError }}</p>
+    <div class="flex gap-2 mt-2">
+      <button
+        @click="cancelEdit"
+        class="flex-1 text-xs text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 px-3 rounded-lg transition-colors"
+      >
+        Cancelar
+      </button>
+      <button
+        @click="saveDescription"
+        :disabled="isSaving"
+        class="flex-1 text-xs bg-[#7DBFF8] hover:bg-[#3457B2] disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 px-3 rounded-lg transition-colors text-center"
+      >
+        {{ isSaving ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>
 
             <!-- Botones -->
             <div class="mt-6 flex flex-col gap-3 items-center">
@@ -185,7 +212,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
 import { storeToRefs } from 'pinia';
@@ -195,7 +222,8 @@ import { type PatientUpdatePayload } from '@/modules/auth/services/authServices'
 
 const router = useRouter();
 const authStore = useAuthStore();
-// Obtenemos el estado reactivo directamente del store
+const descriptionTextarea = ref<HTMLTextAreaElement | null>(null);
+const isSaving = ref(false);
 const { userProfile, loading } = storeToRefs(authStore);
 
 // const patientData = ref<AuthServices.UserProfileData | null>(null);
@@ -203,6 +231,45 @@ const { userProfile, loading } = storeToRefs(authStore);
 const isPatientProfile = (data: AuthServices.UserProfileData): data is AuthServices.PatientProfile => {
     return (data as AuthServices.PatientProfile).alias !== undefined;
 };
+
+// Nueva función para iniciar edición con autofocus
+async function startEditing() {
+  isEditingDescription.value = true;
+  await nextTick();
+  descriptionTextarea.value?.focus();
+}
+
+// Actualiza tu función saveDescription para incluir el estado de guardado
+async function saveDescription() {
+    if (!validateDescription(userDescription.value)) {
+        return;
+    }
+
+    isSaving.value = true; // ✅ Inicia loading
+
+    try {
+        const payload: PatientUpdatePayload = { description: userDescription.value };
+        await AuthServices.updatePatientProfile(payload);
+
+        authStore.updateUserProfile({ description: userDescription.value });
+
+        originalDescription.value = userDescription.value;
+        isEditingDescription.value = false;
+
+        successTitle.value = '¡Actualizado!';
+        successMessage.value = 'Tu descripción ha sido guardada correctamente.';
+        showSuccessModal.value = true;
+
+    } catch (error) {
+        console.error('Error al guardar descripción:', error);
+        showError(
+            'Error al guardar',
+            'Hubo un problema al guardar tu descripción. Por favor, intenta nuevamente.'
+        );
+    } finally {
+        isSaving.value = false; // ✅ Termina loading
+    }
+}
 
 // const userAlias = computed(() => {
 //     if (!patientData.value) return 'Cargando...';
@@ -324,29 +391,6 @@ async function handleAvatarChange(event: Event) {
         if (target) {
             target.value = '';
         }
-    }
-}
-
-async function saveDescription() {
-    if (!validateDescription(userDescription.value)) {
-        return;
-    }
-
-    try {
-        const payload: PatientUpdatePayload = { description: userDescription.value };
-        await AuthServices.updatePatientProfile(payload);
-
-        authStore.updateUserProfile({ description: userDescription.value });
-
-        originalDescription.value = userDescription.value;
-        isEditingDescription.value = false;
-
-        successTitle.value = '¡Actualizado!';
-        successMessage.value = 'Tu descripción ha sido guardada correctamente.';
-        showSuccessModal.value = true;
-
-    } catch (error) {
-        console.error('Error al guardar descripción:', error);
     }
 }
 

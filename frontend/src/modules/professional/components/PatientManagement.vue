@@ -42,7 +42,7 @@
 
                                 <td class="px-6 py-2 lg:py-4 whitespace-normal text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Género">{{ genderMap[patient.gender] || patient.gender }}</td>
 
-                                <td class="px-6 py-2 lg:py-4 whitespace-normal text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Correo electrónico">{{ patient.email }}</td>
+                                <td class="px-6 py-2 lg:py-4 whitespace-normal text-sm text-gray-700 dark:text-gray-300 block lg:table-cell break-words" data-label="Correo electrónico">{{ patient.email }}</td>
 
                                 <td class="px-6 py-2 lg:py-4 whitespace-normal text-sm text-gray-700 dark:text-gray-300 block lg:table-cell" data-label="Alias">{{ patient.alias }}</td>
 

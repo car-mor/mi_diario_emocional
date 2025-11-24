@@ -42,8 +42,11 @@ export const useDiaryStore = defineStore('diary', () => {
       entries.value.unshift(response.data);
       // Forzar una actualización completa del perfil
     await authStore.fetchUserProfile();
-    console.log('DEBUG: Después de crear entrada - current_streak:',
-      authStore.userProfile?.current_streak);
+    if (authStore.userProfile && 'current_streak' in authStore.userProfile) {
+          // Ahora TS sabe que es seguro acceder a current_streak
+          console.log('DEBUG: Después de crear entrada - current_streak:',
+              authStore.userProfile.current_streak);
+      }
       return response.data;
     } catch (err: unknown) {
       if (isAxiosError(err) && err.response) {

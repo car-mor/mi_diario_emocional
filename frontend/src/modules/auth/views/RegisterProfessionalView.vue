@@ -612,8 +612,12 @@ const submitRegistration = async () => {
   }
 }
 
-const goToLogin = () => {
-  router.push('/login')
+function goToLogin() {
+  router.push({
+    name: 'first-login',
+    params: { type: 'professional' }, // 1. Le pasamos el parámetro 'type'
+    query: { email: form.email }    // 2. Le pasamos el email para que el formulario se auto-rellene
+  });
 }
 
 const closeErrorPopup = () => {

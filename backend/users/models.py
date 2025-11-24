@@ -99,7 +99,7 @@ class Patient(models.Model):
 
         from django.utils import timezone
 
-        today = timezone.now().date()
+        today = timezone.localtime(timezone.now()).date()
 
         # Primero, verificar si la racha está rota (current_streak == 0)
         if self.current_streak == 0:
@@ -142,7 +142,7 @@ class Patient(models.Model):
         if not self.last_entry_date:
             return False
 
-        today = timezone.now().date()
+        today = timezone.localtime(timezone.now()).date()
         days_diff = (today - self.last_entry_date).days
 
         # Si han pasado 2 o más días desde la última entrada, romper la racha
@@ -150,10 +150,8 @@ class Patient(models.Model):
             self.current_streak = 0
             self.save()
             return True
-        elif days_diff == 1 and self.current_streak > 0:
-            # Racha en 0 después de 1 día exacto
-            self.current_streak = 0  # ← Descomenta esta línea si quieres que se rompa después de 1 día
-            self.save()
+
+        return False
 
     def __str__(self):
         return self.alias

@@ -3,7 +3,7 @@
     class="min-h-screen bg-gradient-to-br from-slate-50 to-[#70BFE9]/20 dark:from-gray-900 dark:to-gray-800 transition-colors"
   >
     <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
-      <div class="min-h-screen flex items-center justify-center">
+      <div class="flex items-center justify-center">
         <WomanHeart />
       </div>
 

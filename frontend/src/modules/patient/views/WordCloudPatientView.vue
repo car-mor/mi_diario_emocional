@@ -16,7 +16,7 @@
                 <!-- Descripción -->
                 <div class="text-center lg:text-left p-4">
                     <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6">
-                        En la sección de Nube de Palabras, podrás ver una recopilación de las palabras que más has ustilizado hasta ahora ¡Entre más grande la palabra más veces la has usado!
+                        En la sección de Nube de Palabras, podrás ver una recopilación de las palabras que más has utilizado hasta ahora ¡Entre más grande la palabra más veces la has usado!
                     </p>
                 </div>
                 <!-- Contenido principal - component nube de palabras -->

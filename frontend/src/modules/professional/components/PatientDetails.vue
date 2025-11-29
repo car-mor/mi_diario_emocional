@@ -237,11 +237,7 @@
               </span>
               <span v-else>
                 <span v-if="diaryHistory.length === 0">
-                  El primer reporte estará disponible 7 días después de que el paciente escriba por primera vez.
-                </span>
-                <span v-else>
-                  El próximo reporte para este periodo estará disponible el:
-                  <span class="font-semibold">{{ reportInfo?.next_report_date }}</span>
+                  La descarga de reportes estará disponible después de que el paciente escriba por primera vez.
                 </span>
               </span>
             </p>

@@ -34,7 +34,7 @@
           href="/data-protection"
           class="text-gray-700 dark:text-gray-200 hover:text-[#70BFE9] dark:hover:text-[#70BFE9] font-medium transition-colors duration-200"
         >
-          Cómo protegemos los datos
+          ¿Cómo protegemos los datos?
         </a>
       </nav>
 

@@ -45,7 +45,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAuthStore } from '@/store/auth';
-import Sidebar from "../components/SidebarPatient.vue"
+import Sidebar from "../components/SidebarPatient.vue";
+import StreakAndTitle from "../components/StreakAndTitlePatient.vue";
 
 const countdown = ref(120); // 2 minutos en segundos
 

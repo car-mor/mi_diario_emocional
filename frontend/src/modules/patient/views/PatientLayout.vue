@@ -7,7 +7,7 @@
         <main class="flex-1 flex flex-col overflow-hidden">
             <!-- header con título y racha component-->
             <StreakAndTitle
-              title=""
+              title="Inicio: Recursos de Autoayuda"
               :streak-count="streakCount"
             />
         </main>

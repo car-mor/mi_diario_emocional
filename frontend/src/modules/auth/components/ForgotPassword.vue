@@ -92,7 +92,7 @@
       </button>
 
       <button
-        @click="goToStep(0)"
+        @click="goToLogin"
         class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-lg transition-colors"
         :disabled="loading"
       >
@@ -148,7 +148,7 @@
       </button>
 
       <button
-        @click="goToStep(0)"
+        @click="goToLogin"
         class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-lg transition-colors"
         :disabled="loading"
       >
@@ -293,15 +293,6 @@ onMounted(() => {
 onUnmounted(() => {
   stopTimer()
 })
-
-const goToStep = (step: number) => {
-    // Ya no es necesario el if (step === 0)
-    currentStep.value = step;
-
-    // Limpiar errores al cambiar de paso
-    codeError.value = '';
-    passwordError.value = '';
-}
 
 // Función para redireccionar a la página de login
 const goToLogin = () => {

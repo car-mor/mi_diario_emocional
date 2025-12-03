@@ -6,10 +6,10 @@
         <!-- Área principal central -->
         <main class="flex-1 flex flex-col overflow-hidden">
             <!-- header con título y racha component-->
-            <StreakAndTitle title="Soporte y FAQs" :streakCount="2" />
-            <div class="dark:bg-gray-800 transition-colors flex-1 p-4 overflow-y-auto">
-                <router-view />
-            </div>
+            <StreakAndTitle
+              title=""
+              :streak-count="streakCount"
+            />
         </main>
         <!-- Perfil del usuario(solo en pantallas grandes) component -->
         <UserProfile />
@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAuthStore } from '@/store/auth';
 import Sidebar from "../components/SidebarPatient.vue"
 
@@ -129,6 +129,29 @@ const activityEvents: (keyof WindowEventMap)[] = [
   'scroll',
   'touchstart'
 ];
+
+interface PatientProfile {
+    name: string;
+    paternal_last_name: string;
+    maternal_last_name: string;
+    email: string;
+    alias: string;
+    gender: string;
+    professional_name?: string; // Es opcional y puede ser nulo
+    is_linked: boolean;
+    current_streak: number;
+}
+
+const streakCount = computed(() => {
+  // Primero, verificamos si el usuario es un paciente y si su perfil ha cargado
+  if (authStore.userType === 'patient' && authStore.userProfile) {
+    // Si es así, le decimos a TypeScript que trate el perfil como un PatientProfile
+    // y accedemos a 'current_streak' de forma segura.
+    return (authStore.userProfile as PatientProfile).current_streak || 0;
+  }
+  // Si no es un paciente, la racha es 0.
+  return 0;
+});
 
 // ----------------------------------------------------
 // CICLOS DE VIDA (onMounted / onUnmounted)

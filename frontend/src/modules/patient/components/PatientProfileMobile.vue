@@ -9,7 +9,7 @@
             </h2>
 
       <StreakAndTitle
-      title="Inicio: Recursos de Autoayuda"
+      title=""
       :streak-count="streakCount"
     />
         </div>

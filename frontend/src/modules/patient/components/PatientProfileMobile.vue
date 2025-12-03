@@ -3,13 +3,8 @@
         <!-- Área principal central -->
         <main class="dark:bg-gray-800 flex-1 flex flex-col overflow-hidden">
         <div class="flex flex-col items-center text-center">
-
-            <h2 class="text-2xl mt-3 font-semibold text-[#7DBFF8] dark:text-gray-200">
-                Perfil del usuario
-            </h2>
-
       <StreakAndTitle
-      title=""
+      title="Perfil del usuario"
       :streak-count="streakCount"
     />
         </div>
@@ -244,6 +239,8 @@ async function startEditing() {
   await nextTick();
   descriptionTextarea.value?.focus();
 }
+
+
 
 // Actualiza tu función saveDescription para incluir el estado de guardado
 async function saveDescription() {

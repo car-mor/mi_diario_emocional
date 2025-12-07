@@ -10,7 +10,7 @@
   [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
   [![License](https://img.shields.io/badge/License-AGPL%20v3-blue.svg?style=for-the-badge)](LICENSE)
 
-  [Ver Demo en Vivo 🚀](https://mi-diario-emocional-brown.vercel.app)
+  [Ver Demo en Vivo 🚀](https://mi-diario-emocional-nu.vercel.app)
   
 </div>
 
@@ -22,7 +22,7 @@
 
 Este proyecto combina la robustez de **Django** en el backend con la interactividad de **Vue 3** en el frontend, creando una experiencia fluida y segura para el usuario.
 
-## ✨ Características Principales
+## Características Principales
 
 - **📝 Registro de Diario Intuitivo:** Interfaz limpia y fácil de usar para escribir entradas diarias.
 - **🤖 Análisis de Emociones con IA:** Implementación de modelos NLP para detectar patrones emocionales en el texto.
@@ -43,10 +43,6 @@ Este proyecto combina la robustez de **Django** en el backend con la interactivi
 - **API:** Django REST Framework
 - **IA/NLP:** Modelos de procesamiento de lenguaje natural (Python)
 - **Base de Datos:** SQLite / PostgreSQL (Ajustar según corresponda)
-
-## 🚀 Instalación y Configuración Local
-
-Sigue estos pasos para ejecutar el proyecto en tu entorno local.
 
 ### Prerrequisitos
 - Node.js y npm

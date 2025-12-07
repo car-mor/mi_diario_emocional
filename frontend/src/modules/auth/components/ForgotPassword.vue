@@ -104,35 +104,56 @@
       <p class="mb-6 text-gray-600 dark:text-gray-400 leading-relaxed">
         Por favor, escribe tu nueva contraseña a utilizar
       </p>
+
       <div class="text-sm text-left text-gray-600 dark:text-gray-400 mb-4">
         <p v-for="req in passwordValidation" :key="req.text" class="transition-colors"
            :class="{'text-green-500': req.met, 'text-red-500': !req.met && newPassword.length > 0}">
             {{ req.met ? '✓' : '✗' }} {{ req.text }}
         </p>
-    </div>
+      </div>
+
       <div class="mb-4">
         <label for="new-password" class="sr-only">Nueva contraseña</label>
-        <input
-          type="password"
-          id="new-password"
-          v-model="newPassword"
-          placeholder="Nueva contraseña"
-          class="p-3 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
-          required
-          :disabled="loading"
-        />
+        <div class="relative">
+          <input
+            :type="showNewPassword ? 'text' : 'password'"
+            id="new-password"
+            v-model="newPassword"
+            placeholder="Nueva contraseña"
+            class="p-3 pr-10 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
+            required
+            :disabled="loading"
+          />
+          <div
+            class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer select-none"
+            @click="showNewPassword = !showNewPassword"
+          >
+            <IconEye v-if="!showNewPassword" class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+            <IconEyeOff v-else class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+          </div>
+        </div>
       </div>
+
       <div class="mb-6">
         <label for="confirm-password" class="sr-only">Confirmación de contraseña</label>
-        <input
-          type="password"
-          id="confirm-password"
-          v-model="confirmPassword"
-          placeholder="Confirmación de contraseña"
-          class="p-3 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
-          required
-          :disabled="loading"
-        />
+        <div class="relative">
+          <input
+            :type="showConfirmPassword ? 'text' : 'password'"
+            id="confirm-password"
+            v-model="confirmPassword"
+            placeholder="Confirmación de contraseña"
+            class="p-3 pr-10 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
+            required
+            :disabled="loading"
+          />
+          <div
+            class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer select-none"
+            @click="showConfirmPassword = !showConfirmPassword"
+          >
+            <IconEye v-if="!showConfirmPassword" class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+            <IconEyeOff v-else class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+          </div>
+        </div>
       </div>
 
       <p v-if="passwordError" class="text-sm text-red-500 mb-4">
@@ -230,7 +251,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import { requestPasswordReset, passwordResetConfirm, verifyPasswordResetCode } from '../services/authServices'
-import { IconMail, IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-vue'
+import { IconMail, IconCircleCheckFilled, IconCircleXFilled, IconEye,IconEyeOff } from '@tabler/icons-vue'
 
 const router = useRouter() // Inicializa el router
 
@@ -240,6 +261,8 @@ const email = ref<string>('')
 const code = ref<string>('')
 const newPassword = ref<string>('')
 const confirmPassword = ref<string>('')
+  const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 // Estados para popups
 const successPopup = ref(false)

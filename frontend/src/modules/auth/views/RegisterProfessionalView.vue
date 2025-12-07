@@ -35,14 +35,24 @@
             >
             <div class="relative flex items-center">
               <IconLock class="absolute left-4 text-gray-400 dark:text-gray-500" />
+
               <input
                 v-model="form.password"
-                type="password"
+                :type="showPassword ? 'text' : 'password'"
                 placeholder="Ingresa tu contraseña"
-                class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
+                class="w-full pl-12 pr-10 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
                 required
               />
+
+              <div
+                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer select-none"
+                @click="showPassword = !showPassword"
+              >
+                <IconEye v-if="!showPassword" class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+                <IconEyeOff v-else class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+              </div>
             </div>
+
             <div
               v-if="form.password.length > 0"
               class="text-sm text-left text-gray-600 dark:text-gray-400 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1"
@@ -60,21 +70,30 @@
             >
             <div class="relative flex items-center">
               <IconLock class="absolute left-4 text-gray-400 dark:text-gray-500" />
+
               <input
                 v-model="form.confirmPassword"
-                type="password"
+                :type="showConfirmPassword ? 'text' : 'password'"
                 placeholder="Vuelve a introducir la contraseña"
-                class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
+                class="w-full pl-12 pr-10 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#70BFE9]"
                 required
               />
+
+              <div
+                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer select-none"
+                @click="showConfirmPassword = !showConfirmPassword"
+              >
+                <IconEye v-if="!showConfirmPassword" class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+                <IconEyeOff v-else class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+              </div>
             </div>
+
             <div
               v-if="form.password !== form.confirmPassword && form.confirmPassword.length > 0"
               class="text-sm text-left text-gray-600 dark:text-gray-400 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1"
             >
               <p class="flex items-center text-red-500 dark:text-red-400">
-                <span>Las contraseñas no coinciden.</span
-              >
+                <span>Las contraseñas no coinciden.</span>
               </p>
             </div>
           </div>
@@ -292,11 +311,13 @@ import { useRouter, useRoute } from 'vue-router'
 import { isAxiosError } from 'axios';
 import * as AuthServices from '@/modules/auth/services/authServices';
 import BackgroundWrapper from '@/modules/auth/components/BackgroundWrapper.vue'
-import { IconMail, IconLock, IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-vue'
+import { IconMail, IconLock, IconCircleCheckFilled, IconCircleXFilled, IconEye,IconEyeOff } from '@tabler/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 const step = ref(1) // 1 para el formulario, 4 para el mensaje de éxito
 const loading = ref(false)
 const errorPopup = ref(false)

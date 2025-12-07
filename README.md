@@ -35,7 +35,7 @@ Este proyecto combina la robustez de **Django** en el backend con la interactivi
 ### Frontend
 - **Framework:** Vue 3
 - **Lenguaje:** TypeScript
-- **Estilos:** CSS / Posiblemente Tailwind o Bootstrap (Ajustar según corresponda)
+- **Estilos:** Tailwind CSS
 - **Cliente HTTP:** Axios
 
 ### Backend

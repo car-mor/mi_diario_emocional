@@ -62,20 +62,27 @@
                 Contraseña
               </label>
               <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <IconLockSquareRounded
-                    class="h-6 w-6 mx-auto text-[#70BFE9] dark:text-gray-300"
-                  />
-                </div>
-                <input
-                  type="password"
-                  id="password"
-                  v-model="password"
-                  placeholder="Ingresa tu contraseña"
-                  class="pl-10 p-3 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
-                  required
-                />
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <IconLockSquareRounded class="h-6 w-6 mx-auto text-[#70BFE9] dark:text-gray-300" />
               </div>
+
+              <input
+                :type="showPassword ? 'text' : 'password'"
+                id="password"
+                v-model="password"
+                placeholder="Ingresa tu contraseña"
+                class="pl-10 pr-10 p-3 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
+                required
+              />
+
+              <div
+                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                @click="showPassword = !showPassword"
+              >
+                <IconEye v-if="!showPassword" class="h-5 w-5 text-gray-500 hover:text-[#70BFE9]" />
+                <IconEyeOff v-else class="h-5 w-5 text-gray-500 hover:text-[#70BFE9]" />
+              </div>
+            </div>
             </div>
 
             <button
@@ -115,7 +122,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { IconLockSquareRounded, IconMail } from '@tabler/icons-vue';
+import { IconLockSquareRounded, IconMail, IconEye, IconEyeOff } from '@tabler/icons-vue';
 import WomanHeart from '../components/WomanHeart.vue';
 import { useAuthStore } from '@/store/auth';
 import { isAxiosError } from 'axios';
@@ -127,6 +134,7 @@ const authStore = useAuthStore();
 const errorMessage = ref('');
 const showRedirectButton = ref(false);
 const inactiveUserRole = ref<string | null>(null); // Variable clave para guardar el rol
+const showPassword = ref(false);
 
 const redirectToVerification = () => {
   if (!inactiveUserRole.value) {

@@ -204,61 +204,77 @@
           </div>
 
           <div>
-          <div class="relative">
-            <input
-              v-model="form.password"
-              type="password"
-              placeholder="Ingresa tu contraseña"
-              class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
-              :class="{
-                'border-red-500 dark:border-red-500 focus:ring-red-500': passwordError,
-                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !passwordError
-              }"
-              required
-              :style="{ 'padding-left': '3rem' }"
-            />
-            <IconLock
-              class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
-            />
+            <div class="relative">
+              <input
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Ingresa tu contraseña"
+                class="w-full pl-12 pr-10 py-3 rounded-lg border bg-gray-50 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2"
+                :class="{
+                  'border-red-500 dark:border-red-500 focus:ring-red-500': passwordError,
+                  'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !passwordError
+                }"
+                required
+                :style="{ 'padding-left': '3rem' }"
+              />
+              <IconLock
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
 
-          </div>
-          <div
-            v-if="form.password.length > 0"
-            class="text-sm text-left text-gray-600 dark:text-gray-400 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1"
-          >
-            <p v-for="req in passwordValidation" :key="req.text" class="transition-colors flex items-center"
-              :class="{'text-green-500 dark:text-green-400': req.met, 'text-red-500 dark:text-red-400': !req.met}">
-              <span class="mr-2">{{ req.met ? '✓' : '✗' }}</span>
-              <span>{{ req.text }}</span>
-            </p>
-        </div>
+              <div
+                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer select-none"
+                @click="showPassword = !showPassword"
+              >
+                <IconEye v-if="!showPassword" class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+                <IconEyeOff v-else class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+              </div>
+            </div>
+
+            <div
+              v-if="form.password.length > 0"
+              class="text-sm text-left text-gray-600 dark:text-gray-400 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1"
+            >
+              <p v-for="req in passwordValidation" :key="req.text" class="transition-colors flex items-center"
+                :class="{'text-green-500 dark:text-green-400': req.met, 'text-red-500 dark:text-red-400': !req.met}">
+                <span class="mr-2">{{ req.met ? '✓' : '✗' }}</span>
+                <span>{{ req.text }}</span>
+              </p>
+            </div>
           </div>
 
           <div>
-          <div class="relative">
-            <input
-              v-model="form.confirmPassword"
-              type="password"
-              placeholder="Vuelve a introducir la contraseña"
-              class="w-full pl-12 pr-4 py-3 rounded-lg border bg-gray-50 ..."
-               :class="{
-                'border-red-500 dark:border-red-500 focus:ring-red-500': passwordError,
-                'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !passwordError
-              }"
-              required
-              :style="{ 'padding-left': '3rem' }"
-            />
-            <IconLock
-              class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
-            />
-          </div>
+            <div class="relative">
+              <input
+                v-model="form.confirmPassword"
+                :type="showConfirmPassword ? 'text' : 'password'"
+                placeholder="Vuelve a introducir la contraseña"
+                class="w-full pl-12 pr-10 py-3 rounded-lg border bg-gray-50 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2"
+                :class="{
+                  'border-red-500 dark:border-red-500 focus:ring-red-500': passwordError,
+                  'border-gray-300 dark:border-gray-600 focus:ring-[#70BFE9]': !passwordError
+                }"
+                required
+                :style="{ 'padding-left': '3rem' }"
+              />
+              <IconLock
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
+
+              <div
+                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer select-none"
+                @click="showConfirmPassword = !showConfirmPassword"
+              >
+                <IconEye v-if="!showConfirmPassword" class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+                <IconEyeOff v-else class="h-5 w-5 text-gray-400 hover:text-[#70BFE9]" />
+              </div>
+            </div>
+
             <div
               v-if="form.password !== form.confirmPassword && form.confirmPassword.length > 0"
               class="text-sm text-left text-gray-600 dark:text-gray-400 mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1"
             >
               <p class="flex items-center text-red-500 dark:text-red-400">
-                <span>Las contraseñas no coinciden.</span
-              >
+                <span>Las contraseñas no coinciden.</span>
               </p>
             </div>
           </div>
@@ -337,6 +353,8 @@ import {
   IconLock,
   IconCircleCheckFilled,
   IconCircleXFilled,
+  IconEye,
+  IconEyeOff,
 } from '@tabler/icons-vue'
 
 const router = useRouter()
@@ -352,6 +370,8 @@ const linkCodeError = ref('')
 const errorMessage = ref('')
 const errorPopup = ref(false)
 const termsAccepted = ref(false)
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 
 const nameError = ref('');
 const aliasError = ref('');

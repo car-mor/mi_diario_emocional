@@ -7,12 +7,11 @@
       <IconMenu2 class="w-6 h-6" />
     </button>
 
-    <div
-      v-if="showMobileMenu"
-      @click="showMobileMenu = false"
-      class="fixed inset-0 z-30 md:hidden"
-    ></div>
-
+   <div
+  v-if="showMobileMenu"
+  @click.stop="showMobileMenu = false"
+  class="fixed inset-0 z-30 md:hidden bg-black/0 w-full h-full cursor-pointer"
+></div>
     <aside
       :class="[
         'dark:bg-gray-900 transition-colors fixed md:static top-0 left-0 h-full bg-[#7DBFF8] text-white flex flex-col items-center py-6 shadow-xl z-40',

@@ -97,7 +97,7 @@ const routes = [
       path: '/profile-patient-mobile',
       name: 'profile-patient-mobile',
       component: () => import('@/modules/patient/views/PatientProfileMobileView.vue'),
-      meta: { requiresAuth: true, requiredRole: 'patient' } // Ruta protegida
+      meta: { equiresAuth: true, requiredRole: 'patient' } // Ruta protegida
     },
     {
       path: '/article-weekly-patient',

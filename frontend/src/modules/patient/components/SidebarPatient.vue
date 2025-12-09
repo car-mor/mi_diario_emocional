@@ -20,7 +20,7 @@
         'md:translate-x-0 md:w-20 lg:w-24 md:overflow-visible overflow-y-auto transition-all duration-300'
       ]"
     >
-      <nav class="flex flex-col space-y-4 md:space-y-6 flex-1 mt-12 md:mt-6 w-full px-2">
+      <nav class="flex flex-col space-y-4 md:space-y-6 flex-1 w-full px-2 justify-center">
 
         <component
           v-for="(item, index) in menuItems"
@@ -31,15 +31,14 @@
           :class="[
             'group relative flex items-center p-3 rounded-xl transition-all duration-300 w-full',
             showMobileMenu ? 'justify-start px-4' : 'justify-center',
-            'hover:bg-[#5aa7d1] dark:hover:bg-gray-700 text-white'
+            'hover:bg-[#5aa7d1] dark:hover:bg-gray-700 text-white',
+            // CAMBIO AQUÍ: Si es mobileOnly, ocultamos TODO el botón en desktop (md:hidden)
+            item.mobileOnly ? 'md:hidden' : ''
           ]"
         >
           <component
             :is="item.icon"
-            :class="[
-               'w-8 h-8 md:w-9 md:h-9 flex-shrink-0 transition-transform group-hover:scale-110',
-               item.mobileOnly ? 'md:hidden' : ''
-            ]"
+            class="w-8 h-8 md:w-9 md:h-9 flex-shrink-0 transition-transform group-hover:scale-110"
           />
 
           <span
@@ -50,6 +49,7 @@
           </span>
 
           <div
+            v-if="!item.mobileOnly"
             class="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2
                    bg-gray-800 text-white text-sm rounded-md shadow-lg
                    opacity-0 invisible -translate-x-2
@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import { ref, markRaw } from "vue"
-import type { Component } from "vue" // Importar tipo para TypeScript
+import type { Component } from "vue"
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import {
@@ -77,7 +77,6 @@ import {
   IconLogout
 } from "@tabler/icons-vue"
 
-// Definición de tipos
 interface MenuItem {
   name: string;
   path?: string;
@@ -104,7 +103,6 @@ const handleLogout = async () => {
   }
 }
 
-// Ahora 'item' tiene tipo MenuItem en lugar de 'any'
 const handleItemClick = (item: MenuItem) => {
   showMobileMenu.value = false
 
@@ -114,6 +112,7 @@ const handleItemClick = (item: MenuItem) => {
 }
 
 const menuItems: MenuItem[] = [
+  // Mi Perfil ya estaba como mobileOnly: true
   { name: 'Mi Perfil', path: '/profile-patient-mobile', icon: markRaw(IconUserCircle), mobileOnly: true },
   { name: 'Inicio', path: '/home-patient', icon: markRaw(IconHome) },
   { name: 'Diario', path: '/diary-register', icon: markRaw(IconBook) },
@@ -125,7 +124,8 @@ const menuItems: MenuItem[] = [
   {
     name: 'Cerrar sesión',
     icon: markRaw(IconLogout),
-    action: handleLogout
+    action: handleLogout,
+    mobileOnly: true // <--- CAMBIO: Agregado para que solo salga en móvil
   },
 ]
 </script>

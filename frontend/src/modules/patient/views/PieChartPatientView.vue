@@ -71,22 +71,32 @@ const getWeekDateRange = (): { start_date: string, end_date: string } => {
   const now = new Date();
   const dayOfWeek = now.getDay(); // 0 (Domingo) - 6 (Sábado)
 
-  // Asumimos que la semana empieza en Lunes
-  // Ajuste para que Lunes (1) sea el primer día, o Domingo (0) sea -6
+  // 1. Calcular la diferencia para llegar al Lunes
+  // Si es Domingo (0), restamos 6 días. Si es otro día, restamos (dia - 1)
   const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-  const startOfWeek = new Date(now.setDate(diff));
+
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(diff);
+  startOfWeek.setHours(0, 0, 0, 0); // Forzamos a que sea las 00:00h
 
   const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6); // Suma 6 días al inicio
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999); // Forzamos fin del día
 
-  // Formato YYYY-MM-DD
-  const toISODate = (date: Date) => date.toISOString().split('T')[0];
+  // 2. CORRECCIÓN IMPORTANTE: Formatear a YYYY-MM-DD usando hora LOCAL
+  const toLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Meses van de 0-11
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   return {
-    start_date: toISODate(startOfWeek),
-    end_date: toISODate(endOfWeek),
+    start_date: toLocalDateString(startOfWeek),
+    end_date: toLocalDateString(endOfWeek),
   };
 };
+
 onMounted(async () => {
   loading.value = true;
   error.value = null;

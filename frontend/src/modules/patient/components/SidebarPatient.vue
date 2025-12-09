@@ -7,11 +7,12 @@
       <IconMenu2 class="w-6 h-6" />
     </button>
 
-   <div
-  v-if="showMobileMenu"
-  @click.stop="showMobileMenu = false"
-  class="fixed inset-0 z-30 md:hidden bg-black/0 w-full h-full cursor-pointer"
-></div>
+    <div
+      v-if="showMobileMenu"
+      @click.stop="showMobileMenu = false"
+      class="fixed inset-0 z-30 md:hidden bg-black/0 w-full h-full cursor-pointer"
+    ></div>
+
     <aside
       :class="[
         'dark:bg-gray-900 transition-colors fixed md:static top-0 left-0 h-full bg-[#7DBFF8] text-white flex flex-col items-center py-6 shadow-xl z-40',
@@ -21,16 +22,17 @@
     >
       <nav class="flex flex-col space-y-4 md:space-y-6 flex-1 mt-12 md:mt-6 w-full px-2">
 
-        <router-link
+        <component
           v-for="(item, index) in menuItems"
           :key="index"
+          :is="item.path ? 'router-link' : 'button'"
           :to="item.path"
+          @click="handleItemClick(item)"
           :class="[
-            'group relative flex items-center p-3 rounded-xl transition-all duration-300',
+            'group relative flex items-center p-3 rounded-xl transition-all duration-300 w-full',
             showMobileMenu ? 'justify-start px-4' : 'justify-center',
-            'hover:bg-[#5aa7d1] dark:hover:bg-gray-700'
+            'hover:bg-[#5aa7d1] dark:hover:bg-gray-700 text-white'
           ]"
-          @click="showMobileMenu = false"
         >
           <component
             :is="item.icon"
@@ -57,7 +59,7 @@
             {{ item.name }}
             <div class="absolute top-1/2 right-full -translate-y-1/2 -mr-1 border-4 border-transparent border-r-gray-800"></div>
           </div>
-        </router-link>
+        </component>
 
       </nav>
     </aside>
@@ -66,18 +68,52 @@
 
 <script setup lang="ts">
 import { ref, markRaw } from "vue"
+import type { Component } from "vue" // Importar tipo para TypeScript
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/store/auth'
 import {
   IconHome, IconMenu2, IconBook, IconClock, IconChartPie2,
-  IconCloud, IconHelpHexagon, IconSettings, IconUserCircle
+  IconCloud, IconHelpHexagon, IconSettings, IconUserCircle,
+  IconLogout
 } from "@tabler/icons-vue"
 
+// Definición de tipos
+interface MenuItem {
+  name: string;
+  path?: string;
+  icon: Component | object;
+  mobileOnly?: boolean;
+  action?: () => void;
+}
+
+const router = useRouter()
+const authStore = useAuthStore()
 const showMobileMenu = ref(false)
+
 const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value
 }
 
-const menuItems = [
-  // He añadido la propiedad 'mobileOnly' para el perfil, por si quieres ocultar el icono en desktop también
+const handleLogout = async () => {
+  try {
+    await authStore.logout()
+    router.push({ name: 'login' })
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error)
+    router.push({ name: 'login' })
+  }
+}
+
+// Ahora 'item' tiene tipo MenuItem en lugar de 'any'
+const handleItemClick = (item: MenuItem) => {
+  showMobileMenu.value = false
+
+  if (item.action) {
+    item.action()
+  }
+}
+
+const menuItems: MenuItem[] = [
   { name: 'Mi Perfil', path: '/profile-patient-mobile', icon: markRaw(IconUserCircle), mobileOnly: true },
   { name: 'Inicio', path: '/home-patient', icon: markRaw(IconHome) },
   { name: 'Diario', path: '/diary-register', icon: markRaw(IconBook) },
@@ -86,5 +122,10 @@ const menuItems = [
   { name: 'Nube Emocional', path: '/word-cloud-patient', icon: markRaw(IconCloud) },
   { name: 'Preguntas', path: '/faqs-patient', icon: markRaw(IconHelpHexagon) },
   { name: 'Configuración', path: '/account-settings', icon: markRaw(IconSettings) },
+  {
+    name: 'Cerrar sesión',
+    icon: markRaw(IconLogout),
+    action: handleLogout
+  },
 ]
 </script>
